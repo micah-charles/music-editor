@@ -1,0 +1,28 @@
+{
+  "name": "foxchild-music-score-lab",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "workspaces": [
+    "packages/*",
+    "apps/*"
+  ],
+  "scripts": {
+    "dev": "npm --workspace apps/studio run dev",
+    "build": "npm --workspace packages/music-core run build && npm --workspace apps/studio run build",
+    "omr:helper": "cd tools/omr-helper && npm run dev",
+    "omr:helper:build": "cd tools/omr-helper && npm run build",
+    "omr:helper:smoke": "cd tools/omr-helper && npm run smoke --",
+    "test": "vitest run",
+    "typecheck": "npm --workspace packages/music-core run typecheck && npm --workspace apps/studio run typecheck"
+  },
+  "devDependencies": {
+    "@types/node": "^24.0.0",
+    "@types/react": "^18.3.3",
+    "@types/react-dom": "^18.3.0",
+    "@vitejs/plugin-react": "^4.3.4",
+    "typescript": "^5.7.3",
+    "vite": "^6.0.7",
+    "vitest": "^2.1.8"
+  }
+}

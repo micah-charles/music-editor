@@ -1,0 +1,103 @@
+{
+  "schemaVersion": "2.0",
+  "type": "FoxChildMusicScore",
+  "id": "simple-melody-c-major",
+  "metadata": {
+    "title": "Simple Melody in C",
+    "composer": "FoxChild AI",
+    "source": "ai-generated",
+    "createdAt": "2026-07-04"
+  },
+  "global": {
+    "key": {
+      "tonic": "C",
+      "mode": "major"
+    },
+    "timeSignature": {
+      "beats": 4,
+      "beatType": 4
+    },
+    "tempo": {
+      "bpm": 90,
+      "label": "Moderato"
+    }
+  },
+  "parts": [
+    {
+      "id": "melody",
+      "name": "Melody",
+      "instrument": {
+        "name": "Piano",
+        "midiProgram": 1
+      },
+      "clef": "treble",
+      "measures": [
+        {
+          "number": 1,
+          "events": [
+            {
+              "type": "note",
+              "pitch": {
+                "step": "C",
+                "octave": 4,
+                "alter": 0
+              },
+              "duration": {
+                "value": "quarter",
+                "beats": 1
+              }
+            },
+            {
+              "type": "note",
+              "pitch": {
+                "step": "D",
+                "octave": 4,
+                "alter": 0
+              },
+              "duration": {
+                "value": "quarter",
+                "beats": 1
+              }
+            },
+            {
+              "type": "note",
+              "pitch": {
+                "step": "E",
+                "octave": 4,
+                "alter": 0
+              },
+              "duration": {
+                "value": "quarter",
+                "beats": 1
+              }
+            },
+            {
+              "type": "note",
+              "pitch": {
+                "step": "C",
+                "octave": 4,
+                "alter": 0
+              },
+              "duration": {
+                "value": "quarter",
+                "beats": 1
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "learning": {
+    "level": "beginner",
+    "skills": [
+      "read C4",
+      "read D4",
+      "quarter notes"
+    ],
+    "suitableFor": [
+      "sight-reading",
+      "beginner piano"
+    ]
+  }
+}

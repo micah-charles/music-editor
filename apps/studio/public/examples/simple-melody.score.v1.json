@@ -1,0 +1,41 @@
+{
+  "schemaVersion": "1.0",
+  "id": "simple-melody",
+  "title": "Simple Melody",
+  "composer": "FoxChild",
+  "tempo": 90,
+  "key": "C",
+  "timeSignature": {
+    "beats": 4,
+    "beatType": 4
+  },
+  "tracks": [
+    {
+      "id": "melody",
+      "name": "Melody",
+      "instrument": "piano",
+      "clef": "treble",
+      "notes": [
+        {
+          "pitch": "C4",
+          "duration": "quarter"
+        },
+        {
+          "pitch": "D4",
+          "duration": "quarter"
+        },
+        {
+          "pitch": "E4",
+          "duration": "quarter"
+        },
+        {
+          "pitch": "C4",
+          "duration": "quarter"
+        }
+      ]
+    }
+  ],
+  "metadata": {
+    "source": "ai"
+  }
+}

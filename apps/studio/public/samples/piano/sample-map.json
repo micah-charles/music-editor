@@ -1,0 +1,13 @@
+{
+  "instrument": "piano",
+  "format": "wav",
+  "samples": {
+    "C3": "/samples/piano/C3.wav",
+    "E3": "/samples/piano/E3.wav",
+    "G3": "/samples/piano/G3.wav",
+    "C4": "/samples/piano/C4.wav",
+    "E4": "/samples/piano/E4.wav",
+    "G4": "/samples/piano/G4.wav",
+    "C5": "/samples/piano/C5.wav"
+  }
+}
