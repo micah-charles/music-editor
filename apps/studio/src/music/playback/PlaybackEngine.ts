@@ -6,6 +6,8 @@ export type PlaybackNoteEvent = {
   startBeat: number;
   durationBeats: number;
   velocity?: number;
+  trackVolume?: number;
+  pan?: number;
   isRest?: boolean;
   partId?: string;
   instrument?: string;
@@ -24,13 +26,23 @@ export type PlaybackOptions = {
 
 export interface PlaybackEngine {
   name: string;
+  capabilities?: PlaybackEngineCapabilities;
+  prepare?(): Promise<void>;
   load?(): Promise<void>;
   play(events: PlaybackNoteEvent[], options: PlaybackOptions): Promise<void>;
   pause?(): void;
   resume?(): void;
+  cancelScheduled?(): void;
+  allNotesOff?(): void;
   stop(): void;
   dispose?(): void;
 }
+
+export type PlaybackEngineCapabilities = {
+  pause: "native" | "restart" | "unsupported";
+  seek: "restart" | "native" | "unsupported";
+  scheduling: "batch" | "look-ahead";
+};
 
 export type PlaybackEngineMode = "basic-synth" | "sampled-piano" | "soundfont";
 

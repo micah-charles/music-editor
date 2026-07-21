@@ -27,8 +27,10 @@ export function ImportPanel({ onImport, onMessage }: ImportPanelProps) {
   function importPaste() {
     try {
       const trimmed = text.trim();
-      const score = trimmed.startsWith("{") ? importAstJson(trimmed) : plainTextToAst(trimmed);
-      onImport(score, trimmed.startsWith("{") ? "Imported FoxChild JSON." : "Converted plain text notes into AST.");
+      const isJson = trimmed.startsWith("{");
+      const isMusicXml = trimmed.startsWith("<") && (trimmed.includes("<score-partwise") || trimmed.includes("<score-timewise"));
+      const score = isJson ? importAstJson(trimmed) : isMusicXml ? musicXmlToAst(trimmed) : plainTextToAst(trimmed);
+      onImport(score, isJson ? "Imported FoxChild JSON." : isMusicXml ? "Imported pasted MusicXML." : "Converted plain text notes into AST.");
     } catch (error) {
       onMessage((error as Error).message);
     }
@@ -66,7 +68,7 @@ export function ImportPanel({ onImport, onMessage }: ImportPanelProps) {
         value={text}
         onChange={(event) => setText(event.target.value)}
         spellCheck={false}
-        aria-label="Paste AST JSON, V1 JSON, or simple note text"
+        aria-label="Paste MusicXML, AST JSON, V1 JSON, or simple note text"
       />
       <div className="button-row">
         <button type="button" className="primary" onClick={importPaste}>Generate Score</button>

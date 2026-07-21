@@ -9,9 +9,15 @@ export interface AudiverisRunResult {
   warnings: string[];
 }
 
+interface AudiverisArgOptions {
+  finalProcessingSwitches?: Record<string, string>;
+}
+
 const PROCESSING_SWITCH_PREFIX = "org.audiveris.omr.sheet.ProcessingSwitches.";
+const OCR_LANGUAGE_CONSTANT = "org.audiveris.omr.text.Language.defaultSpecification";
 const DEFAULT_PROCESSING_SWITCHES = new Map<string, string>([
-  ["fingerings", "true"]
+  ["fingerings", "true"],
+  ["smallHeads", "true"]
 ]);
 
 export async function runAudiveris(inputFile: string, outputDir: string): Promise<AudiverisRunResult> {
@@ -25,36 +31,69 @@ export async function runAudiveris(inputFile: string, outputDir: string): Promis
   const preparedInput = await prepareInputForAudiveris(inputFile, outputDir, warnings);
   const args = buildAudiverisArgs(preparedInput, outputDir, process.env);
   const startedAt = Date.now();
-  const { code, logs } = await runCommand(audiverisBin, args, path.dirname(audiverisBin));
+  const initial = await runCommand(audiverisBin, args, path.dirname(audiverisBin));
+  let completed = initial;
+  let resultDir = outputDir;
 
-  if (code !== 0) {
-    throw new Error(`Audiveris failed with exit code ${code}.\n${logs}`);
+  if (initial.code !== 0 && shouldRetryWithoutSmallHeads(initial.logs, args)) {
+    const retryDir = path.join(outputDir, "retry-no-small-heads");
+    await ensureDir(retryDir);
+    const retryArgs = buildAudiverisArgs(preparedInput, retryDir, process.env, {
+      finalProcessingSwitches: { smallHeads: "false" }
+    });
+    const retry = await runCommand(audiverisBin, retryArgs, path.dirname(audiverisBin));
+    completed = {
+      code: retry.code,
+      logs: [
+        "===== Initial Audiveris attempt (small-head recognition enabled) =====",
+        initial.logs,
+        "===== Automatic Audiveris retry (small-head recognition disabled) =====",
+        retry.logs
+      ].join("\n")
+    };
+    resultDir = retryDir;
+    if (retry.code === 0) {
+      warnings.push(
+        "Audiveris crashed at STEMS while processing small noteheads. The helper automatically retried with small-head recognition disabled and recovered the complete score. Cue-sized notes may be missing; review them against the scan."
+      );
+    }
   }
 
-  const outputFile = await findMusicXmlFile(outputDir);
+  if (completed.code !== 0) {
+    throw new Error(`Audiveris failed with exit code ${completed.code}.\n${boundedFailureLogs(completed.logs)}`);
+  }
+
+  const outputFile = await findMusicXmlFile(resultDir);
   if (!outputFile) {
-    throw new Error(`Audiveris finished but no MusicXML/MXL/XML output was found in ${outputDir}.\n${logs}`);
+    throw new Error(`Audiveris finished but no MusicXML/MXL/XML output was found in ${resultDir}.\n${boundedFailureLogs(completed.logs)}`);
   }
 
   warnings.push("Audiveris OMR output is a draft transcription. Human review is required.");
-  warnings.push(...analyzeAudiverisLogs(logs));
+  warnings.push(...analyzeAudiverisLogs(completed.logs));
   if (Date.now() - startedAt > 120_000) {
     warnings.push("OMR conversion took more than 120 seconds.");
   }
-  return { outputFile, logs, warnings };
+  return { outputFile, logs: completed.logs, warnings };
 }
 
 export function buildAudiverisArgs(
   preparedInput: string,
   outputDir: string,
-  env: NodeJS.ProcessEnv = process.env
+  env: NodeJS.ProcessEnv = process.env,
+  options: AudiverisArgOptions = {}
 ): string[] {
   return [
     "-batch",
     "-transcribe",
     "-export",
+    "-constant",
+    `${OCR_LANGUAGE_CONSTANT}=${env.AUDIVERIS_OCR_LANGUAGES?.trim() || "eng+jpn"}`,
     ...buildProcessingSwitchArgs(env),
     ...parseExtraArgs(env.AUDIVERIS_EXTRA_ARGS),
+    ...Object.entries(options.finalProcessingSwitches ?? {}).flatMap(([name, value]) => [
+      "-constant",
+      `${PROCESSING_SWITCH_PREFIX}${name}=${value}`
+    ]),
     "-output",
     outputDir,
     "--",
@@ -103,7 +142,16 @@ export function analyzeAudiverisLogs(logs: string): string[] {
     warnings.push("Audiveris skipped cue-beam detection because small-head recognition is disabled.");
   }
 
+  if (/No installed OCR languages|collection of supported languages is empty|Missing support for ['\"]eng['\"] language/i.test(logs)) {
+    warnings.push("Audiveris has no English OCR language installed. Title, composer, lyrics, tempo text, and other words may be missing.");
+  }
+
   return warnings;
+}
+
+export function shouldRetryWithoutSmallHeads(logs: string, args: string[]): boolean {
+  return effectiveProcessingSwitch(args, "smallHeads") === "true"
+    && /StepMonitoring[^\n]*\|\s*STEMS\s*\r?\n[^\n]*Error processing stub/.test(logs);
 }
 
 function defaultSwitchesEnabled(env: NodeJS.ProcessEnv): boolean {
@@ -115,6 +163,20 @@ function parseExtraArgs(value: string | undefined): string[] {
     return [];
   }
   return value.match(/(?:[^\s"']+|"[^"]*"|'[^']*')+/g)?.map((arg) => arg.replace(/^["']|["']$/g, "")) ?? [];
+}
+
+function effectiveProcessingSwitch(args: string[], name: string): string | undefined {
+  const prefix = `${PROCESSING_SWITCH_PREFIX}${name}=`;
+  let value: string | undefined;
+  for (const arg of args) {
+    if (arg.startsWith(prefix)) value = arg.slice(prefix.length);
+  }
+  return value;
+}
+
+function boundedFailureLogs(logs: string): string {
+  if (logs.length <= 14_000) return logs;
+  return `${logs.slice(0, 2_000)}\n... ${logs.length - 14_000} log characters omitted ...\n${logs.slice(-12_000)}`;
 }
 
 async function prepareInputForAudiveris(inputFile: string, outputDir: string, warnings: string[]): Promise<string> {

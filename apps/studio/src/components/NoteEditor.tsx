@@ -2,10 +2,11 @@ import { useMemo, useState } from "react";
 import {
   DURATION_BEATS,
   detectChordName,
-  eventsToMeasures,
   getBeatsPerMeasure,
+  measureContentDuration,
   parsePitchName,
   pitchToName,
+  toNumber,
   transposeScore,
   type Duration,
   type FoxChildMusicScore,
@@ -19,6 +20,7 @@ import {
   presetOptionKey,
   type SoundFontPresetOption
 } from "../music/playback/soundfontPresets";
+import { usePlaybackActiveEvents } from "../music/playback/session/usePlaybackSession";
 
 interface NoteEditorProps {
   score: FoxChildMusicScore;
@@ -37,6 +39,7 @@ const defaultPitch = { step: "C" as const, octave: 4, alter: 0 };
 const defaultChordPitches = ["C4", "E4", "G4"].map(parsePitchName);
 
 export function NoteEditor({ score, activePartId, measureIssues, instrumentOptions, onActivePartChange, onChange }: NoteEditorProps) {
+  const activePlaybackEvents = usePlaybackActiveEvents();
   const [inputWarnings, setInputWarnings] = useState<Record<string, string>>({});
   const [draftInputs, setDraftInputs] = useState<Record<string, string>>({});
   const presets = instrumentOptions.length > 0 ? instrumentOptions : generalMidiPresetOptions;
@@ -54,28 +57,45 @@ export function NoteEditor({ score, activePartId, measureIssues, instrumentOptio
     onChange(next);
   }
 
-  function rebuildPartEvents(partId: string, nextEvents: MusicEvent[]) {
-    updateScorePart(partId, (part) => {
-      part.measures = eventsToMeasures(nextEvents, getBeatsPerMeasure(score.global.timeSignature));
+  function updateEvent(part: Part, index: number, nextEvent: MusicEvent) {
+    updateScorePart(part.id, (nextPart) => {
+      mutateEditableEvent(nextPart, index, () => nextEvent);
     });
   }
 
-  function updateEvent(part: Part, index: number, nextEvent: MusicEvent) {
-    const events = flattenedEvents(part);
-    rebuildPartEvents(part.id, events.map((event, eventIndex) => eventIndex === index ? nextEvent : event));
-  }
-
   function deleteEvent(part: Part, index: number) {
-    const events = flattenedEvents(part);
-    rebuildPartEvents(part.id, events.filter((_, eventIndex) => eventIndex !== index));
+    updateScorePart(part.id, (nextPart) => {
+      mutateEditableEvent(nextPart, index, () => undefined);
+    });
   }
 
   function addEvent(part: Part, type: EditableEventType) {
-    rebuildPartEvents(part.id, [...flattenedEvents(part), createEvent(type, `${type}-${Date.now()}`, defaultDuration)]);
+    updateScorePart(part.id, (nextPart) => {
+      const beatsPerMeasure = getBeatsPerMeasure(score.global.timeSignature);
+      let measure = nextPart.measures[nextPart.measures.length - 1];
+      if (!measure) {
+        measure = { number: 1, events: [] };
+        nextPart.measures.push(measure);
+      }
+      const laneEvents = measure.events.filter((event) => event.type !== "annotation" && event.type !== "direction" && (event.staff ?? 1) === 1 && (event.voice ?? 1) === 1);
+      const laneEnd = toNumber(measureContentDuration(laneEvents));
+      if (laneEnd + DURATION_BEATS[defaultDuration.value] > beatsPerMeasure + 0.0001) {
+        measure = { number: Math.max(...nextPart.measures.map((item) => item.number)) + 1, events: [] };
+        nextPart.measures.push(measure);
+      }
+      const event = createEvent(type, `${type}-${Date.now()}`, defaultDuration);
+      if ((nextPart.staffCount ?? 1) > 1 || measure.events.some((item) => item.position || item.staff !== undefined || item.voice !== undefined)) {
+        const currentLane = measure.events.filter((item) => item.type !== "annotation" && item.type !== "direction" && (item.staff ?? 1) === 1 && (item.voice ?? 1) === 1);
+        event.staff = 1;
+        event.voice = 1;
+        event.position = { measure: measure.number, beat: toNumber(measureContentDuration(currentLane)) };
+      }
+      measure.events.push(event);
+    });
   }
 
   function updateEventType(part: Part, index: number, event: MusicEvent, type: EditableEventType) {
-    if (event.type === type || event.type === "annotation") {
+    if (event.type === type || event.type === "annotation" || event.type === "direction") {
       return;
     }
     updateEvent(part, index, convertEventType(event, type));
@@ -149,7 +169,7 @@ export function NoteEditor({ score, activePartId, measureIssues, instrumentOptio
         soundFontPreset: preset.program
       },
       clef: "treble",
-      channel: next.parts.length % 16,
+      channel: nextMelodicChannel(next.parts),
       collapsed: false,
       measures: [{ number: 1, events: [] }]
     });
@@ -170,6 +190,18 @@ export function NoteEditor({ score, activePartId, measureIssues, instrumentOptio
     }
   }
 
+  function moveTrack(partId: string, direction: -1 | 1) {
+    const next = structuredClone(score) as FoxChildMusicScore;
+    const index = next.parts.findIndex((part) => part.id === partId);
+    const destination = index + direction;
+    if (index < 0 || destination < 0 || destination >= next.parts.length) {
+      return;
+    }
+    const [part] = next.parts.splice(index, 1);
+    next.parts.splice(destination, 0, part);
+    onChange(next);
+  }
+
   function setInstrument(partId: string, key: string) {
     const preset = presets.find((item) => presetOptionKey(item) === key) ?? presets[0] ?? generalMidiPresetOptions[0];
     updateScorePart(partId, (part) => {
@@ -180,6 +212,11 @@ export function NoteEditor({ score, activePartId, measureIssues, instrumentOptio
         soundFontBank: preset.bank,
         soundFontPreset: preset.program
       };
+      if (preset.bank === 128) {
+        part.channel = 9;
+      } else if (part.channel === 9) {
+        part.channel = nextMelodicChannel(score.parts.filter((item) => item.id !== partId));
+      }
     });
   }
 
@@ -198,14 +235,17 @@ export function NoteEditor({ score, activePartId, measureIssues, instrumentOptio
       {score.parts.map((part) => {
         const rows = part.measures.flatMap((measure) => {
           return measure.events
-            .filter((event) => event.type !== "annotation")
+            .filter((event) => event.type !== "annotation" && event.type !== "direction")
             .map((event) => ({ event, measureNumber: measure.number }));
         });
         const collapsed = Boolean(part.collapsed);
+        const isSounding = activePlaybackEvents.some((event) => event.partId === part.id);
+        const trackIndex = score.parts.indexOf(part);
 
         return (
-          <article className={`track-panel ${activePartId === part.id ? "active" : ""}`} key={part.id}>
+          <article className={`track-panel ${activePartId === part.id ? "active" : ""} ${isSounding ? "sounding" : ""}`} key={part.id}>
             <div className="track-header">
+              <span className="track-meter" aria-label={`${part.name} ${isSounding ? "active" : "silent"}`}><span /></span>
               <button
                 type="button"
                 className="icon-button"
@@ -236,7 +276,7 @@ export function NoteEditor({ score, activePartId, measureIssues, instrumentOptio
                 </select>
               </label>
               <label className="track-channel-control">
-                <span>Channel</span>
+                <span>Channel (0-15)</span>
                 <input
                   type="number"
                   min={0}
@@ -244,6 +284,23 @@ export function NoteEditor({ score, activePartId, measureIssues, instrumentOptio
                   value={part.channel ?? score.parts.indexOf(part)}
                   onChange={(event) => updateScorePart(part.id, (nextPart) => { nextPart.channel = clampChannel(Number(event.target.value)); })}
                 />
+                {(part.channel ?? trackIndex) === 9 ? <small>GM drums</small> : null}
+              </label>
+              <label className="track-mix-control">
+                <span>Volume {Math.round((part.volume ?? 1) * 100)}</span>
+                <input type="range" min={0} max={1} step={0.01} value={part.volume ?? 1} onChange={(event) => updateScorePart(part.id, (nextPart) => { nextPart.volume = Number(event.target.value); })} />
+              </label>
+              <label className="track-mix-control">
+                <span>Pan {Math.round((part.pan ?? 0) * 100)}</span>
+                <input type="range" min={-1} max={1} step={0.01} value={part.pan ?? 0} onChange={(event) => updateScorePart(part.id, (nextPart) => { nextPart.pan = Number(event.target.value); })} />
+              </label>
+              <label className="track-color-control" title="Track colour">
+                <span>Colour</span>
+                <input type="color" value={part.color ?? "#2f7656"} onChange={(event) => updateScorePart(part.id, (nextPart) => { nextPart.color = event.target.value; })} />
+              </label>
+              <label className="inline-toggle">
+                <input type="checkbox" checked={part.visible !== false} onChange={(event) => updateScorePart(part.id, (nextPart) => { nextPart.visible = event.target.checked; })} />
+                <span>Show</span>
               </label>
               <label className="inline-toggle">
                 <input
@@ -262,6 +319,8 @@ export function NoteEditor({ score, activePartId, measureIssues, instrumentOptio
                 <span>Solo</span>
               </label>
               <button type="button" onClick={() => addEvent(part, "note")}>Add Event</button>
+              <button type="button" className="icon-button" aria-label={`Move ${part.name} up`} disabled={trackIndex === 0} onClick={() => moveTrack(part.id, -1)}>↑</button>
+              <button type="button" className="icon-button" aria-label={`Move ${part.name} down`} disabled={trackIndex === score.parts.length - 1} onClick={() => moveTrack(part.id, 1)}>↓</button>
               <button type="button" onClick={() => deleteTrack(part.id)} disabled={score.parts.length <= 1}>Delete</button>
             </div>
 
@@ -335,8 +394,27 @@ export function NoteEditor({ score, activePartId, measureIssues, instrumentOptio
   );
 }
 
-function flattenedEvents(part: Part): MusicEvent[] {
-  return part.measures.flatMap((measure) => measure.events).filter((event) => event.type !== "annotation");
+function mutateEditableEvent(part: Part, targetIndex: number, update: (event: MusicEvent) => MusicEvent | undefined): void {
+  let currentIndex = 0;
+  for (const measure of part.measures) {
+    const nextEvents: MusicEvent[] = [];
+    for (const event of measure.events) {
+      if (event.type === "annotation" || event.type === "direction") {
+        nextEvents.push(event);
+        continue;
+      }
+      if (currentIndex === targetIndex) {
+        const nextEvent = update(event);
+        if (nextEvent) {
+          nextEvents.push(nextEvent);
+        }
+      } else {
+        nextEvents.push(event);
+      }
+      currentIndex += 1;
+    }
+    measure.events = nextEvents;
+  }
 }
 
 function createEvent(type: EditableEventType, id: string, duration: Duration): MusicEvent {
@@ -360,12 +438,18 @@ function createEvent(type: EditableEventType, id: string, duration: Duration): M
   };
 }
 
-function convertEventType(event: Exclude<MusicEvent, { type: "annotation" }>, type: EditableEventType): MusicEvent {
+function convertEventType(event: Exclude<MusicEvent, { type: "annotation" | "direction" }>, type: EditableEventType): MusicEvent {
+  const placement = {
+    voice: event.voice,
+    staff: event.staff,
+    position: event.position
+  };
   if (type === "rest") {
     return {
       id: event.id,
       type: "rest",
-      duration: event.duration
+      duration: event.duration,
+      ...placement
     };
   }
 
@@ -376,7 +460,9 @@ function convertEventType(event: Exclude<MusicEvent, { type: "annotation" }>, ty
       type: "note",
       pitch: { ...pitch },
       duration: event.duration,
-      velocity: event.type !== "rest" ? event.velocity : undefined
+      velocity: event.type !== "rest" ? event.velocity : undefined,
+      lyric: event.type !== "rest" ? event.lyric : undefined,
+      ...placement
     };
   }
 
@@ -387,6 +473,8 @@ function convertEventType(event: Exclude<MusicEvent, { type: "annotation" }>, ty
     pitches: pitches.map((pitch) => ({ ...pitch })),
     duration: event.duration,
     velocity: event.type !== "rest" ? event.velocity : undefined,
+    lyric: event.type !== "rest" ? event.lyric : undefined,
+    ...placement,
     semantic: pitches.length > 1 ? { chordName: detectChordName(pitches) } : undefined
   };
 }
@@ -430,6 +518,11 @@ function instrumentValue(part: Part, presets: SoundFontPresetOption[]): string {
 
 function clampChannel(value: number): number {
   return Math.min(15, Math.max(0, Math.round(Number.isFinite(value) ? value : 0)));
+}
+
+function nextMelodicChannel(parts: Part[]): number {
+  const used = new Set(parts.map((part, index) => part.channel ?? index));
+  return Array.from({ length: 16 }, (_, index) => index).find((channel) => channel !== 9 && !used.has(channel)) ?? 0;
 }
 
 function errorMessage(error: unknown): string {

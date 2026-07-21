@@ -61,7 +61,7 @@ export function astToSimpleJson(score: FoxChildMusicScore): FoxChildSimpleScoreV
       updatedAt: score.metadata.updatedAt,
       notes: `Converted from FoxChild Music AST v2. Durations are stored as labels; beat data remains in AST. First track total beats: ${score.parts[0]?.measures.reduce((sum, measure) => {
         return sum + measure.events.reduce((eventSum, event) => {
-          if (event.type === "annotation") {
+          if (event.type === "annotation" || event.type === "direction") {
             return eventSum;
           }
           return eventSum + durationToBeats(event.duration);

@@ -10,9 +10,12 @@
   "scripts": {
     "dev": "npm --workspace apps/studio run dev",
     "build": "npm --workspace packages/music-core run build && npm --workspace apps/studio run build",
+    "benchmark:timeline": "vite-node tools/benchmark-timeline.ts",
+    "qa:real-scores": "vite-node tools/analyze-real-score-corpus.ts",
     "omr:helper": "cd tools/omr-helper && npm run dev",
     "omr:helper:build": "cd tools/omr-helper && npm run build",
     "omr:helper:smoke": "cd tools/omr-helper && npm run smoke --",
+    "omr:trace": "vite-node tools/omr-trace.ts",
     "test": "vitest run",
     "typecheck": "npm --workspace packages/music-core run typecheck && npm --workspace apps/studio run typecheck"
   },

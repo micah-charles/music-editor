@@ -54,7 +54,8 @@ export function createScoreFromEvents(options: CreateScoreOptions): FoxChildMusi
       timeSignature,
       tempo: {
         bpm: options.tempo ?? 90,
-        label: "Moderato"
+        label: "Moderato",
+        source: options.tempo === undefined ? "default" : "user"
       }
     },
     parts: [part],

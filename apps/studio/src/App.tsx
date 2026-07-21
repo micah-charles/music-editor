@@ -28,6 +28,7 @@ import { JsonEditor } from "./components/JsonEditor";
 import { LearningPanel } from "./components/LearningPanel";
 import { NoteEditor } from "./components/NoteEditor";
 import { OmrImportPanel } from "./components/OmrImportPanel";
+import { OmrFidelityReview } from "./components/OmrFidelityReview";
 import { PianoKeyboard } from "./components/PianoKeyboard";
 import { PlaybackControls } from "./components/PlaybackControls";
 import { ScoreMetadataEditor } from "./components/ScoreMetadataEditor";
@@ -43,14 +44,14 @@ import {
   type MidiRecordMode
 } from "./music/midi/midiInput";
 import { NoteAudition } from "./music/playback/NoteAudition";
-import type { PlaybackNoteEvent } from "./music/playback/PlaybackEngine";
 import { BrowserMetronome, type MetronomeBeat } from "./music/playback/metronome";
+import { usePlaybackActiveEvents, usePlaybackSessionController } from "./music/playback/session/usePlaybackSession";
 import { generalMidiPresetOptions, type SoundFontPresetOption } from "./music/playback/soundfontPresets";
-import { SystemRecordingClock } from "./music/recording/recordingClock";
+import { SharedRecordingClock } from "./music/recording/recordingClock";
 import { quantizeBeatsToDuration, quantizeStartBeat, type QuantizeGrid } from "./music/rhythm/quantizeDuration";
 
-type ViewMode = "notation" | "notes" | "ast" | "learning";
 type InputMode = "fixed" | "performed";
+type RecordingStrategy = "overdub" | "replace";
 type MeasureFillMode = "ask" | "auto-advance" | "shorten" | "allow-overfill";
 type AppliedMeasureFillMode = Exclude<MeasureFillMode, "ask">;
 type HeldPitch = {
@@ -66,17 +67,61 @@ type PendingOverfill = {
   message: string;
   startBeat?: number;
 };
+
+type WorkspaceId = "score" | "piano-input" | "piano-roll" | "mixer" | "recording" | "omr-review" | "analysis" | "learning" | "export" | "settings";
+type InspectorDock = "right" | "left" | "float";
+type KeyboardSize = "compact" | "performance" | "teaching" | "fullscreen";
+type UiLayoutState = {
+  workspace: WorkspaceId;
+  navigationCollapsed: boolean;
+  inspectorVisible: boolean;
+  inspectorCollapsed: boolean;
+  inspectorDock: InspectorDock;
+  inspectorWidth: number;
+  keyboardVisible: boolean;
+  keyboardSize: KeyboardSize;
+  keyboardHeight: number;
+  validationExpanded: boolean;
+};
+
+const UI_LAYOUT_STORAGE_KEY = "foxchild-ui-3-layout-v1";
+const defaultUiLayout: UiLayoutState = {
+  workspace: "score",
+  navigationCollapsed: false,
+  inspectorVisible: true,
+  inspectorCollapsed: false,
+  inspectorDock: "right",
+  inspectorWidth: 280,
+  keyboardVisible: false,
+  keyboardSize: "performance",
+  keyboardHeight: 250,
+  validationExpanded: false
+};
+
+const workspaces: Array<{ id: WorkspaceId; icon: string; label: string; section?: "library" }> = [
+  { id: "score", icon: "SC", label: "Score" },
+  { id: "piano-input", icon: "PI", label: "Piano Input" },
+  { id: "piano-roll", icon: "PR", label: "Piano Roll" },
+  { id: "mixer", icon: "MX", label: "Mixer" },
+  { id: "recording", icon: "RC", label: "Recording" },
+  { id: "omr-review", icon: "OM", label: "OMR Review" },
+  { id: "analysis", icon: "AN", label: "AI Analysis" },
+  { id: "learning", icon: "LR", label: "Learning" },
+  { id: "export", icon: "EX", label: "Export" },
+  { id: "settings", icon: "ST", label: "Settings", section: "library" }
+];
 const durationValues = Object.keys(DURATION_BEATS) as NoteDurationValue[];
 
 export function App() {
+  const playbackController = usePlaybackSessionController();
+  const playbackActiveEvents = usePlaybackActiveEvents();
   const [score, setScore] = useState<FoxChildMusicScore>(() => withMeasureValidation(simpleMelodyAst));
-  const [previousScore, setPreviousScore] = useState<FoxChildMusicScore | null>(null);
+  const [undoStack, setUndoStack] = useState<FoxChildMusicScore[]>([]);
+  const [redoStack, setRedoStack] = useState<FoxChildMusicScore[]>([]);
   const [previewScore, setPreviewScore] = useState<FoxChildMusicScore | null>(null);
-  const [viewMode, setViewMode] = useState<ViewMode>("notation");
+  const [uiLayout, setUiLayout] = useState<UiLayoutState>(loadUiLayout);
   const [message, setMessage] = useState("Loaded demo AST score.");
   const [activePartId, setActivePartId] = useState(simpleMelodyAst.parts[0].id);
-  const [playbackActivePitches, setPlaybackActivePitches] = useState<string[]>([]);
-  const [playbackActiveEvents, setPlaybackActiveEvents] = useState<PlaybackNoteEvent[]>([]);
   const [keyboardPressedPitches, setKeyboardPressedPitches] = useState<string[]>([]);
   const [selectedChordPitches, setSelectedChordPitches] = useState<string[]>([]);
   const [keyboardDuration, setKeyboardDuration] = useState<NoteDurationValue>("quarter");
@@ -91,6 +136,7 @@ export function App() {
   const [midiDevices, setMidiDevices] = useState<MidiInputDevice[]>([]);
   const [selectedMidiInputId, setSelectedMidiInputId] = useState("");
   const [midiRecordMode, setMidiRecordMode] = useState<MidiRecordMode>("off");
+  const [recordingStrategy, setRecordingStrategy] = useState<RecordingStrategy>("overdub");
   const [midiActivePitches, setMidiActivePitches] = useState<string[]>([]);
   const [midiStatus, setMidiStatus] = useState("MIDI disabled");
   const [soundFontPresetOptions, setSoundFontPresetOptions] = useState<SoundFontPresetOption[]>(generalMidiPresetOptions);
@@ -98,18 +144,37 @@ export function App() {
   const midiChordCaptureRef = useRef<{ pitches: string[]; timer?: number }>({ pitches: [] });
   const noteAuditionRef = useRef<NoteAudition | null>(null);
   const metronomeRef = useRef<BrowserMetronome | null>(null);
-  const recordingClockRef = useRef(new SystemRecordingClock(simpleMelodyAst.global.tempo.bpm, 1));
+  const recordingClockRef = useRef(new SharedRecordingClock(
+    simpleMelodyAst.global.tempo.bpm,
+    1,
+    () => sessionRecordingBeat(playbackController)
+  ));
   const heldPitchesRef = useRef(new Map<string, HeldPitch>());
   const performedChordCaptureRef = useRef<{ notes: CompletedHeldPitch[]; timer?: number }>({ notes: [] });
+  const replaceOnNextRecordedEventRef = useRef(false);
 
   const validation = useMemo(() => validateScore(score), [score]);
   const analysis = useMemo(() => analyseDifficulty(score), [score]);
   const musicXml = useMemo(() => astToMusicXml(score), [score]);
+  const notationMusicXml = useMemo(() => {
+    const visibleParts = score.parts.filter((part) => part.visible !== false);
+    return astToMusicXml(visibleParts.length > 0 ? { ...score, parts: visibleParts } : score);
+  }, [score]);
   const learningPack = useMemo(() => astToLearningPack(score), [score]);
   const measureCount = score.parts.reduce((sum, part) => sum + part.measures.length, 0);
 
   const measureIssues = useMemo(() => score.validation?.measures.filter((measure) => measure.status !== "complete") ?? [], [score]);
+  const playbackActivePitches = useMemo(() => uniquePitches(playbackActiveEvents.map((event) => event.pitch)), [playbackActiveEvents]);
   const activeKeyboardPitches = useMemo(() => uniquePitches([...playbackActivePitches, ...keyboardPressedPitches, ...midiActivePitches]), [keyboardPressedPitches, midiActivePitches, playbackActivePitches]);
+  const keyboardIsVisible = uiLayout.keyboardVisible
+    || uiLayout.workspace === "piano-input"
+    || uiLayout.workspace === "recording"
+    || midiDevices.length > 0
+    || midiRecordMode !== "off";
+
+  useEffect(() => {
+    window.localStorage.setItem(UI_LAYOUT_STORAGE_KEY, JSON.stringify(uiLayout));
+  }, [uiLayout]);
 
   useEffect(() => {
     if (!score.parts.some((part) => part.id === activePartId)) {
@@ -131,7 +196,7 @@ export function App() {
       setMidiStatus(errorMessage(error));
       return undefined;
     }
-  }, [keyboardDuration, midiAccess, midiDevices, midiRecordMode, score, selectedMidiInputId]);
+  }, [keyboardDuration, midiAccess, midiDevices, midiRecordMode, recordingStrategy, score, selectedMidiInputId]);
 
   useEffect(() => {
     return () => {
@@ -149,10 +214,14 @@ export function App() {
   }, [midiAccess]);
 
   useEffect(() => {
-    recordingClockRef.current = new SystemRecordingClock(score.global.tempo.bpm, 1);
+    recordingClockRef.current = new SharedRecordingClock(
+      score.global.tempo.bpm,
+      playbackController.getSnapshot().speed,
+      () => sessionRecordingBeat(playbackController)
+    );
     const countInBeats = metronomeOn ? -countInBars * getBeatsPerMeasure(score.global.timeSignature) : 0;
     recordingClockRef.current.start(countInBeats);
-  }, [countInBars, inputMode, metronomeOn, score.global.tempo.bpm, score.global.timeSignature]);
+  }, [countInBars, inputMode, metronomeOn, playbackController, score.global.tempo.bpm, score.global.timeSignature]);
 
   useEffect(() => {
     metronomeRef.current ??= new BrowserMetronome();
@@ -166,11 +235,12 @@ export function App() {
       bpm: score.global.tempo.bpm,
       beatsPerMeasure: score.global.timeSignature.beats,
       countInBars,
+      clock: recordingClockRef.current,
       onBeat: setMetronomeBeat
     });
 
     return () => metronomeRef.current?.stop();
-  }, [countInBars, metronomeOn, score.global.tempo.bpm, score.global.timeSignature.beats]);
+  }, [countInBars, metronomeOn, playbackController, score.global.tempo.bpm, score.global.timeSignature.beats]);
 
   function acceptScore(nextScore: FoxChildMusicScore, nextMessage: string) {
     const decoratedScore = withMeasureValidation({
@@ -180,7 +250,8 @@ export function App() {
         updatedAt: new Date().toISOString().slice(0, 10)
       }
     }, score);
-    setPreviousScore(score);
+    setUndoStack((current) => [...current.slice(-49), score]);
+    setRedoStack([]);
     setScore(decoratedScore);
     setPreviewScore(null);
     setMessage(nextMessage);
@@ -217,7 +288,7 @@ export function App() {
     const next = structuredClone(score) as FoxChildMusicScore;
     const part = next.parts.find((item) => item.id === issue.partId);
     const measure = part?.measures.find((item) => item.number === issue.measure);
-    const lastTimedEvent = measure ? [...measure.events].reverse().find((event) => event.type !== "annotation") : undefined;
+    const lastTimedEvent = measure ? [...measure.events].reverse().find((event) => event.type !== "annotation" && event.type !== "direction") : undefined;
     if (!lastTimedEvent) {
       return;
     }
@@ -227,15 +298,28 @@ export function App() {
   }
 
   function revertLastChange() {
+    const previousScore = undoStack[undoStack.length - 1];
     if (!previousScore) {
       return;
     }
+    setUndoStack((current) => current.slice(0, -1));
+    setRedoStack((current) => [...current.slice(-49), score]);
     setScore(withMeasureValidation(previousScore));
-    setPreviousScore(null);
     setMessage("Reverted the last score change.");
   }
 
-  function insertKeyboardEvent(event: MusicEvent, nextMessage: string, startBeat?: number, forcedFillMode?: AppliedMeasureFillMode) {
+  function redoLastChange() {
+    const nextScore = redoStack[redoStack.length - 1];
+    if (!nextScore) {
+      return;
+    }
+    setRedoStack((current) => current.slice(0, -1));
+    setUndoStack((current) => [...current.slice(-49), score]);
+    setScore(withMeasureValidation(nextScore));
+    setMessage("Restored the next score change.");
+  }
+
+  function insertKeyboardEvent(event: MusicEvent, nextMessage: string, startBeat?: number, forcedFillMode?: AppliedMeasureFillMode, replaceExisting = false) {
     if (!activePartId) {
       return;
     }
@@ -243,6 +327,10 @@ export function App() {
     const part = next.parts.find((item) => item.id === activePartId) ?? next.parts[0];
     if (!part) {
       return;
+    }
+    if (replaceExisting && replaceOnNextRecordedEventRef.current) {
+      part.measures = [{ number: 1, events: [] }];
+      replaceOnNextRecordedEventRef.current = false;
     }
     const beatsPerMeasure = getBeatsPerMeasure(next.global.timeSignature);
     const overfill = getOverfillInfo(part, event, beatsPerMeasure, startBeat);
@@ -274,26 +362,26 @@ export function App() {
   function insertKeyboardNote(pitchName: string, duration: Duration = {
     value: keyboardDuration,
     beats: DURATION_BEATS[keyboardDuration]
-  }, startBeat?: number) {
+  }, startBeat?: number, replaceExisting = false) {
     const pitch = parsePitchName(pitchName);
     insertKeyboardEvent({
       id: `keyboard-note-${Date.now()}`,
       type: "note",
       pitch,
       duration
-    }, `Inserted ${pitchName} ${duration.value.replaceAll("-", " ")} note.`, startBeat);
+    }, `Inserted ${pitchName} ${duration.value.replaceAll("-", " ")} note.`, startBeat, undefined, replaceExisting);
   }
 
   function insertKeyboardChord(pitchNames: string[], duration: Duration = {
     value: keyboardDuration,
     beats: DURATION_BEATS[keyboardDuration]
-  }, startBeat?: number) {
+  }, startBeat?: number, replaceExisting = false) {
     const unique = uniquePitches(pitchNames);
     if (unique.length === 0) {
       return;
     }
     if (unique.length === 1) {
-      insertKeyboardNote(unique[0], duration, startBeat);
+      insertKeyboardNote(unique[0], duration, startBeat, replaceExisting);
       return;
     }
     const pitches = unique.map(parsePitchName);
@@ -304,7 +392,7 @@ export function App() {
       pitches,
       duration,
       semantic: { chordName }
-    }, `Inserted ${chordName} chord: ${unique.join(", ")}.`, startBeat);
+    }, `Inserted ${chordName} chord: ${unique.join(", ")}.`, startBeat, undefined, replaceExisting);
     setSelectedChordPitches([]);
   }
 
@@ -358,7 +446,7 @@ export function App() {
       queuePerformedChord(completed);
       return;
     }
-    insertKeyboardNote(pitch, duration, held.startBeat);
+    insertKeyboardNote(pitch, duration, held.startBeat, source === "midi" && recordingStrategy === "replace");
   }
 
   function queuePerformedChord(note: CompletedHeldPitch) {
@@ -377,7 +465,7 @@ export function App() {
         return (note.duration.beats ?? 0) > (longest.beats ?? 0) ? note.duration : longest;
       }, notes[0].duration);
       const startBeat = Math.min(...notes.map((note) => note.startBeat));
-      insertKeyboardChord(pitches, duration, startBeat);
+      insertKeyboardChord(pitches, duration, startBeat, recordingStrategy === "replace");
     }, CHORD_CAPTURE_WINDOW_MS);
   }
 
@@ -425,7 +513,7 @@ export function App() {
         return;
       }
       if (midiRecordMode === "insert-notes") {
-        insertKeyboardNote(message.pitch);
+        insertKeyboardNote(message.pitch, undefined, undefined, recordingStrategy === "replace");
       } else if (midiRecordMode === "insert-chords") {
         queueMidiChordPitch(message.pitch);
       }
@@ -448,102 +536,273 @@ export function App() {
     capture.timer = window.setTimeout(() => {
       const pitches = midiChordCaptureRef.current.pitches;
       midiChordCaptureRef.current = { pitches: [] };
-      insertKeyboardChord(pitches);
+      insertKeyboardChord(pitches, undefined, undefined, recordingStrategy === "replace");
     }, CHORD_CAPTURE_WINDOW_MS);
   }
 
+  function updateUiLayout(patch: Partial<UiLayoutState>) {
+    setUiLayout((current) => ({ ...current, ...patch }));
+  }
+
+  function selectWorkspace(workspace: WorkspaceId) {
+    updateUiLayout({
+      workspace,
+      ...(workspace === "piano-input" ? { keyboardVisible: true, keyboardSize: "performance" } : {}),
+      ...(workspace === "recording" ? { keyboardVisible: true, keyboardSize: "teaching" } : {})
+    });
+  }
+
+  function beginInspectorResize(event: React.PointerEvent<HTMLDivElement>) {
+    const startX = event.clientX;
+    const startWidth = uiLayout.inspectorWidth;
+    const direction = uiLayout.inspectorDock === "left" ? 1 : -1;
+    const onMove = (moveEvent: PointerEvent) => {
+      const width = Math.min(520, Math.max(260, startWidth + (moveEvent.clientX - startX) * direction));
+      updateUiLayout({ inspectorWidth: Math.round(width) });
+    };
+    const onUp = () => {
+      window.removeEventListener("pointermove", onMove);
+      window.removeEventListener("pointerup", onUp);
+    };
+    window.addEventListener("pointermove", onMove);
+    window.addEventListener("pointerup", onUp);
+  }
+
+  function beginKeyboardResize(event: React.PointerEvent<HTMLDivElement>) {
+    const startY = event.clientY;
+    const startHeight = uiLayout.keyboardHeight;
+    const onMove = (moveEvent: PointerEvent) => {
+      const height = Math.min(520, Math.max(170, startHeight + startY - moveEvent.clientY));
+      updateUiLayout({ keyboardHeight: Math.round(height), keyboardSize: "performance" });
+    };
+    const onUp = () => {
+      window.removeEventListener("pointermove", onMove);
+      window.removeEventListener("pointerup", onUp);
+    };
+    window.addEventListener("pointermove", onMove);
+    window.addEventListener("pointerup", onUp);
+  }
+
+  const workspaceLabel = workspaces.find((workspace) => workspace.id === uiLayout.workspace)?.label ?? "Score";
+  const validationIssueCount = validation.errors.length + validation.warnings.length + measureIssues.length + (score.sourceMetadata?.warnings?.length ?? 0);
+
   return (
-    <div className="app-shell">
-      <header className="app-header">
-        <div>
-          <p className="eyebrow">FoxChild Music Score Lab</p>
-          <h1>Music Studio</h1>
+    <div className={`app-shell ui3 keyboard-${keyboardIsVisible ? "open" : "closed"}`}>
+      <header className="app-header workstation-header">
+        <button
+          type="button"
+          className="brand-mark"
+          aria-label="Toggle workspace navigation"
+          title="Toggle workspace navigation"
+          onClick={() => updateUiLayout({ navigationCollapsed: !uiLayout.navigationCollapsed })}
+        >FC</button>
+        <div className="brand-title">FoxChild Music Score Lab</div>
+        <div className="document-title-block">
+          <strong>{score.metadata.title}</strong>
+          <span>{workspaceLabel}</span>
         </div>
-        <div className="header-meta">
-          <span className={validation.valid ? "status-pill ok" : "status-pill error"}>
-            {validation.valid ? "Valid AST v2" : `${validation.errors.length} errors`}
-          </span>
-          {measureIssues.length > 0 ? <span className="status-pill warning">{measureIssues.length} bar warning{measureIssues.length === 1 ? "" : "s"}</span> : null}
-          <span className="status-pill">V1 compatible</span>
-          <span className="status-pill">{analysis.level}</span>
+        <div className="header-actions">
+          <button
+            type="button"
+            className={`warning-button ${validationIssueCount > 0 ? "has-issues" : ""}`}
+            onClick={() => updateUiLayout({ inspectorVisible: true, inspectorCollapsed: false, validationExpanded: true })}
+          >{validationIssueCount} issue{validationIssueCount === 1 ? "" : "s"}</button>
+          <button type="button" className="icon-button" onClick={revertLastChange} disabled={undoStack.length === 0} title="Undo" aria-label="Undo">↶</button>
+          <button type="button" className="icon-button" onClick={redoLastChange} disabled={redoStack.length === 0} title="Redo" aria-label="Redo">↷</button>
+          <button
+            type="button"
+            className="icon-button"
+            onClick={() => updateUiLayout({ inspectorVisible: !uiLayout.inspectorVisible })}
+            title="Toggle inspector"
+            aria-label="Toggle inspector"
+          >IN</button>
         </div>
       </header>
 
-      <main className="studio-layout">
-        <aside className="side-panel">
-          <ImportPanel onImport={acceptScore} onMessage={setMessage} />
-          <OmrImportPanel onImport={acceptScore} onMessage={setMessage} />
-          <ScoreMetadataEditor score={score} onChange={(next) => acceptScore(next, "Updated score metadata.")} />
-          <ChordProgressionPanel
-            score={score}
-            onPreview={previewPlayback}
-            onInsert={acceptScore}
-            onMessage={setMessage}
-          />
-          <JsonEditor score={score} onApply={(next) => acceptScore(next, "Applied AST JSON.")} onMessage={setMessage} />
-        </aside>
+      <main className={`workstation-body inspector-${uiLayout.inspectorDock}`}>
+        <nav className={`workspace-navigation ${uiLayout.navigationCollapsed ? "collapsed" : ""}`} aria-label="Workspaces">
+          <div className="navigation-label">Workspaces</div>
+          {workspaces.map((workspace, index) => (
+            <div key={workspace.id} className={workspace.section === "library" && index > 0 ? "navigation-library" : undefined}>
+              {workspace.section === "library" ? <div className="navigation-label">Library</div> : null}
+              <button
+                type="button"
+                className={`workspace-button ${uiLayout.workspace === workspace.id ? "active" : ""}`}
+                onClick={() => selectWorkspace(workspace.id)}
+                title={workspace.label}
+                aria-label={workspace.label}
+              >
+                <span className="workspace-icon">{workspace.icon}</span>
+                <span className="workspace-name">{workspace.label}</span>
+              </button>
+            </div>
+          ))}
+          <button
+            type="button"
+            className="workspace-collapse"
+            onClick={() => updateUiLayout({ navigationCollapsed: !uiLayout.navigationCollapsed })}
+          >{uiLayout.navigationCollapsed ? ">" : "Collapse"}</button>
+        </nav>
 
-        <section className="workspace-panel">
-          <div className="score-topbar">
+        <section className="workspace-panel canvas-workspace">
+          <div className="score-topbar workstation-toolbar">
             <div>
-              <h2>{score.metadata.title}</h2>
-              <p>
-                {score.global.key.tonic} {score.global.key.mode} · {score.global.timeSignature.beats}/
-                {score.global.timeSignature.beatType} · {score.global.tempo.bpm} bpm · {measureCount} measures
-              </p>
+              <h1>{workspaceLabel}</h1>
+              <p>{score.global.key.tonic} {score.global.key.mode} · {score.global.timeSignature.beats}/{score.global.timeSignature.beatType} · {score.global.tempo.bpm} bpm · {measureCount} measures</p>
             </div>
-            <div className="segmented">
-              <button className={viewMode === "notation" ? "active" : ""} onClick={() => setViewMode("notation")}>Notation</button>
-              <button className={viewMode === "notes" ? "active" : ""} onClick={() => setViewMode("notes")}>Notes</button>
-              <button className={viewMode === "ast" ? "active" : ""} onClick={() => setViewMode("ast")}>AST</button>
-              <button className={viewMode === "learning" ? "active" : ""} onClick={() => setViewMode("learning")}>Learning</button>
+            <div className="document-actions">
+              <button type="button" onClick={() => selectWorkspace("score")} className={uiLayout.workspace === "score" ? "active" : ""}>Score</button>
+              <button type="button" onClick={() => selectWorkspace("mixer")} className={uiLayout.workspace === "mixer" ? "active" : ""}>Tracks</button>
+              <button
+                type="button"
+                onClick={() => updateUiLayout({ keyboardVisible: !uiLayout.keyboardVisible })}
+                aria-pressed={keyboardIsVisible}
+              >{keyboardIsVisible ? "Hide Keyboard" : "Show Keyboard"}</button>
             </div>
           </div>
 
-          <div className="workspace-alerts" aria-live="polite">
-            {message ? <p className="message-line">{message}</p> : null}
-            {!validation.valid ? (
-              <div className="error-list">
-                {validation.errors.map((error, index) => <p key={`${index}-${error}`}>{error}</p>)}
+          <button
+            type="button"
+            className={`validation-banner ${validationIssueCount > 0 ? "warning" : "ok"}`}
+            onClick={() => updateUiLayout({ validationExpanded: !uiLayout.validationExpanded })}
+            aria-expanded={uiLayout.validationExpanded}
+          >
+            <span>{validationIssueCount > 0 ? `${validationIssueCount} validation and fidelity issue${validationIssueCount === 1 ? "" : "s"}` : "Score validation passed"}</span>
+            <span>{uiLayout.validationExpanded ? "Hide details" : "Show details"}</span>
+          </button>
+          {uiLayout.validationExpanded ? (
+            <div className="validation-details" aria-live="polite">
+              {message ? <p className="message-line">{message}</p> : null}
+              {validation.errors.map((error, index) => <p className="validation-error" key={`${index}-${error}`}>{error}</p>)}
+              {validation.warnings.map((warning, index) => <p key={`${index}-${warning}`}>{warning}</p>)}
+              {measureIssues.map((issue) => <p key={`${issue.partId}-${issue.measure}`}>Measure {issue.measure}: {issue.status}</p>)}
+              {score.sourceMetadata?.warnings?.map((warning, index) => <p key={`source-${index}-${warning}`}>{warning}</p>)}
+            </div>
+          ) : message ? <div className="workspace-message" aria-live="polite">{message}</div> : null}
+
+          <div className="canvas-stage">
+            {uiLayout.workspace === "piano-roll" || uiLayout.workspace === "mixer" ? (
+              <NoteEditor
+                score={score}
+                activePartId={activePartId}
+                measureIssues={measureIssues}
+                instrumentOptions={soundFontPresetOptions}
+                onActivePartChange={setActivePartId}
+                onChange={(next) => acceptScore(next, "Updated tracks.")}
+              />
+            ) : uiLayout.workspace === "analysis" || uiLayout.workspace === "learning" ? (
+              <LearningPanel analysis={analysis} learningPack={learningPack} />
+            ) : uiLayout.workspace === "export" ? (
+              <ExportPanel score={score} musicXml={musicXml} learningPack={learningPack} />
+            ) : uiLayout.workspace === "omr-review" ? (
+              <OmrFidelityReview score={score} onChange={(next) => acceptScore(next, "Updated OMR review values.")} />
+            ) : uiLayout.workspace === "settings" ? (
+              <div className="settings-canvas">
+                <ScoreMetadataEditor score={score} onChange={(next) => acceptScore(next, "Updated score metadata.")} />
+                <JsonEditor score={score} onApply={(next) => acceptScore(next, "Applied AST JSON.")} onMessage={setMessage} />
               </div>
-            ) : null}
-            {validation.warnings.length > 0 ? (
-              <div className="warning-list">
-                {validation.warnings.map((warning, index) => <p key={`${index}-${warning}`}>{warning}</p>)}
-              </div>
-            ) : null}
+            ) : (
+              <ScoreViewer
+                score={score}
+                musicXml={notationMusicXml}
+                measureIssues={measureIssues}
+                activePlaybackEvents={playbackActiveEvents}
+                showValidationDetails={uiLayout.validationExpanded}
+                canRevert={undoStack.length > 0}
+                onAddMissingRest={addMissingRest}
+                onStretchLastNote={stretchLastNote}
+                onRevertChange={revertLastChange}
+              />
+            )}
           </div>
+        </section>
 
-          {viewMode === "notation" ? (
-            <ScoreViewer
-              score={score}
-              musicXml={musicXml}
-              measureIssues={measureIssues}
-              activePlaybackEvents={playbackActiveEvents}
-              canRevert={Boolean(previousScore)}
-              onAddMissingRest={addMissingRest}
-              onStretchLastNote={stretchLastNote}
-              onRevertChange={revertLastChange}
-            />
-          ) : null}
-          {viewMode === "notes" ? (
-            <NoteEditor
-              score={score}
-              activePartId={activePartId}
-              measureIssues={measureIssues}
-              instrumentOptions={soundFontPresetOptions}
-              onActivePartChange={setActivePartId}
-              onChange={(next) => acceptScore(next, "Updated tracks.")}
-            />
-          ) : null}
-          {viewMode === "ast" ? (
-            <pre className="json-view">{JSON.stringify(score, null, 2)}</pre>
-          ) : null}
-          {viewMode === "learning" ? <LearningPanel analysis={analysis} learningPack={learningPack} /> : null}
+        {uiLayout.inspectorVisible ? (
+          <aside
+            className={`inspector-panel ${uiLayout.inspectorCollapsed ? "collapsed" : ""} ${uiLayout.inspectorDock === "float" ? "floating" : ""}`}
+            style={{ width: uiLayout.inspectorCollapsed ? 48 : uiLayout.inspectorWidth }}
+          >
+            {uiLayout.inspectorDock !== "float" && !uiLayout.inspectorCollapsed ? <div className="inspector-resize-handle" onPointerDown={beginInspectorResize} /> : null}
+            <div className="inspector-header">
+              {!uiLayout.inspectorCollapsed ? <strong>Inspector</strong> : null}
+              <button type="button" className="icon-button" onClick={() => updateUiLayout({ inspectorCollapsed: !uiLayout.inspectorCollapsed })} title="Collapse inspector" aria-label="Collapse inspector">{uiLayout.inspectorCollapsed ? "<" : ">"}</button>
+              {!uiLayout.inspectorCollapsed ? <button type="button" className="icon-button" onClick={() => updateUiLayout({ inspectorVisible: false })} title="Hide inspector" aria-label="Hide inspector">×</button> : null}
+            </div>
+            {!uiLayout.inspectorCollapsed ? (
+              <div className="inspector-content">
+                <section className="inspector-section">
+                  <div className="inspector-section-heading">
+                    <strong>Validation</strong>
+                    <span>{validationIssueCount}</span>
+                  </div>
+                  <button type="button" onClick={() => updateUiLayout({ validationExpanded: true })}>Review issues</button>
+                </section>
 
-          <section className="panel keyboard-panel">
+                {uiLayout.workspace === "omr-review" ? (
+                  <>
+                    <OmrImportPanel onImport={acceptScore} onMessage={setMessage} />
+                    <ImportPanel onImport={acceptScore} onMessage={setMessage} />
+                  </>
+                ) : null}
+
+                {uiLayout.workspace === "settings" ? (
+                  <>
+                    <section className="inspector-section layout-settings">
+                      <div className="inspector-section-heading"><strong>Layout</strong></div>
+                      <label><span>Inspector dock</span><select aria-label="Inspector dock" value={uiLayout.inspectorDock} onChange={(event) => updateUiLayout({ inspectorDock: event.target.value as InspectorDock })}><option value="right">Right</option><option value="left">Left</option><option value="float">Float</option></select></label>
+                      <label><span>Inspector width</span><input aria-label="Inspector width" type="range" min={260} max={520} value={uiLayout.inspectorWidth} onChange={(event) => updateUiLayout({ inspectorWidth: Number(event.target.value) })} /></label>
+                      <label><span>Keyboard size</span><select aria-label="Keyboard size" value={uiLayout.keyboardSize} onChange={(event) => updateUiLayout({ keyboardSize: event.target.value as KeyboardSize, keyboardVisible: true })}><option value="compact">Compact</option><option value="performance">Performance</option><option value="teaching">Teaching</option><option value="fullscreen">Fullscreen</option></select></label>
+                      <button type="button" onClick={() => setUiLayout(defaultUiLayout)}>Reset workspace layout</button>
+                    </section>
+                    <ChordProgressionPanel score={score} onPreview={previewPlayback} onInsert={acceptScore} onMessage={setMessage} />
+                  </>
+                ) : null}
+
+                {uiLayout.workspace !== "omr-review" && uiLayout.workspace !== "settings" ? (
+                  <>
+                    <ScoreMetadataEditor score={score} onChange={(next) => acceptScore(next, "Updated score metadata.")} />
+                    <section className="inspector-section track-summary">
+                      <div className="inspector-section-heading"><strong>Tracks</strong><span>{score.parts.length}</span></div>
+                      {score.parts.map((part, index) => (
+                        <button type="button" key={part.id} className={activePartId === part.id ? "active" : ""} onClick={() => setActivePartId(part.id)}>
+                          <span className="track-number">{index + 1}</span><span>{part.name}</span><small>{part.instrument.name}</small>
+                        </button>
+                      ))}
+                      <button type="button" onClick={() => selectWorkspace("mixer")}>Open mixer</button>
+                    </section>
+                  </>
+                ) : null}
+
+                <section className="inspector-section docking-controls">
+                  <div className="inspector-section-heading"><strong>Panel</strong></div>
+                  <div className="button-row">
+                    <button type="button" onClick={() => updateUiLayout({ inspectorDock: "left" })}>Dock Left</button>
+                    <button type="button" onClick={() => updateUiLayout({ inspectorDock: "right" })}>Dock Right</button>
+                    <button type="button" onClick={() => updateUiLayout({ inspectorDock: "float" })}>Float</button>
+                  </div>
+                </section>
+              </div>
+            ) : null}
+          </aside>
+        ) : null}
+      </main>
+
+      {keyboardIsVisible ? (
+        <section
+          className={`keyboard-dock keyboard-size-${uiLayout.keyboardSize}`}
+          style={uiLayout.keyboardSize === "performance" ? { height: uiLayout.keyboardHeight } : undefined}
+        >
+          <div className="keyboard-resize-handle" onPointerDown={beginKeyboardResize} />
+          <div className="keyboard-dock-header">
+            <strong>Piano Input</strong>
+            <div className="keyboard-size-actions">
+              {(["compact", "performance", "teaching", "fullscreen"] as KeyboardSize[]).map((size) => <button type="button" key={size} className={uiLayout.keyboardSize === size ? "active" : ""} onClick={() => updateUiLayout({ keyboardSize: size })}>{size}</button>)}
+              <button type="button" onClick={() => updateUiLayout({ keyboardVisible: false })} disabled={uiLayout.workspace === "piano-input" || uiLayout.workspace === "recording" || midiRecordMode !== "off"}>Hide</button>
+            </div>
+          </div>
+          <div className="keyboard-dock-content">
+            <section className="keyboard-panel">
             <div className="keyboard-toolbar">
-              <strong>Piano Keyboard</strong>
               <label className="keyboard-mode-control">
                 <span>Input Mode</span>
                 <select value={inputMode} onChange={(event) => setInputMode(event.target.value as InputMode)}>
@@ -620,10 +879,25 @@ export function App() {
               </label>
               <label className="midi-mode-control">
                 <span>Record Mode</span>
-                <select value={midiRecordMode} onChange={(event) => setMidiRecordMode(event.target.value as MidiRecordMode)}>
+                <select value={midiRecordMode} onChange={(event) => {
+                  const mode = event.target.value as MidiRecordMode;
+                  setMidiRecordMode(mode);
+                  replaceOnNextRecordedEventRef.current = mode !== "off" && recordingStrategy === "replace";
+                }}>
                   <option value="off">Off</option>
                   <option value="insert-notes">Insert Notes</option>
                   <option value="insert-chords">Insert Chords</option>
+                </select>
+              </label>
+              <label className="midi-mode-control">
+                <span>Write</span>
+                <select value={recordingStrategy} onChange={(event) => {
+                  const strategy = event.target.value as RecordingStrategy;
+                  setRecordingStrategy(strategy);
+                  replaceOnNextRecordedEventRef.current = midiRecordMode !== "off" && strategy === "replace";
+                }}>
+                  <option value="overdub">Overdub</option>
+                  <option value="replace">Replace track</option>
                 </select>
               </label>
               <span className="midi-status">{midiStatus}</span>
@@ -649,18 +923,22 @@ export function App() {
               }}
               onKeyPress={handleKeyboardPress}
             />
-          </section>
-
-          <ExportPanel score={score} musicXml={musicXml} learningPack={learningPack} />
+            </section>
+          </div>
         </section>
-      </main>
+      ) : null}
 
       <PlaybackControls
         score={previewScore ?? score}
         label={previewScore ? `Preview: ${previewScore.metadata.title}` : undefined}
-        onActivePitchesChange={setPlaybackActivePitches}
-        onActiveEventsChange={setPlaybackActiveEvents}
         onPresetCatalogChange={setSoundFontPresetOptions}
+        onTempoChange={(bpm) => {
+          if (previewScore) {
+            setPreviewScore({ ...previewScore, global: { ...previewScore.global, tempo: { ...previewScore.global.tempo, bpm } } });
+            return;
+          }
+          acceptScore({ ...score, global: { ...score.global, tempo: { ...score.global.tempo, bpm } } }, `Changed tempo to ${bpm} bpm.`);
+        }}
       />
     </div>
   );
@@ -672,6 +950,32 @@ function uniquePitches(pitches: string[]): string[] {
 
 function errorMessage(error: unknown): string {
   return error instanceof Error ? error.message : String(error);
+}
+
+function loadUiLayout(): UiLayoutState {
+  try {
+    const compactViewport = window.innerWidth <= 820;
+    const stored = window.localStorage.getItem(UI_LAYOUT_STORAGE_KEY);
+    if (!stored) {
+      return {
+        ...defaultUiLayout,
+        navigationCollapsed: compactViewport,
+        inspectorVisible: !compactViewport
+      };
+    }
+    const parsed = JSON.parse(stored) as Partial<UiLayoutState>;
+    return {
+      ...defaultUiLayout,
+      ...parsed,
+      navigationCollapsed: compactViewport ? true : Boolean(parsed.navigationCollapsed),
+      inspectorVisible: compactViewport ? false : parsed.inspectorVisible ?? defaultUiLayout.inspectorVisible,
+      keyboardSize: compactViewport ? "compact" : parsed.keyboardSize ?? defaultUiLayout.keyboardSize,
+      inspectorWidth: Math.min(520, Math.max(260, Number(parsed.inspectorWidth) || defaultUiLayout.inspectorWidth)),
+      keyboardHeight: Math.min(520, Math.max(170, Number(parsed.keyboardHeight) || defaultUiLayout.keyboardHeight))
+    };
+  } catch {
+    return defaultUiLayout;
+  }
 }
 
 function appendEventToPart(
@@ -749,10 +1053,18 @@ function remainingBeatsInMeasure(events: MusicEvent[], beatsPerMeasure: number):
 }
 
 function eventBeats(event: MusicEvent): number {
-  if (event.type === "annotation") {
+  if (event.type === "annotation" || event.type === "direction") {
     return 0;
   }
   return event.duration.beats ?? DURATION_BEATS[event.duration.value];
+}
+
+function sessionRecordingBeat(controller: ReturnType<typeof usePlaybackSessionController>): number | undefined {
+  const snapshot = controller.getSnapshot();
+  if (snapshot.status !== "playing" && snapshot.status !== "paused") {
+    return undefined;
+  }
+  return snapshot.currentScoreTime.numerator / snapshot.currentScoreTime.denominator;
 }
 
 function eventsToMeasuresAllowOverfill(events: MusicEvent[], beatsPerMeasure: number) {

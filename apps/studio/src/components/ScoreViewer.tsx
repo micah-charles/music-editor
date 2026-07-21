@@ -7,12 +7,18 @@ import {
   type MeasureValidationResult
 } from "@foxchild/music-core";
 import type { PlaybackNoteEvent } from "../music/playback/PlaybackEngine";
+import { AutoScrollController } from "../music/notation/AutoScrollController";
+import { buildOsmdPositionIndex } from "../music/notation/buildOsmdPositionIndex";
+import { ScoreCursorController } from "../music/notation/ScoreCursorController";
+import type { OsmdCursorLike } from "../music/notation/OsmdPositionIndex";
+import { usePlaybackSession } from "../music/playback/session/usePlaybackSession";
 
 interface ScoreViewerProps {
   score: FoxChildMusicScore;
   musicXml: string;
   measureIssues: MeasureValidationResult[];
   activePlaybackEvents?: PlaybackNoteEvent[];
+  showValidationDetails?: boolean;
   canRevert: boolean;
   onAddMissingRest: (issue: MeasureValidationResult) => void;
   onStretchLastNote: (issue: MeasureValidationResult) => void;
@@ -27,17 +33,23 @@ export function ScoreViewer({
   musicXml,
   measureIssues,
   activePlaybackEvents = [],
+  showValidationDetails = false,
   canRevert,
   onAddMissingRest,
   onStretchLastNote,
   onRevertChange
 }: ScoreViewerProps) {
+  const { snapshot: playbackSession } = usePlaybackSession();
   const containerRef = useRef<HTMLDivElement | null>(null);
+  const frameRef = useRef<HTMLDivElement | null>(null);
   const osmdRef = useRef<OsmdInstance | null>(null);
+  const cursorControllerRef = useRef<ScoreCursorController | null>(null);
+  const autoScrollRef = useRef(new AutoScrollController());
   const activePlaybackEventsRef = useRef<PlaybackNoteEvent[]>(activePlaybackEvents);
   const [error, setError] = useState("");
   const [isRendering, setIsRendering] = useState(false);
   const [showFullScore, setShowFullScore] = useState(false);
+  const [followPlayback, setFollowPlayback] = useState(true);
   const noteCount = useMemo(() => score.parts.reduce((sum, part) => sum + countNotes(part.measures), 0), [score]);
   const measureCount = useMemo(() => score.parts.reduce((sum, part) => sum + part.measures.length, 0), [score]);
   const isLarge = measureCount > LARGE_SCORE_MEASURE_THRESHOLD || noteCount > LARGE_SCORE_NOTE_THRESHOLD;
@@ -57,6 +69,7 @@ export function ScoreViewer({
       setError("");
       osmdRef.current?.cursor?.hide?.();
       osmdRef.current = null;
+      cursorControllerRef.current = null;
       containerRef.current.innerHTML = "";
 
       try {
@@ -78,7 +91,11 @@ export function ScoreViewer({
           await osmd.render();
           osmd.cursor?.hide?.();
           osmdRef.current = osmd as OsmdInstance;
-          syncScoreCursor(osmdRef.current, activePlaybackEventsRef.current);
+          if (osmd.cursor) {
+            const index = buildOsmdPositionIndex(osmd.cursor);
+            cursorControllerRef.current = new ScoreCursorController(osmd.cursor, index);
+            cursorControllerRef.current.moveTo(playbackSession.currentSourceTime, playbackSession.status === "playing" || playbackSession.status === "paused");
+          }
         }
       } catch (renderError) {
         if (!cancelled) {
@@ -100,8 +117,15 @@ export function ScoreViewer({
 
   useEffect(() => {
     activePlaybackEventsRef.current = activePlaybackEvents;
-    syncScoreCursor(osmdRef.current, activePlaybackEvents);
   }, [activePlaybackEvents]);
+
+  useEffect(() => {
+    const visible = playbackSession.status === "playing" || playbackSession.status === "paused";
+    cursorControllerRef.current?.moveTo(playbackSession.currentSourceTime, visible);
+    if (visible && followPlayback && frameRef.current) {
+      autoScrollRef.current.follow(frameRef.current);
+    }
+  }, [followPlayback, playbackSession.currentSourceTime, playbackSession.status]);
 
   return (
     <div className={`score-viewer ${showFullScore ? "full-score" : ""}`}>
@@ -111,6 +135,12 @@ export function ScoreViewer({
           <span className="score-active-summary">{activePlaybackSummary}</span>
         ) : isLarge ? <span>Large score mode recommended</span> : <span>OSMD SVG renderer</span>}
         <div className="score-viewer-actions">
+          {!followPlayback ? (
+            <button type="button" onClick={() => {
+              autoScrollRef.current.resume();
+              setFollowPlayback(true);
+            }}>Follow</button>
+          ) : null}
           <button type="button" onClick={() => setShowFullScore((current) => !current)}>
             {showFullScore ? "Frame View" : "Show All Bars"}
           </button>
@@ -124,7 +154,7 @@ export function ScoreViewer({
           <pre>{error}</pre>
         </div>
       ) : null}
-      {measureIssues.length > 0 ? (
+      {showValidationDetails && measureIssues.length > 0 ? (
         <div className="measure-warning-panel">
           {measureIssues.map((issue) => (
             <article className={`measure-warning-card ${issue.status}`} key={`${issue.partId}-${issue.measure}`}>
@@ -160,7 +190,7 @@ export function ScoreViewer({
           ))}
         </div>
       ) : null}
-      {measureIssues.length > 0 ? (
+      {showValidationDetails && measureIssues.length > 0 ? (
         <div className="measure-status-strip" aria-label="Measure validation status">
           {measureIssues.map((issue) => (
             <span className={`measure-status-tile ${issue.status}`} key={`${issue.partId}-${issue.measure}-tile`}>
@@ -169,7 +199,18 @@ export function ScoreViewer({
           ))}
         </div>
       ) : null}
-      <div className={`score-paper-frame ${hasUnderfilled ? "has-underfilled-measure" : ""} ${hasOverfilled ? "has-overfilled-measure" : ""}`}>
+      <div
+        className={`score-paper-frame ${hasUnderfilled ? "has-underfilled-measure" : ""} ${hasOverfilled ? "has-overfilled-measure" : ""}`}
+        ref={frameRef}
+        onWheel={() => {
+          autoScrollRef.current.suspend();
+          setFollowPlayback(false);
+        }}
+        onTouchMove={() => {
+          autoScrollRef.current.suspend();
+          setFollowPlayback(false);
+        }}
+      >
         <div className="score-paper" ref={containerRef} />
       </div>
     </div>
@@ -180,63 +221,9 @@ function article(label: string): "a" | "an" {
   return /^[aeiou]/i.test(label) ? "an" : "a";
 }
 
-type OsmdCursor = {
-  hide?: () => void;
-  next?: () => void;
-  reset?: () => void;
-  show?: () => void;
-  update?: () => void;
-  Iterator?: {
-    CurrentSourceTimestamp?: { RealValue?: number };
-    currentTimeStamp?: { RealValue?: number };
-    EndReached?: boolean;
-  };
-};
-
 type OsmdInstance = {
-  cursor?: OsmdCursor;
+  cursor?: OsmdCursorLike;
 };
-
-function syncScoreCursor(osmd: OsmdInstance | null, activeEvents: PlaybackNoteEvent[]): void {
-  const cursor = osmd?.cursor;
-  if (!cursor) {
-    return;
-  }
-
-  if (activeEvents.length === 0) {
-    cursor.hide?.();
-    return;
-  }
-
-  const targetScoreTime = Math.min(...activeEvents.map((event) => event.startBeat)) / 4;
-
-  try {
-    cursor.reset?.();
-    cursor.show?.();
-
-    let guard = 0;
-    let currentTime = cursorSourceTime(cursor);
-    while (currentTime !== null && currentTime + 0.0001 < targetScoreTime && !cursor.Iterator?.EndReached && guard < 2000) {
-      cursor.next?.();
-      currentTime = cursorSourceTime(cursor);
-      guard += 1;
-    }
-
-    cursor.update?.();
-  } catch {
-    cursor.hide?.();
-  }
-}
-
-function cursorSourceTime(cursor: OsmdCursor): number | null {
-  const sourceTime = cursor.Iterator?.CurrentSourceTimestamp?.RealValue;
-  if (typeof sourceTime === "number") {
-    return sourceTime;
-  }
-
-  const currentTime = cursor.Iterator?.currentTimeStamp?.RealValue;
-  return typeof currentTime === "number" ? currentTime : null;
-}
 
 function summarizeActivePlayback(activeEvents: PlaybackNoteEvent[]): string {
   if (activeEvents.length === 0) {

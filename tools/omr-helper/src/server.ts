@@ -7,6 +7,7 @@ import { fileURLToPath } from "node:url";
 import multer from "multer";
 import { nanoid } from "nanoid";
 import { runAudiveris } from "./audiverisRunner.js";
+import { isAiCorrectionDisabled, requestAiOmrCorrection } from "./aiCorrection.js";
 import { readMusicXmlAsText } from "./musicxmlNormalizer.js";
 import { assertAllowedInput, ensureDir, getWorkspaceRoot, sanitizeFilename } from "./safeFiles.js";
 import type { OmrConversionResult } from "./types.js";
@@ -44,6 +45,10 @@ app.get("/health", (_req, res) => {
     audiverisConfigured: Boolean(process.env.AUDIVERIS_BIN),
     audiverisBin: process.env.AUDIVERIS_BIN || null,
     mockConfigured: Boolean(process.env.OMR_HELPER_MOCK_MUSICXML),
+    aiCorrectionProvider: "local-codex",
+    aiCorrectionConfigured: !isAiCorrectionDisabled(),
+    aiCorrectionExecutable: process.env.CODEX_BIN || "codex",
+    aiCorrectionModel: process.env.CODEX_OMR_MODEL || "Codex configured default",
     port
   });
 });
@@ -74,6 +79,14 @@ app.post("/convert", upload.single("score"), async (req, res) => {
       : await readAudiverisMusicXml(inputFile, outputDir);
 
     warnings.push(...converted.warnings);
+    const aiCorrection = await requestAiOmrCorrection({
+      requested: String(req.body?.aiReview ?? "").toLowerCase() === "true",
+      sourcePath: inputFile,
+      filename: req.file.originalname,
+      musicXml: converted.musicXml,
+      warnings,
+      jobDir
+    });
     const payload: OmrConversionResult = {
       ok: true,
       jobId,
@@ -82,7 +95,8 @@ app.post("/convert", upload.single("score"), async (req, res) => {
       musicXml: converted.musicXml,
       warnings,
       logs: converted.logs.slice(-12000),
-      elapsedMs: Date.now() - startedAt
+      elapsedMs: Date.now() - startedAt,
+      aiCorrection
     };
     res.json(payload);
   } catch (error) {

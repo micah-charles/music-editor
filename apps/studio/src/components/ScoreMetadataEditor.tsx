@@ -1,4 +1,4 @@
-import type { FoxChildMusicScore, Mode, Step } from "@foxchild/music-core";
+import { keyToFifths, type FoxChildMusicScore, type Mode, type Step } from "@foxchild/music-core";
 
 interface ScoreMetadataEditorProps {
   score: FoxChildMusicScore;
@@ -32,6 +32,20 @@ export function ScoreMetadataEditor({ score, onChange }: ScoreMetadataEditorProp
           onChange={(event) => patch({ metadata: { ...score.metadata, composer: event.target.value } })}
         />
       </label>
+      <label className="field">
+        <span>Subtitle</span>
+        <input
+          value={score.metadata.subtitle ?? ""}
+          onChange={(event) => patch({ metadata: { ...score.metadata, subtitle: event.target.value } })}
+        />
+      </label>
+      <label className="field">
+        <span>Arranger</span>
+        <input
+          value={score.metadata.arranger ?? ""}
+          onChange={(event) => patch({ metadata: { ...score.metadata, arranger: event.target.value } })}
+        />
+      </label>
       <div className="field-grid">
         <label className="field">
           <span>Tempo</span>
@@ -40,14 +54,17 @@ export function ScoreMetadataEditor({ score, onChange }: ScoreMetadataEditorProp
             min={20}
             max={280}
             value={score.global.tempo.bpm}
-            onChange={(event) => patch({ global: { ...score.global, tempo: { ...score.global.tempo, bpm: Number(event.target.value) || 90 } } })}
+            onChange={(event) => patch({ global: { ...score.global, tempo: { ...score.global.tempo, bpm: Number(event.target.value) || 90, source: "user" } } })}
           />
         </label>
         <label className="field">
           <span>Key</span>
           <select
             value={score.global.key.tonic}
-            onChange={(event) => patch({ global: { ...score.global, key: { ...score.global.key, tonic: event.target.value as Step } } })}
+            onChange={(event) => {
+              const tonic = event.target.value as Step;
+              patch({ global: { ...score.global, key: { ...score.global.key, tonic, fifths: keyToFifths(tonic, score.global.key.mode) } } });
+            }}
           >
             {steps.map((step) => <option key={step} value={step}>{step}</option>)}
           </select>
@@ -56,7 +73,10 @@ export function ScoreMetadataEditor({ score, onChange }: ScoreMetadataEditorProp
           <span>Mode</span>
           <select
             value={score.global.key.mode}
-            onChange={(event) => patch({ global: { ...score.global, key: { ...score.global.key, mode: event.target.value as Mode } } })}
+            onChange={(event) => {
+              const mode = event.target.value as Mode;
+              patch({ global: { ...score.global, key: { ...score.global.key, mode, fifths: keyToFifths(score.global.key.tonic, mode) } } });
+            }}
           >
             {modes.map((mode) => <option key={mode} value={mode}>{mode}</option>)}
           </select>

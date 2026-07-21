@@ -6,7 +6,7 @@ export function getBeatsPerMeasure(timeSignature: { beats: number; beatType: num
 }
 
 export function eventDurationBeats(event: MusicEvent): number {
-  if (event.type === "annotation") {
+  if (event.type === "annotation" || event.type === "direction") {
     return 0;
   }
   return durationToBeats(event.duration);

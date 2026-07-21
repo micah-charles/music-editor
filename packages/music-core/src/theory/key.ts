@@ -32,6 +32,18 @@ const FIFTHS_TO_MAJOR: Record<number, Step> = {
   5: "B"
 };
 
+const FIFTHS_TO_MINOR: Record<number, Step> = {
+  [-4]: "F",
+  [-3]: "C",
+  [-2]: "G",
+  [-1]: "D",
+  0: "A",
+  1: "E",
+  2: "B",
+  3: "F",
+  4: "C"
+};
+
 export function keyToFifths(tonic: Step, mode: Mode): number {
   if (mode === "minor") {
     return MINOR_FIFTHS[tonic] ?? 0;
@@ -39,10 +51,10 @@ export function keyToFifths(tonic: Step, mode: Mode): number {
   return MAJOR_FIFTHS[tonic] ?? 0;
 }
 
-export function fifthsToKey(fifths: number): { tonic: Step; mode: Mode } {
+export function fifthsToKey(fifths: number, mode: Mode = "major"): { tonic: Step; mode: Mode } {
   return {
-    tonic: FIFTHS_TO_MAJOR[fifths] ?? "C",
-    mode: "major"
+    tonic: (mode === "minor" ? FIFTHS_TO_MINOR[fifths] : FIFTHS_TO_MAJOR[fifths]) ?? "C",
+    mode
   };
 }
 

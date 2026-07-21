@@ -28,7 +28,7 @@ export function astToMidi(score: FoxChildMusicScore): Uint8Array {
         midi: event.midi ?? 60,
         time: beatsToSeconds(event.startBeat, score.global.tempo.bpm),
         duration: beatsToSeconds(event.durationBeats, score.global.tempo.bpm),
-        velocity: Math.min(1, Math.max(0.1, event.velocity / 127))
+        velocity: Math.min(1, Math.max(0.001, (event.velocity / 127) * (event.trackVolume ?? 1)))
       });
     });
   }

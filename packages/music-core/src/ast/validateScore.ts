@@ -1,8 +1,6 @@
 import type { FoxChildMusicScore, MusicEvent, ValidationResult } from "./types";
-import { durationToBeats } from "../rhythm/duration";
-import { getBeatsPerMeasure } from "../rhythm/measure";
 import { pitchToMidi } from "../theory/pitch";
-import { validateMeasure, validateScoreMeasures } from "../validation/measureValidation";
+import { validateScoreMeasures } from "../validation/measureValidation";
 
 export function validateScore(score: unknown): ValidationResult {
   const errors: string[] = [];
@@ -37,11 +35,17 @@ export function validateScore(score: unknown): ValidationResult {
     if (!isRecord(global.key) || !["major", "minor"].includes(String(global.key.mode))) {
       errors.push("global.key.mode must be major or minor.");
     }
+    if (isRecord(global.key) && "fifths" in global.key && (!Number.isInteger(global.key.fifths) || Number(global.key.fifths) < -7 || Number(global.key.fifths) > 7)) {
+      errors.push("global.key.fifths must be an integer from -7 to 7.");
+    }
     if (!isRecord(global.timeSignature) || !isPositiveNumber(global.timeSignature.beats) || !isPositiveNumber(global.timeSignature.beatType)) {
       errors.push("global.timeSignature.beats and beatType must be positive numbers.");
     }
     if (!isRecord(global.tempo) || !isPositiveNumber(global.tempo.bpm)) {
       errors.push("global.tempo.bpm must be a positive number.");
+    }
+    if (isRecord(global.tempo) && "source" in global.tempo && !["musicxml", "omr", "user", "default"].includes(String(global.tempo.source))) {
+      errors.push("global.tempo.source is unsupported.");
     }
   }
 
@@ -49,13 +53,6 @@ export function validateScore(score: unknown): ValidationResult {
   if (!Array.isArray(parts) || parts.length === 0) {
     errors.push("parts must contain at least one part.");
   } else {
-    const beatsPerMeasure = isRecord(global) && isRecord(global.timeSignature)
-      ? getBeatsPerMeasure({
-        beats: Number(global.timeSignature.beats || 4),
-        beatType: Number(global.timeSignature.beatType || 4)
-      })
-      : 4;
-
     parts.forEach((part, partIndex) => {
       if (!isRecord(part)) {
         errors.push(`parts[${partIndex}] must be an object.`);
@@ -94,18 +91,9 @@ export function validateScore(score: unknown): ValidationResult {
           return;
         }
 
-        let measureBeats = 0;
         measure.events.forEach((event, eventIndex) => {
           validateEvent(event, `parts[${partIndex}].measures[${measureIndex}].events[${eventIndex}]`, errors);
-          if (isRecord(event) && "duration" in event && isRecord(event.duration)) {
-            measureBeats += durationToBeats(event.duration as never);
-          }
         });
-
-        const measureStatus = validateMeasure(measureBeats, beatsPerMeasure);
-        if (measureStatus === "overfilled") {
-          errors.push(`parts[${partIndex}].measures[${measureIndex}] exceeds ${beatsPerMeasure} beats.`);
-        }
       });
     });
   }
@@ -137,7 +125,7 @@ function validateEvent(event: unknown, path: string, errors: string[]): void {
     return;
   }
 
-  if (!["note", "rest", "chord", "annotation"].includes(String(event.type))) {
+  if (!["note", "rest", "chord", "annotation", "direction"].includes(String(event.type))) {
     errors.push(`${path}.type is unsupported.`);
     return;
   }
@@ -145,6 +133,13 @@ function validateEvent(event: unknown, path: string, errors: string[]): void {
   if (event.type === "annotation") {
     if (!isNonEmptyString(event.text)) {
       errors.push(`${path}.text is required for annotations.`);
+    }
+    return;
+  }
+
+  if (event.type === "direction") {
+    if (!isNonEmptyString(event.dynamic) && !isNonEmptyString(event.text)) {
+      errors.push(`${path} requires a dynamic or text value.`);
     }
     return;
   }

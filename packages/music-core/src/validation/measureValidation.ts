@@ -6,8 +6,10 @@ import type {
   MusicEvent
 } from "../ast/types";
 import { durationToBeats, beatsToDuration } from "../rhythm/duration";
-import { getBeatsPerMeasure, eventDurationBeats } from "../rhythm/measure";
+import { getBeatsPerMeasure } from "../rhythm/measure";
 import { pitchToName } from "../theory/pitch";
+import { measureContentDuration } from "../timeline/measureMap";
+import { toNumber } from "../timeline/rational";
 
 const EPSILON = 0.0001;
 
@@ -25,12 +27,19 @@ export function validateScoreMeasures(
   score: FoxChildMusicScore,
   previousScore?: FoxChildMusicScore
 ): MeasureValidationResult[] {
-  const beatsExpected = roundBeat(getBeatsPerMeasure(score.global.timeSignature));
   const previousEvents = previousScore ? eventMapById(previousScore) : new Map<string, MusicEvent>();
 
   return score.parts.flatMap((part) => {
-    return part.measures.map((measure) => {
-      const beatsUsed = roundBeat(measure.events.reduce((sum, event) => sum + eventDurationBeats(event), 0));
+    return part.measures.map((measure, measureIndex) => {
+      const meter = [...(score.global.meterEvents ?? [])]
+        .filter((event) => event.measure <= measure.number)
+        .sort((left, right) => left.measure - right.measure)
+        .at(-1) ?? score.global.timeSignature;
+      const nominalBeats = roundBeat(getBeatsPerMeasure(meter));
+      const beatsUsed = roundBeat(toNumber(measureContentDuration(measure.events)));
+      const beatsExpected = measureIndex === 0 && measure.implicit && beatsUsed > 0 && beatsUsed < nominalBeats
+        ? beatsUsed
+        : nominalBeats;
       const status = validateMeasure(beatsUsed, beatsExpected);
       const eventIds = measure.events.map((event) => event.id).filter((id): id is string => Boolean(id));
       const result: MeasureValidationResult = {
@@ -158,8 +167,8 @@ function eventMapById(score: FoxChildMusicScore): Map<string, MusicEvent> {
   return map;
 }
 
-function hasDuration(event: MusicEvent): event is Exclude<MusicEvent, { type: "annotation" }> {
-  return event.type !== "annotation";
+function hasDuration(event: MusicEvent): event is Exclude<MusicEvent, { type: "annotation" | "direction" }> {
+  return event.type !== "annotation" && event.type !== "direction";
 }
 
 function eventLabel(event: MusicEvent): string {
@@ -172,7 +181,7 @@ function eventLabel(event: MusicEvent): string {
   if (event.type === "chord") {
     return event.pitches.map(pitchToName).join("+");
   }
-  return "annotation";
+  return event.type === "direction" ? "direction" : "annotation";
 }
 
 function article(label: string): "a" | "an" {

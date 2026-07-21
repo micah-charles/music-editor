@@ -13,7 +13,11 @@ export const foxChildMusicAstSchema = {
       required: ["title"],
       properties: {
         title: { type: "string", minLength: 1 },
+        movementTitle: { type: "string" },
+        subtitle: { type: "string" },
         composer: { type: "string" },
+        arranger: { type: "string" },
+        lyricist: { type: "string" },
         source: { type: "string" },
         createdAt: { type: "string" },
         updatedAt: { type: "string" },
@@ -29,7 +33,8 @@ export const foxChildMusicAstSchema = {
           required: ["tonic", "mode"],
           properties: {
             tonic: { enum: ["C", "D", "E", "F", "G", "A", "B"] },
-            mode: { enum: ["major", "minor"] }
+            mode: { enum: ["major", "minor"] },
+            fifths: { type: "integer", minimum: -7, maximum: 7 }
           }
         },
         timeSignature: {
@@ -45,7 +50,8 @@ export const foxChildMusicAstSchema = {
           required: ["bpm"],
           properties: {
             bpm: { type: "number", minimum: 20, maximum: 280 },
-            label: { type: "string" }
+            label: { type: "string" },
+            source: { enum: ["musicxml", "omr", "user", "default"] }
           }
         }
       }

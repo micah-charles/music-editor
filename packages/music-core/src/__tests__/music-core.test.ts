@@ -8,6 +8,7 @@ import {
   astToMusicXml,
   astToPlaybackEvents,
   chordProgressionToAst,
+  compileScoreTimeline,
   countNotes,
   DURATION_BEATS,
   detectChordName,
@@ -152,7 +153,7 @@ describe("@foxchild/music-core", () => {
     expect(countNotes(roundTrip.parts[0].measures)).toBeGreaterThan(0);
   });
 
-  it("imports MusicXML staves and voices as separate playable tracks", () => {
+  it("imports MusicXML staves and voices as lanes in one playable part", () => {
     const xml = `<?xml version="1.0" encoding="UTF-8"?>
 <score-partwise version="3.1">
   <work><work-title>Two Voice Piano</work-title></work>
@@ -189,16 +190,101 @@ describe("@foxchild/music-core", () => {
     const validation = validateScore(imported);
     const playbackEvents = astToPlaybackEvents(imported).filter((event) => !event.isRest);
 
-    expect(imported.global.key).toEqual({ tonic: "D", mode: "major" });
+    expect(imported.global.key).toEqual({ tonic: "D", mode: "major", fifths: 2 });
     expect(imported.global.tempo.bpm).toBe(120);
-    expect(imported.parts.map((part) => part.clef)).toEqual(["treble", "bass"]);
+    expect(imported.parts).toHaveLength(1);
+    expect(imported.parts[0]).toMatchObject({
+      id: "P1",
+      clef: "treble",
+      staffCount: 2,
+      clefs: { 1: "treble", 2: "bass" }
+    });
     expect(validation.errors).toEqual([]);
     expect(playbackEvents.map((event) => [event.partId, event.startBeat, event.pitch])).toEqual([
-      ["P1-s1-v1", 0, "D5"],
-      ["P1-s2-v2", 0, "D3"],
-      ["P1-s1-v1", 4, "E5"],
-      ["P1-s2-v2", 4, "A2"]
+      ["P1", 0, "D5"],
+      ["P1", 0, "D3"],
+      ["P1", 4, "E5"],
+      ["P1", 4, "A2"]
     ]);
+  });
+
+  it("preserves the initial key and measure-level key changes", () => {
+    const xml = `<?xml version="1.0" encoding="UTF-8"?>
+<score-partwise version="4.0">
+  <part-list><score-part id="P1"><part-name>Piano</part-name></score-part></part-list>
+  <part id="P1">
+    <measure number="1">
+      <attributes><divisions>4</divisions><key><fifths>5</fifths><mode>major</mode></key><time><beats>4</beats><beat-type>4</beat-type></time></attributes>
+      <note><rest/><duration>16</duration><voice>1</voice><type>whole</type></note>
+    </measure>
+    <measure number="2">
+      <attributes><key><fifths>5</fifths><mode>major</mode></key></attributes>
+      <note><rest/><duration>16</duration><voice>1</voice><type>whole</type></note>
+    </measure>
+    <measure number="3">
+      <attributes><key><fifths>-5</fifths><mode>major</mode></key></attributes>
+      <note><rest/><duration>16</duration><voice>1</voice><type>whole</type></note>
+    </measure>
+  </part>
+</score-partwise>`;
+
+    const imported = musicXmlToAst(xml);
+    expect(imported.global.key).toEqual({ tonic: "B", mode: "major", fifths: 5 });
+    expect(imported.global.keyEvents).toEqual([
+      { position: { measure: 3, beat: 0 }, tonic: "C", mode: "major", fifths: -5 }
+    ]);
+
+    const exported = astToMusicXml(imported);
+    expect(exported.match(/<fifths>5<\/fifths>/g)).toHaveLength(1);
+    expect(exported.match(/<fifths>-5<\/fifths>/g)).toHaveLength(1);
+
+    const roundTrip = musicXmlToAst(exported);
+    expect(roundTrip.global.key.fifths).toBe(5);
+    expect(roundTrip.global.keyEvents?.map((event) => [event.position.measure, event.fifths])).toEqual([[3, -5]]);
+  });
+
+  it("recovers Audiveris title credits and text-only tempo changes", () => {
+    const xml = `<?xml version="1.0" encoding="UTF-8"?>
+<score-partwise version="4.0">
+  <movement-title>Oshi no Ko Opening</movement-title>
+  <identification><encoding><software>Audiveris 5.10.2</software></encoding></identification>
+  <credit page="1"><credit-words font-size="16">Idol (アイドル)</credit-words></credit>
+  <credit page="1"><credit-words font-size="12">Oshi no Ko Opening</credit-words></credit>
+  <part-list><score-part id="P1"><part-name>Piano</part-name></score-part></part-list>
+  <part id="P1">
+    <measure number="1">
+      <attributes><divisions>4</divisions><time><beats>4</beats><beat-type>4</beat-type></time></attributes>
+      <direction><direction-type><metronome><beat-unit>quarter</beat-unit><per-minute>166</per-minute></metronome></direction-type><sound tempo="166"/></direction>
+      <note><rest/><duration>16</duration><voice>1</voice><type>whole</type></note>
+    </measure>
+    <measure number="86">
+      <direction><direction-type><words>Allegretto (J = 150)</words></direction-type></direction>
+      <note><rest/><duration>16</duration><voice>1</voice><type>whole</type></note>
+    </measure>
+  </part>
+</score-partwise>`;
+
+    const imported = musicXmlToAst(xml);
+    expect(imported.metadata).toMatchObject({
+      title: "Idol (アイドル)",
+      movementTitle: "Oshi no Ko Opening",
+      subtitle: "Oshi no Ko Opening"
+    });
+    expect(imported.global.tempo.bpm).toBe(166);
+    expect(imported.global.tempo.label).toBeUndefined();
+    expect(imported.global.tempoEvents).toContainEqual({
+      position: { measure: 86, beat: 0 },
+      bpm: 150,
+      label: "Allegretto"
+    });
+    const exported = astToMusicXml(imported);
+    expect(exported).toContain("<words>Allegretto</words>");
+    expect(exported).toContain("<per-minute>150</per-minute>");
+    expect(musicXmlToAst(exported).global.tempoEvents).toContainEqual({
+      position: { measure: 86, beat: 0 },
+      bpm: 150,
+      label: "Allegretto"
+    });
   });
 
   it("imports MusicXML forward gaps as rests for the matching lane", () => {
@@ -228,12 +314,16 @@ describe("@foxchild/music-core", () => {
 </score-partwise>`;
 
     const imported = withMeasureValidation(musicXmlToAst(xml));
-    const upperMeasure = imported.parts.find((part) => part.id === "P1-s1-v1")?.measures[0];
-    const upperIssue = imported.validation?.measures.find((measure) => measure.partId === "P1-s1-v1" && measure.measure === 1);
+    const upperMeasure = imported.parts[0]?.measures[0];
+    const upperIssue = imported.validation?.measures.find((measure) => measure.partId === "P1" && measure.measure === 1);
 
-    expect(upperMeasure?.events.filter((event) => event.type !== "annotation").map((event) => [event.type, event.duration.beats])).toEqual([
+    expect(upperMeasure?.events.flatMap((event) => event.type !== "annotation" && event.type !== "direction" && event.staff === 1 ? [[event.type, event.duration.beats]] : [])).toEqual([
       ["rest", 2],
       ["chord", 2]
+    ]);
+    expect(upperMeasure?.events.flatMap((event) => event.type !== "annotation" && event.type !== "direction" && event.staff === 2 ? [[event.type, event.duration.beats]] : [])).toEqual([
+      ["note", 2],
+      ["note", 2]
     ]);
     expect(upperIssue?.status).toBe("complete");
   });
@@ -260,7 +350,7 @@ describe("@foxchild/music-core", () => {
 </score-partwise>`;
 
     const imported = withMeasureValidation(musicXmlToAst(xml));
-    const notes = imported.parts[0].measures[0].events.slice(0, 3).filter((event) => event.type !== "annotation");
+    const notes = imported.parts[0].measures[0].events.slice(0, 3).filter((event) => event.type !== "annotation" && event.type !== "direction");
     const exported = astToMusicXml(imported);
 
     expect(notes.map((event) => event.duration.beats)).toEqual([0.333333, 0.333333, 0.333333]);
@@ -273,6 +363,70 @@ describe("@foxchild/music-core", () => {
     expect(exported).toContain("<time-modification>");
     expect(exported).toContain("<actual-notes>3</actual-notes>");
     expect(exported).toContain("<normal-notes>2</normal-notes>");
+  });
+
+  it("preserves OMR fidelity semantics through MusicXML import and export", () => {
+    const xml = readFileSync("packages/music-core/src/__tests__/fixtures/omr-fidelity.musicxml", "utf8");
+    const imported = musicXmlToAst(xml);
+    const firstMeasure = imported.parts[0].measures[0];
+    const exported = astToMusicXml(imported);
+    const roundTrip = musicXmlToAst(exported);
+    const chord = firstMeasure.events.find((event) => event.type === "chord");
+    const dynamic = firstMeasure.events.find((event) => event.type === "direction");
+    const bassRest = firstMeasure.events.find((event) => event.type === "rest" && event.voice === 5);
+    const voices = new Set(firstMeasure.events.map((event) => event.voice));
+
+    expect(imported.metadata).toMatchObject({
+      title: "Fidelity Study",
+      movementTitle: "Opening",
+      subtitle: "OMR Regression",
+      composer: "Test Composer",
+      arranger: "Test Arranger"
+    });
+    expect(imported.global.key).toEqual({ tonic: "E", mode: "major", fifths: 4 });
+    expect(imported.global.tempo).toMatchObject({ bpm: 163, source: "musicxml" });
+    expect(compileScoreTimeline(imported).tempoMap[0].bpm).toBe(163);
+    expect(dynamic).toMatchObject({ type: "direction", dynamic: "f", staff: 1, voice: 1, placement: "below" });
+    expect(chord?.type === "chord" ? chord.notation : undefined).toMatchObject({
+      articulations: ["staccato"],
+      slurs: [{ type: "start", number: 1 }],
+      beams: [{ number: 1, value: "begin" }]
+    });
+    expect(bassRest?.type === "rest" ? bassRest.duration : undefined).toMatchObject({ value: "dotted-half", beats: 3 });
+    expect(voices.has(2)).toBe(false);
+    expect(voices.has(6)).toBe(false);
+
+    expect(exported).toContain("<fifths>4</fifths>");
+    expect(exported).toContain("<per-minute>163</per-minute>");
+    expect(exported).toContain('<creator type="arranger">Test Arranger</creator>');
+    expect(exported).toContain("<dynamics><f/></dynamics>");
+    expect(exported).toContain('<slur type="start" number="1"/>');
+    expect(exported).toContain('<slur type="stop" number="1"/>');
+    expect(exported.match(/<staccato\/>/g)).toHaveLength(1);
+    expect(exported).toContain('<beam number="1">begin</beam>');
+    expect(exported).toContain("<type>half</type>\n        <dot/>");
+    expect(roundTrip.global.key.fifths).toBe(4);
+    expect(roundTrip.global.tempo.bpm).toBe(163);
+  });
+
+  it("warns when repeated explicit sharps may hide a lost key signature", () => {
+    const source = readFileSync("packages/music-core/src/__tests__/fixtures/omr-fidelity.musicxml", "utf8")
+      .replace("<fifths>4</fifths>", "<fifths>0</fifths>")
+      .replaceAll("<step>E</step>", "<step>E</step><alter>1</alter>");
+    const imported = musicXmlToAst(source);
+    expect(imported.sourceMetadata?.warnings).toContain(
+      "Possible lost key signature: repeated explicit accidentals detected while key signature is C major."
+    );
+  });
+
+  it("does not export a contradictory MusicXML type for a non-standard numeric duration", () => {
+    const score = structuredClone(simpleMelodyAst);
+    const first = score.parts[0].measures[0].events[0];
+    if (first.type !== "note") throw new Error("Expected a note.");
+    first.duration = { value: "quarter", beats: 1.25 };
+    const firstNote = astToMusicXml(score).match(/<note>[\s\S]*?<\/note>/)?.[0] ?? "";
+    expect(firstNote).toContain("<duration>30</duration>");
+    expect(firstNote).not.toContain("<type>quarter</type>");
   });
 
   it("exports MIDI and imports it as a draft transcription", () => {

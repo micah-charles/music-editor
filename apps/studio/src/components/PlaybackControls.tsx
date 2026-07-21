@@ -1,9 +1,17 @@
-import { astToPlaybackEvents, type FoxChildMusicScore } from "@foxchild/music-core";
-import { useEffect, useMemo, useRef, useState } from "react";
+import {
+  astToPlaybackEvents,
+  compareRational,
+  compileScoreTimeline,
+  midiToPitch,
+  pitchToName,
+  type FoxChildMusicScore
+} from "@foxchild/music-core";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { BasicSynthEngine } from "../music/playback/BasicSynthEngine";
 import type { PlaybackEngine, PlaybackEngineMode, PlaybackNoteEvent } from "../music/playback/PlaybackEngine";
 import { SamplePlaybackEngine } from "../music/playback/SamplePlaybackEngine";
 import { SoundFontPlaybackEngine } from "../music/playback/SoundFontPlaybackEngine";
+import { usePlaybackSession } from "../music/playback/session/usePlaybackSession";
 import {
   defaultDirectSoundFontUrl,
   defaultSoundFontConfig,
@@ -18,163 +26,152 @@ import {
 interface PlaybackControlsProps {
   score: FoxChildMusicScore;
   label?: string;
-  onActivePitchesChange?: (pitches: string[]) => void;
-  onActiveEventsChange?: (events: PlaybackNoteEvent[]) => void;
   onPresetCatalogChange?: (presets: SoundFontPresetOption[]) => void;
+  onTempoChange?: (bpm: number) => void;
 }
 
-type PlaybackState = "stopped" | "playing" | "paused";
-
-const speeds = [0.5, 0.75, 1, 1.25, 1.5];
+const speeds = [0.5, 0.75, 1, 1.25, 1.5, 2];
+const transposeOptions = [-12, -7, -5, 0, 5, 7, 12];
 const engineLabels: Record<PlaybackEngineMode, string> = {
   "basic-synth": "Basic Synth",
   "sampled-piano": "Sampled Piano",
   soundfont: "Direct SF2"
 };
 
-export function PlaybackControls({ score, label, onActivePitchesChange, onActiveEventsChange, onPresetCatalogChange }: PlaybackControlsProps) {
-  const [speed, setSpeed] = useState(1);
-  const [volume, setVolume] = useState(0.8);
-  const [engineMode, setEngineMode] = useState<PlaybackEngineMode>("basic-synth");
+export function PlaybackControls({ score, label, onPresetCatalogChange, onTempoChange }: PlaybackControlsProps) {
+  const { controller, snapshot } = usePlaybackSession();
+  const [engineMode, setEngineMode] = useState<PlaybackEngineMode>("soundfont");
   const [soundFontUrl, setSoundFontUrl] = useState(defaultDirectSoundFontUrl);
-  const [soundFontLabel, setSoundFontLabel] = useState("default.sf2");
-  const [state, setState] = useState<PlaybackState>("stopped");
+  const [soundFontLabel, setSoundFontLabel] = useState("GeneralUser GS v1.471.sf2");
+  const [transpose, setTranspose] = useState(0);
   const [warning, setWarning] = useState("");
-  const engineRef = useRef<PlaybackEngine | null>(null);
-  const finishTimerRef = useRef<number | undefined>();
-  const soundFontObjectUrlRef = useRef<string | undefined>();
+  const soundFontObjectUrlRef = useRef<string>();
+  const timeline = useMemo(() => compileScoreTimeline(score), [score]);
   const playbackEvents = useMemo<PlaybackNoteEvent[]>(() => {
     return astToPlaybackEvents(score)
       .filter((event) => !event.isRest && event.pitch && typeof event.midi === "number")
-      .map((event) => ({
-        id: event.id,
-        pitch: event.pitch ?? "C4",
-        midi: event.midi ?? 60,
-        measureNumber: event.measureNumber,
-        startBeat: event.startBeat,
-        durationBeats: event.durationBeats,
-        velocity: event.velocity,
-        isRest: event.isRest,
-        partId: event.partId,
-        instrument: event.instrument,
-        channel: event.channel,
-        midiProgram: event.midiProgram,
-        midiBank: event.midiBank
-      }));
-  }, [score]);
-  const totalBeats = playbackEvents.reduce((max, event) => Math.max(max, event.startBeat + event.durationBeats), 0);
+      .map((event) => {
+        const midi = Math.min(127, Math.max(0, (event.midi ?? 60) + transpose));
+        return {
+          id: event.id,
+          pitch: pitchToName(midiToPitch(midi)),
+          midi,
+          measureNumber: event.measureNumber,
+          startBeat: event.startBeat,
+          durationBeats: event.durationBeats,
+          velocity: event.velocity,
+          trackVolume: event.trackVolume,
+          pan: event.pan,
+          partId: event.partId,
+          instrument: event.instrument,
+          channel: event.channel,
+          midiProgram: event.midiProgram,
+          midiBank: event.midiBank
+        };
+      });
+  }, [score, transpose]);
+
+  const createEngine = useCallback((): PlaybackEngine => {
+    if (engineMode === "basic-synth") {
+      return new BasicSynthEngine();
+    }
+    if (engineMode === "sampled-piano") {
+      return new SamplePlaybackEngine({
+        sampleMapUrl: instrumentSampleMaps.piano,
+        instrument: "piano"
+      });
+    }
+    return new SoundFontPlaybackEngine(defaultSoundFontConfig(soundFontUrl));
+  }, [engineMode, soundFontUrl]);
 
   useEffect(() => {
-    stop();
-    engineRef.current?.dispose?.();
-    engineRef.current = null;
-    setWarning(engineMode === "soundfont" ? `Direct SF2 mode loads a real .sf2 SoundFont. Current source: ${soundFontLabel}.` : "");
-  }, [engineMode, soundFontUrl, soundFontLabel]);
+    controller.configure({ timeline, events: playbackEvents, bpm: score.global.tempo.bpm, createEngine });
+  }, [controller, createEngine, playbackEvents, score.global.tempo.bpm, timeline]);
 
   useEffect(() => {
     let cancelled = false;
-
     if (engineMode !== "soundfont") {
       onPresetCatalogChange?.(generalMidiPresetOptions);
+      setWarning("");
       return () => {
         cancelled = true;
       };
     }
 
+    setWarning(`Direct SF2 mode loads a real .sf2 SoundFont. Current source: ${soundFontLabel}.`);
     loadSoundFontPresetOptions(soundFontUrl)
       .then((presets) => {
-        if (cancelled) {
-          return;
+        if (!cancelled) {
+          onPresetCatalogChange?.(presets);
+          setWarning(`Direct SF2 is using ${soundFontLabel}. Loaded ${presets.length} track presets.`);
         }
-        onPresetCatalogChange?.(presets);
-        setWarning(`Direct SF2 playback is using ${soundFontLabel}. Loaded ${presets.length} presets for the Tracks instrument list.`);
       })
       .catch((error) => {
-        if (cancelled) {
-          return;
+        if (!cancelled) {
+          onPresetCatalogChange?.(generalMidiPresetOptions);
+          setWarning(`${errorMessage(error)} Using the General MIDI track preset list.`);
         }
-        onPresetCatalogChange?.(generalMidiPresetOptions);
-        setWarning(`${errorMessage(error)} Falling back to the General MIDI preset list in Tracks.`);
       });
-
     return () => {
       cancelled = true;
     };
   }, [engineMode, onPresetCatalogChange, soundFontLabel, soundFontUrl]);
 
-  useEffect(() => {
-    return () => {
-      if (soundFontObjectUrlRef.current) {
-        URL.revokeObjectURL(soundFontObjectUrlRef.current);
-      }
-    };
+  useEffect(() => () => {
+    if (soundFontObjectUrlRef.current) {
+      URL.revokeObjectURL(soundFontObjectUrlRef.current);
+    }
   }, []);
 
-  async function play() {
-    const secondsPerBeat = 60 / (score.global.tempo.bpm * speed);
-    try {
-      if (finishTimerRef.current) {
-        window.clearTimeout(finishTimerRef.current);
+  useEffect(() => {
+    const handleShortcut = (event: KeyboardEvent) => {
+      if (isTypingTarget(event.target)) {
+        return;
       }
-      const engine = getEngine();
-      await engine.play(playbackEvents, {
-        bpm: score.global.tempo.bpm,
-        speed,
-        volume,
-        onActivePitchesChange,
-        onActiveEventsChange
-      });
-      setWarning(engineMode === "soundfont" ? `Direct SF2 playback is using ${soundFontLabel}.` : "");
-      setState("playing");
-      finishTimerRef.current = window.setTimeout(() => setState("stopped"), Math.ceil((totalBeats * secondsPerBeat + 0.4) * 1000));
-    } catch (error) {
-      setState("stopped");
-      onActivePitchesChange?.([]);
-      onActiveEventsChange?.([]);
-      setWarning(errorMessage(error));
+      if (event.code === "Space") {
+        event.preventDefault();
+        void togglePlayback();
+      } else if (event.key === "ArrowLeft") {
+        event.preventDefault();
+        void controller.seekToSeconds(snapshot.currentSeconds - 5);
+      } else if (event.key === "ArrowRight") {
+        event.preventDefault();
+        void controller.seekToSeconds(snapshot.currentSeconds + 5);
+      } else if (event.key === "Home") {
+        event.preventDefault();
+        void controller.seekToSeconds(0);
+      }
+    };
+    window.addEventListener("keydown", handleShortcut);
+    return () => window.removeEventListener("keydown", handleShortcut);
+  });
+
+  const currentPlaybackMeasureIndex = findCurrentMeasureIndex(timeline.playbackMeasureMap, snapshot.currentScoreTime);
+  const currentPlaybackMeasure = timeline.playbackMeasureMap[currentPlaybackMeasureIndex];
+  const currentMeasure = timeline.measureMap.find((measure) => measure.measureNumber === currentPlaybackMeasure?.measureNumber);
+  const beatInMeasure = currentMeasure
+    ? Math.max(1, Math.floor((snapshot.currentSourceTime.numerator / snapshot.currentSourceTime.denominator) - (currentMeasure.start.numerator / currentMeasure.start.denominator)) + 1)
+    : 1;
+
+  async function togglePlayback() {
+    if (snapshot.status === "playing" || snapshot.status === "loading") {
+      controller.pause();
+    } else if (snapshot.status === "paused") {
+      await controller.resume();
+    } else {
+      await controller.play();
     }
   }
 
-  function pauseOrResume() {
-    if (state === "playing") {
-      engineRef.current?.pause?.();
-      setState("paused");
-    } else if (state === "paused") {
-      if (engineRef.current?.resume) {
-        engineRef.current.resume();
-      } else {
-        void play();
-      }
-      setState("playing");
+  function toggleLoop(enabled: boolean) {
+    if (!enabled || !currentPlaybackMeasure) {
+      controller.setLoop(undefined);
+      return;
     }
-  }
-
-  function stop(resetState = true) {
-    if (finishTimerRef.current) {
-      window.clearTimeout(finishTimerRef.current);
-    }
-    engineRef.current?.stop();
-    onActivePitchesChange?.([]);
-    onActiveEventsChange?.([]);
-    if (resetState) {
-      setState("stopped");
-    }
-  }
-
-  function getEngine(): PlaybackEngine {
-    if (!engineRef.current) {
-      if (engineMode === "basic-synth") {
-        engineRef.current = new BasicSynthEngine();
-      } else if (engineMode === "sampled-piano") {
-        engineRef.current = new SamplePlaybackEngine({
-          sampleMapUrl: instrumentSampleMaps.piano,
-          instrument: "piano"
-        });
-      } else {
-        engineRef.current = new SoundFontPlaybackEngine(defaultSoundFontConfig(soundFontUrl));
-      }
-    }
-    return engineRef.current;
+    controller.setLoop({
+      start: currentPlaybackMeasure.start,
+      end: timeline.playbackMeasureMap[currentPlaybackMeasureIndex + 1]?.start ?? timeline.playbackDuration
+    });
   }
 
   function selectSoundFontFile(fileList: FileList | null) {
@@ -182,15 +179,9 @@ export function PlaybackControls({ score, label, onActivePitchesChange, onActive
     if (!file) {
       return;
     }
-
     if (soundFontObjectUrlRef.current) {
       URL.revokeObjectURL(soundFontObjectUrlRef.current);
     }
-
-    stop();
-    engineRef.current?.dispose?.();
-    engineRef.current = null;
-
     const objectUrl = URL.createObjectURL(file);
     soundFontObjectUrlRef.current = objectUrl;
     setSoundFontUrl(objectUrl);
@@ -203,100 +194,129 @@ export function PlaybackControls({ score, label, onActivePitchesChange, onActive
       URL.revokeObjectURL(soundFontObjectUrlRef.current);
       soundFontObjectUrlRef.current = undefined;
     }
-
-    stop();
-    engineRef.current?.dispose?.();
-    engineRef.current = null;
-
     setSoundFontUrl(value);
     setSoundFontLabel(value.split("/").filter(Boolean).pop() || value || "SoundFont URL");
   }
 
   return (
-    <footer className="playback-bar">
-      <div>
+    <footer className="playback-bar" aria-label="Playback transport">
+      <div className="playback-summary">
         <strong>Playback</strong>
-        <span>{label ? `${label} · ` : ""}{score.global.tempo.bpm} bpm · {speed}× · {engineLabels[engineMode]}</span>
+        <span>{label ? `${label} · ` : ""}{score.global.tempo.bpm} bpm · {snapshot.speed}× · {engineLabels[engineMode]}</span>
       </div>
+
       <div className="transport-buttons">
-        <button type="button" className="primary" onClick={() => void play()}>Play</button>
-        <button type="button" onClick={pauseOrResume} disabled={state === "stopped"}>
-          {state === "paused" ? "Resume" : "Pause"}
+        <button type="button" onClick={() => void controller.seekToSeconds(0)} aria-label="Jump to start" title="Jump to start (Home)">|◀</button>
+        <button type="button" onClick={() => void controller.seekToScoreTime(timeline.playbackMeasureMap[Math.max(0, currentPlaybackMeasureIndex - 1)]?.start ?? timeline.playbackMeasureMap[0].start)} aria-label="Previous measure" title="Previous measure">◀</button>
+        <button type="button" className="primary" onClick={() => void togglePlayback()} aria-label={snapshot.status === "playing" ? "Pause" : "Play"} title="Play or pause (Space)">
+          {snapshot.status === "playing" || snapshot.status === "loading" ? "Pause" : "Play"}
         </button>
-        <button type="button" onClick={() => stop()}>Stop</button>
+        <button type="button" onClick={() => controller.stop()} aria-label="Stop">Stop</button>
+        <button type="button" onClick={() => void controller.seekToScoreTime(timeline.playbackMeasureMap[currentPlaybackMeasureIndex + 1]?.start ?? currentPlaybackMeasure.start)} disabled={!timeline.playbackMeasureMap[currentPlaybackMeasureIndex + 1]} aria-label="Next measure" title="Next measure">▶</button>
       </div>
+
+      <div className="timeline-control">
+        <span className="playback-time">{formatTime(snapshot.currentSeconds)}</span>
+        <input
+          aria-label="Playback position"
+          type="range"
+          min={0}
+          max={Math.max(0.01, snapshot.durationSeconds)}
+          step={0.01}
+          value={Math.min(snapshot.currentSeconds, snapshot.durationSeconds)}
+          onChange={(event) => void controller.seekToSeconds(Number(event.target.value))}
+        />
+        <span className="playback-time">{formatTime(snapshot.durationSeconds)}</span>
+        <span className="measure-position">M{currentMeasure?.measureNumber ?? 1} · B{beatInMeasure}</span>
+      </div>
+
+      <label className="tempo-control">
+        <span>BPM</span>
+        <input type="number" min={20} max={280} value={score.global.tempo.bpm} onChange={(event) => onTempoChange?.(clamp(Number(event.target.value) || 90, 20, 280))} />
+      </label>
+
       <label className="engine-control">
-        <span>Sound Engine</span>
+        <span>Engine</span>
         <select value={engineMode} onChange={(event) => setEngineMode(event.target.value as PlaybackEngineMode)}>
           <option value="basic-synth">Basic Synth</option>
           <option value="sampled-piano">Sampled Piano</option>
           <option value="soundfont">Direct SF2</option>
         </select>
       </label>
+
       {engineMode === "soundfont" ? (
-        <>
+        <div className="sf2-controls">
           <label className="sf2-url-control">
             <span>SF2 URL</span>
-            <input
-              value={soundFontUrl.startsWith("blob:") ? "" : soundFontUrl}
-              placeholder={soundFontUrl.startsWith("blob:") ? soundFontLabel : defaultDirectSoundFontUrl}
-              onChange={(event) => updateSoundFontUrl(event.target.value)}
-            />
+            <input value={soundFontUrl.startsWith("blob:") ? "" : soundFontUrl} placeholder={soundFontUrl.startsWith("blob:") ? soundFontLabel : defaultDirectSoundFontUrl} onChange={(event) => updateSoundFontUrl(event.target.value)} />
           </label>
           <label className="sf2-file-control">
             <span>Local SF2</span>
             <input type="file" accept=".sf2" onChange={(event) => selectSoundFontFile(event.target.files)} />
           </label>
-        </>
+        </div>
       ) : null}
+
       <label className="volume-control">
         <span>Volume</span>
-        <input
-          type="range"
-          min={0}
-          max={100}
-          value={Math.round(volume * 100)}
-          onChange={(event) => setVolume(Number(event.target.value) / 100)}
-        />
+        <input aria-label="Playback volume" type="range" min={0} max={100} value={Math.round(snapshot.volume * 100)} onChange={(event) => controller.setVolume(Number(event.target.value) / 100)} />
       </label>
       <label className="speed-control">
         <span>Speed</span>
-        <select value={speed} onChange={(event) => setSpeed(Number(event.target.value))}>
+        <select value={snapshot.speed} onChange={(event) => controller.setSpeed(Number(event.target.value))}>
           {speeds.map((value) => <option key={value} value={value}>{value}×</option>)}
         </select>
       </label>
-      <span className={`playback-state ${state}`}>{state}</span>
-      {warning ? <p className="playback-warning">{warning}</p> : null}
+      <label className="transpose-control">
+        <span>Transpose</span>
+        <select value={transpose} onChange={(event) => setTranspose(Number(event.target.value))}>
+          {transposeOptions.map((value) => <option key={value} value={value}>{value > 0 ? `+${value}` : value}</option>)}
+        </select>
+      </label>
+      <label className="loop-control inline-toggle">
+        <input type="checkbox" checked={Boolean(snapshot.loop)} onChange={(event) => toggleLoop(event.target.checked)} />
+        <span>Loop measure</span>
+      </label>
+
+      <span className={`playback-state ${snapshot.status}`}>{snapshot.status}</span>
+      {snapshot.error || warning ? <p className="playback-warning" role="status">{snapshot.error || warning}</p> : null}
     </footer>
   );
 }
 
+function formatTime(seconds: number): string {
+  const safeSeconds = Math.max(0, Number.isFinite(seconds) ? seconds : 0);
+  const minutes = Math.floor(safeSeconds / 60);
+  const remainder = Math.floor(safeSeconds % 60);
+  return `${minutes}:${remainder.toString().padStart(2, "0")}`;
+}
+
+function isTypingTarget(target: EventTarget | null): boolean {
+  if (!(target instanceof HTMLElement)) {
+    return false;
+  }
+  return target.isContentEditable || ["INPUT", "TEXTAREA", "SELECT"].includes(target.tagName);
+}
+
+function clamp(value: number, minimum: number, maximum: number): number {
+  return Math.min(maximum, Math.max(minimum, value));
+}
+
+function findCurrentMeasureIndex(
+  measures: ReturnType<typeof compileScoreTimeline>["measureMap"],
+  scoreTime: ReturnType<typeof compileScoreTimeline>["duration"]
+): number {
+  let index = 0;
+  for (let candidate = 0; candidate < measures.length; candidate += 1) {
+    if (compareRational(measures[candidate].start, scoreTime) <= 0) {
+      index = candidate;
+    } else {
+      break;
+    }
+  }
+  return index;
+}
+
 function errorMessage(error: unknown): string {
-  if (error instanceof Error && error.message) {
-    return error.message;
-  }
-  if (typeof error === "string" && error) {
-    return error;
-  }
-  if (error && typeof error === "object") {
-    const namedError = error as { message?: unknown; name?: unknown; type?: unknown };
-    const details = [
-      typeof namedError.name === "string" ? namedError.name : "",
-      typeof namedError.message === "string" ? namedError.message : "",
-      typeof namedError.type === "string" ? namedError.type : ""
-    ].filter(Boolean);
-    if (details.length > 0) {
-      return details.join(": ");
-    }
-    try {
-      const json = JSON.stringify(error);
-      if (json && json !== "{}") {
-        return json;
-      }
-    } catch {
-      // Fall through to String(error).
-    }
-    return String(error);
-  }
-  return `Playback could not start${error === undefined ? ": unknown error." : `: ${String(error)}.`}`;
+  return error instanceof Error && error.message ? error.message : String(error);
 }

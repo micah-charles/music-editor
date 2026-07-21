@@ -30,15 +30,20 @@ export function playbackEventsToSmf(events: PlaybackNoteEvent[], options: SmfPla
     }
   ];
 
-  const programByChannel = new Map<number, { program: number; bank: number }>();
+  const programByChannel = new Map<number, { program: number; bank: number; volume: number; pan: number }>();
   if (events.length === 0) {
-    programByChannel.set(channel, { program, bank });
+    programByChannel.set(channel, { program, bank, volume: 127, pan: 64 });
   }
   for (const event of events) {
     const eventChannel = clampInt(event.channel ?? channel, 0, 15);
     const eventProgram = clampInt(event.midiProgram ?? program, 0, 127);
     const eventBank = clampInt(event.midiBank ?? bank, 0, 16383);
-    programByChannel.set(eventChannel, { program: eventProgram, bank: eventBank });
+    programByChannel.set(eventChannel, {
+      program: eventProgram,
+      bank: eventBank,
+      volume: clampInt((event.trackVolume ?? 1) * 127, 0, 127),
+      pan: clampInt(((event.pan ?? 0) + 1) * 63.5, 0, 127)
+    });
   }
   [...programByChannel.entries()]
     .sort(([channelA], [channelB]) => channelA - channelB)
@@ -48,6 +53,8 @@ export function playbackEventsToSmf(events: PlaybackNoteEvent[], options: SmfPla
       trackEvents.push(
         { tick: 0, order: -3, data: [0xb0 | eventChannel, 0x00, bankMsb] },
         { tick: 0, order: -2, data: [0xb0 | eventChannel, 0x20, bankLsb] },
+        { tick: 0, order: -1.8, data: [0xb0 | eventChannel, 0x07, preset.volume] },
+        { tick: 0, order: -1.6, data: [0xb0 | eventChannel, 0x0a, preset.pan] },
         { tick: 0, order: -1 + index / 100, data: [0xc0 | eventChannel, preset.program] }
       );
     });

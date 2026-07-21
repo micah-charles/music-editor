@@ -22,6 +22,25 @@ export type NoteDurationValue =
   | "dotted-quarter"
   | "dotted-eighth";
 
+export interface Rational {
+  numerator: number;
+  denominator: number;
+}
+
+export interface MusicalPosition {
+  measure: number;
+  /** Zero-based quarter-note beat offset within the measure. */
+  beat: number;
+  offset?: Rational;
+}
+
+export interface TimedEventFields {
+  position?: MusicalPosition;
+  voice?: number;
+  staff?: number;
+  extensions?: Record<string, unknown>;
+}
+
 export interface Pitch {
   step: Step;
   octave: number;
@@ -36,6 +55,21 @@ export interface Duration {
     normalNotes: number;
     normalType?: NoteDurationValue;
   };
+}
+
+export type ArticulationType = "staccato" | "staccatissimo" | "accent" | "strong-accent" | "tenuto";
+
+export interface NoteNotation {
+  articulations?: ArticulationType[];
+  slurs?: Array<{
+    type: "start" | "stop" | "continue";
+    number?: number;
+    placement?: "above" | "below";
+  }>;
+  beams?: Array<{
+    number: number;
+    value: "begin" | "continue" | "end" | "forward hook" | "backward hook";
+  }>;
 }
 
 export interface SemanticNoteInfo {
@@ -53,40 +87,55 @@ export interface SemanticChordInfo {
   sourceProgression?: string;
 }
 
-export interface NoteEvent {
+export interface NoteEvent extends TimedEventFields {
   id?: string;
   type: "note";
   pitch: Pitch;
   duration: Duration;
   velocity?: number;
   lyric?: string;
+  tie?: {
+    start?: boolean;
+    stop?: boolean;
+    groupId?: string;
+  };
+  notation?: NoteNotation;
   semantic?: SemanticNoteInfo;
 }
 
-export interface RestEvent {
+export interface RestEvent extends TimedEventFields {
   id?: string;
   type: "rest";
   duration: Duration;
 }
 
-export interface ChordEvent {
+export interface ChordEvent extends TimedEventFields {
   id?: string;
   type: "chord";
   pitches: Pitch[];
   duration: Duration;
   velocity?: number;
   lyric?: string;
+  notation?: NoteNotation;
   semantic?: SemanticChordInfo;
 }
 
-export interface AnnotationEvent {
+export interface AnnotationEvent extends TimedEventFields {
   id?: string;
   type: "annotation";
   text: string;
   placement?: "above" | "below";
 }
 
-export type MusicEvent = NoteEvent | RestEvent | ChordEvent | AnnotationEvent;
+export interface DirectionEvent extends TimedEventFields {
+  id?: string;
+  type: "direction";
+  dynamic?: "ppp" | "pp" | "p" | "mp" | "mf" | "f" | "ff" | "fff" | "sf" | "sfz" | "fp";
+  text?: string;
+  placement?: "above" | "below";
+}
+
+export type MusicEvent = NoteEvent | RestEvent | ChordEvent | AnnotationEvent | DirectionEvent;
 
 export interface Harmony {
   root: string;
@@ -98,6 +147,14 @@ export interface Measure {
   number: number;
   events: MusicEvent[];
   harmony?: Harmony[];
+  implicit?: boolean;
+  repeat?: {
+    start?: boolean;
+    end?: boolean;
+    times?: number;
+    endings?: number[];
+  };
+  extensions?: Record<string, unknown>;
 }
 
 export type MeasureStatus = "complete" | "underfilled" | "overfilled";
@@ -126,9 +183,15 @@ export interface Part {
   name: string;
   instrument: Instrument;
   clef: Clef;
+  staffCount?: number;
+  clefs?: Record<number, Clef>;
   channel?: number;
   muted?: boolean;
   solo?: boolean;
+  volume?: number;
+  pan?: number;
+  visible?: boolean;
+  color?: string;
   collapsed?: boolean;
   measures: Measure[];
 }
@@ -154,7 +217,16 @@ export interface FoxChildMusicScore {
   id: string;
   metadata: {
     title: string;
+    movementTitle?: string;
+    subtitle?: string;
     composer?: string;
+    arranger?: string;
+    lyricist?: string;
+    credits?: Array<{
+      type?: string;
+      text: string;
+      page?: number;
+    }>;
     source?: ScoreSource;
     createdAt?: string;
     updatedAt?: string;
@@ -164,6 +236,8 @@ export interface FoxChildMusicScore {
     key: {
       tonic: Step;
       mode: Mode;
+      /** Canonical MusicXML circle-of-fifths value when known. */
+      fifths?: number;
     };
     timeSignature: {
       beats: number;
@@ -172,7 +246,25 @@ export interface FoxChildMusicScore {
     tempo: {
       bpm: number;
       label?: string;
+      source?: "musicxml" | "omr" | "user" | "default";
     };
+    tempoEvents?: Array<{
+      position: MusicalPosition;
+      bpm: number;
+      label?: string;
+    }>;
+    meterEvents?: Array<{
+      measure: number;
+      beats: number;
+      beatType: number;
+    }>;
+    keyEvents?: Array<{
+      position: MusicalPosition;
+      tonic: Step;
+      mode: Mode;
+      /** Canonical MusicXML circle-of-fifths value when known. */
+      fifths?: number;
+    }>;
     swing?: number;
     style?: string;
   };
@@ -193,6 +285,7 @@ export interface FoxChildMusicScore {
     draftTranscription?: boolean;
     warnings?: string[];
   };
+  extensions?: Record<string, unknown>;
 }
 
 export interface PlaybackEvent {
@@ -204,6 +297,8 @@ export interface PlaybackEvent {
   startBeat: number;
   durationBeats: number;
   velocity: number;
+  trackVolume?: number;
+  pan?: number;
   isRest?: boolean;
   instrument?: string;
   channel?: number;

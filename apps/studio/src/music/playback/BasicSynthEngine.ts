@@ -34,7 +34,7 @@ export class BasicSynthEngine implements PlaybackEngine {
           event.pitch,
           event.durationBeats * beatSeconds * 0.94,
           time,
-          Math.min(1, Math.max(0.05, (event.velocity ?? 80) / 127))
+          Math.min(1, Math.max(0.001, ((event.velocity ?? 80) / 127) * (event.trackVolume ?? 1)))
         );
       }, event.startBeat * beatSeconds);
     });

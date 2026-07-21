@@ -37,3 +37,29 @@ export class SystemRecordingClock implements RecordingClock {
     return this.startBeat + elapsedSeconds / (60 / (this.bpm * this.speed));
   }
 }
+
+export class SharedRecordingClock implements RecordingClock {
+  private fallback: SystemRecordingClock;
+
+  constructor(
+    public bpm: number,
+    public speed = 1,
+    private readonly sessionBeat: () => number | undefined,
+    private readonly now: () => number = () => performance.now()
+  ) {
+    this.fallback = new SystemRecordingClock(bpm, speed, this.now);
+  }
+
+  start(startBeat = 0): void {
+    this.fallback = new SystemRecordingClock(this.bpm, this.speed, this.now);
+    this.fallback.start(startBeat);
+  }
+
+  stop(): void {
+    this.fallback.stop();
+  }
+
+  getCurrentBeat(): number {
+    return this.sessionBeat() ?? this.fallback.getCurrentBeat();
+  }
+}

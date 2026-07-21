@@ -101,13 +101,19 @@ export class SamplePlaybackEngine implements PlaybackEngine {
       }
       const source = context.createBufferSource();
       const gain = context.createGain();
+      const panner = typeof context.createStereoPanner === "function" ? context.createStereoPanner() : undefined;
       const eventStart = startAt + event.startBeat * beatSeconds;
       const eventDuration = event.durationBeats * beatSeconds;
 
       source.buffer = sample.buffer;
       source.playbackRate.value = Math.pow(2, (event.midi - sample.midi) / 12);
-      gain.gain.value = Math.min(1, Math.max(0.03, (event.velocity ?? 80) / 127));
-      source.connect(gain).connect(this.masterGain);
+      gain.gain.value = Math.min(1, Math.max(0.001, ((event.velocity ?? 80) / 127) * (event.trackVolume ?? 1)));
+      if (panner) {
+        panner.pan.value = Math.min(1, Math.max(-1, event.pan ?? 0));
+        source.connect(gain).connect(panner).connect(this.masterGain);
+      } else {
+        source.connect(gain).connect(this.masterGain);
+      }
       source.start(eventStart);
       source.stop(eventStart + eventDuration);
       source.onended = () => {
