@@ -25,6 +25,7 @@ import {
 
 interface PlaybackControlsProps {
   score: FoxChildMusicScore;
+  trackVolumes?: Readonly<Record<string, number>>;
   label?: string;
   onPresetCatalogChange?: (presets: SoundFontPresetOption[]) => void;
   onTempoChange?: (bpm: number) => void;
@@ -38,7 +39,7 @@ const engineLabels: Record<PlaybackEngineMode, string> = {
   soundfont: "Direct SF2"
 };
 
-export function PlaybackControls({ score, label, onPresetCatalogChange, onTempoChange }: PlaybackControlsProps) {
+export function PlaybackControls({ score, trackVolumes = {}, label, onPresetCatalogChange, onTempoChange }: PlaybackControlsProps) {
   const { controller, snapshot } = usePlaybackSession();
   const [engineMode, setEngineMode] = useState<PlaybackEngineMode>("soundfont");
   const [soundFontUrl, setSoundFontUrl] = useState(defaultDirectSoundFontUrl);
@@ -47,8 +48,17 @@ export function PlaybackControls({ score, label, onPresetCatalogChange, onTempoC
   const [warning, setWarning] = useState("");
   const soundFontObjectUrlRef = useRef<string>();
   const timeline = useMemo(() => compileScoreTimeline(score), [score]);
+  const playbackSourceScore = useMemo<FoxChildMusicScore>(() => ({
+    ...score,
+    parts: score.parts.map((part) => ({
+      ...part,
+      muted: false,
+      solo: false,
+      volume: 1
+    }))
+  }), [score]);
   const playbackEvents = useMemo<PlaybackNoteEvent[]>(() => {
-    return astToPlaybackEvents(score)
+    return astToPlaybackEvents(playbackSourceScore)
       .filter((event) => !event.isRest && event.pitch && typeof event.midi === "number")
       .map((event) => {
         const midi = Math.min(127, Math.max(0, (event.midi ?? 60) + transpose));
@@ -69,7 +79,7 @@ export function PlaybackControls({ score, label, onPresetCatalogChange, onTempoC
           midiBank: event.midiBank
         };
       });
-  }, [score, transpose]);
+  }, [playbackSourceScore, transpose]);
 
   const createEngine = useCallback((): PlaybackEngine => {
     if (engineMode === "basic-synth") {
@@ -87,6 +97,10 @@ export function PlaybackControls({ score, label, onPresetCatalogChange, onTempoC
   useEffect(() => {
     controller.configure({ timeline, events: playbackEvents, bpm: score.global.tempo.bpm, createEngine });
   }, [controller, createEngine, playbackEvents, score.global.tempo.bpm, timeline]);
+
+  useEffect(() => {
+    controller.setPartVolumes(trackVolumes);
+  }, [controller, trackVolumes]);
 
   useEffect(() => {
     let cancelled = false;
@@ -232,30 +246,17 @@ export function PlaybackControls({ score, label, onPresetCatalogChange, onTempoC
 
       <label className="tempo-control">
         <span>BPM</span>
-        <input type="number" min={20} max={280} value={score.global.tempo.bpm} onChange={(event) => onTempoChange?.(clamp(Number(event.target.value) || 90, 20, 280))} />
+        <input aria-label="Playback tempo" type="number" min={20} max={280} value={score.global.tempo.bpm} onChange={(event) => onTempoChange?.(clamp(Number(event.target.value) || 90, 20, 280))} />
       </label>
 
       <label className="engine-control">
         <span>Engine</span>
-        <select value={engineMode} onChange={(event) => setEngineMode(event.target.value as PlaybackEngineMode)}>
+        <select aria-label="Playback engine" value={engineMode} onChange={(event) => setEngineMode(event.target.value as PlaybackEngineMode)}>
           <option value="basic-synth">Basic Synth</option>
           <option value="sampled-piano">Sampled Piano</option>
           <option value="soundfont">Direct SF2</option>
         </select>
       </label>
-
-      {engineMode === "soundfont" ? (
-        <div className="sf2-controls">
-          <label className="sf2-url-control">
-            <span>SF2 URL</span>
-            <input value={soundFontUrl.startsWith("blob:") ? "" : soundFontUrl} placeholder={soundFontUrl.startsWith("blob:") ? soundFontLabel : defaultDirectSoundFontUrl} onChange={(event) => updateSoundFontUrl(event.target.value)} />
-          </label>
-          <label className="sf2-file-control">
-            <span>Local SF2</span>
-            <input type="file" accept=".sf2" onChange={(event) => selectSoundFontFile(event.target.files)} />
-          </label>
-        </div>
-      ) : null}
 
       <label className="volume-control">
         <span>Volume</span>
@@ -263,13 +264,13 @@ export function PlaybackControls({ score, label, onPresetCatalogChange, onTempoC
       </label>
       <label className="speed-control">
         <span>Speed</span>
-        <select value={snapshot.speed} onChange={(event) => controller.setSpeed(Number(event.target.value))}>
+        <select aria-label="Playback speed" value={snapshot.speed} onChange={(event) => controller.setSpeed(Number(event.target.value))}>
           {speeds.map((value) => <option key={value} value={value}>{value}×</option>)}
         </select>
       </label>
       <label className="transpose-control">
         <span>Transpose</span>
-        <select value={transpose} onChange={(event) => setTranspose(Number(event.target.value))}>
+        <select aria-label="Playback transpose" value={transpose} onChange={(event) => setTranspose(Number(event.target.value))}>
           {transposeOptions.map((value) => <option key={value} value={value}>{value > 0 ? `+${value}` : value}</option>)}
         </select>
       </label>
@@ -279,7 +280,26 @@ export function PlaybackControls({ score, label, onPresetCatalogChange, onTempoC
       </label>
 
       <span className={`playback-state ${snapshot.status}`}>{snapshot.status}</span>
-      {snapshot.error || warning ? <p className="playback-warning" role="status">{snapshot.error || warning}</p> : null}
+      {engineMode === "soundfont" || snapshot.error || warning ? (
+        <details className={`playback-options ${snapshot.error ? "has-error" : ""}`} {...(snapshot.error ? { open: true } : {})}>
+          <summary aria-label="More playback settings" title="SoundFont and playback details">•••</summary>
+          <div className="playback-options-popover">
+            {engineMode === "soundfont" ? (
+              <div className="sf2-controls">
+                <label className="sf2-url-control">
+                  <span>SF2 URL</span>
+                  <input value={soundFontUrl.startsWith("blob:") ? "" : soundFontUrl} placeholder={soundFontUrl.startsWith("blob:") ? soundFontLabel : defaultDirectSoundFontUrl} onChange={(event) => updateSoundFontUrl(event.target.value)} />
+                </label>
+                <label className="sf2-file-control">
+                  <span>Local SF2</span>
+                  <input type="file" accept=".sf2" onChange={(event) => selectSoundFontFile(event.target.files)} />
+                </label>
+              </div>
+            ) : null}
+            {snapshot.error || warning ? <p className="playback-warning" role="status">{snapshot.error || warning}</p> : null}
+          </div>
+        </details>
+      ) : null}
     </footer>
   );
 }

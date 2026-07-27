@@ -8,6 +8,7 @@ class FakeEngine implements PlaybackEngine {
   plays: Array<{ events: PlaybackNoteEvent[]; options: PlaybackOptions }> = [];
   stop = vi.fn();
   dispose = vi.fn();
+  setPartVolume = vi.fn();
 
   async play(events: PlaybackNoteEvent[], options: PlaybackOptions): Promise<void> {
     this.plays.push({ events, options });
@@ -66,6 +67,29 @@ describe("PlaybackSessionController", () => {
 
     expect(controller.getSnapshot().speed).toBe(2);
     expect(controller.getSnapshot().currentSeconds).toBeCloseTo(0.5, 3);
+  });
+
+  it("changes live track volume without stopping or restarting playback", async () => {
+    const engine = new FakeEngine();
+    const { controller } = configuredController(engine, () => 0);
+    await controller.play();
+
+    controller.setPartVolumes({ piano: 0 });
+
+    expect(controller.getSnapshot().status).toBe("playing");
+    expect(engine.plays).toHaveLength(1);
+    expect(engine.stop).not.toHaveBeenCalled();
+    expect(engine.setPartVolume).toHaveBeenLastCalledWith("piano", 0);
+  });
+
+  it("applies track volumes when playback starts", async () => {
+    const engine = new FakeEngine();
+    const { controller } = configuredController(engine, () => 0);
+    controller.setPartVolumes({ piano: 0.42 });
+
+    await controller.play();
+
+    expect(engine.setPartVolume).toHaveBeenLastCalledWith("piano", 0.42);
   });
 
   it("loops at a rational score boundary", async () => {

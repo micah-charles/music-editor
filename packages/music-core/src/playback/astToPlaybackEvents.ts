@@ -9,7 +9,9 @@ export function astToPlaybackEvents(score: FoxChildMusicScore): PlaybackEvent[] 
     .map((part) => part.id));
 
   return compileScoreTimeline(score).playbackEvents
-    .filter((event) => audibleParts.has(event.partId) && event.kind !== "annotation" && (event.kind === "rest" || event.attack))
+    .filter((event) => audibleParts.has(event.partId)
+      && event.kind !== "annotation"
+      && (event.kind === "rest" || (event.attack && toNumber(event.soundingDuration) > 0)))
     .map((event) => ({
       id: event.id,
       partId: event.partId,

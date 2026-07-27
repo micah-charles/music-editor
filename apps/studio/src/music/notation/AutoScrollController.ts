@@ -9,21 +9,22 @@ export class AutoScrollController {
     this.enabled = true;
   }
 
-  follow(container: HTMLElement): void {
+  follow(container: HTMLElement, highlight?: HTMLElement | null): void {
     if (!this.enabled) {
       return;
     }
-    const cursor = container.querySelector<HTMLElement>(".osmd-cursor");
-    if (!cursor) {
+    const target = highlight
+      ?? container.querySelector<HTMLElement>(".score-playback-highlight, [id^='cursorImg-']");
+    if (!target || target.offsetWidth === 0 || target.offsetHeight === 0) {
       return;
     }
     const frame = container.getBoundingClientRect();
-    const cursorBox = cursor.getBoundingClientRect();
+    const cursorBox = target.getBoundingClientRect();
     const outside = cursorBox.left < frame.left + 32 || cursorBox.right > frame.right - 32 || cursorBox.top < frame.top + 32 || cursorBox.bottom > frame.bottom - 32;
     if (!outside) {
       return;
     }
-    cursor.scrollIntoView({
+    target.scrollIntoView({
       behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth",
       block: "center",
       inline: "center"

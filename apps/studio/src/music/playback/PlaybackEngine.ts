@@ -34,6 +34,7 @@ export interface PlaybackEngine {
   resume?(): void;
   cancelScheduled?(): void;
   allNotesOff?(): void;
+  setPartVolume?(partId: string, volume: number): void;
   stop(): void;
   dispose?(): void;
 }

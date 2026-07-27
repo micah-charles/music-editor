@@ -60,6 +60,9 @@ export interface Duration {
 export type ArticulationType = "staccato" | "staccatissimo" | "accent" | "strong-accent" | "tenuto";
 
 export interface NoteNotation {
+  grace?: {
+    slash?: boolean;
+  };
   articulations?: ArticulationType[];
   slurs?: Array<{
     type: "start" | "stop" | "continue";
@@ -132,6 +135,10 @@ export interface DirectionEvent extends TimedEventFields {
   type: "direction";
   dynamic?: "ppp" | "pp" | "p" | "mp" | "mf" | "f" | "ff" | "fff" | "sf" | "sfz" | "fp";
   text?: string;
+  wedge?: {
+    type: "crescendo" | "diminuendo" | "stop";
+    number?: number;
+  };
   placement?: "above" | "below";
 }
 
@@ -185,6 +192,17 @@ export interface Part {
   clef: Clef;
   staffCount?: number;
   clefs?: Record<number, Clef>;
+  /**
+   * MusicXML written-to-sounding transposition. For example, B-flat clarinet
+   * uses chromatic -2; its exported written notes are two semitones above the
+   * concert-pitch notes stored in the canonical AST.
+   */
+  transposition?: {
+    diatonic?: number;
+    chromatic: number;
+    octaveChange?: number;
+    writtenKeyFifths?: number;
+  };
   channel?: number;
   muted?: boolean;
   solo?: boolean;

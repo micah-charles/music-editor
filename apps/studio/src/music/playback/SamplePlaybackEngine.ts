@@ -38,6 +38,8 @@ export class SamplePlaybackEngine implements PlaybackEngine {
   name = "Sampled Piano";
   private audioContext?: AudioContext;
   private masterGain?: GainNode;
+  private partGains = new Map<string, GainNode>();
+  private partVolumes = new Map<string, number>();
   private samples: LoadedSample[] = [];
   private activeSources: AudioBufferSourceNode[] = [];
   private stopActivePitchCallbacks?: () => void;
@@ -99,6 +101,14 @@ export class SamplePlaybackEngine implements PlaybackEngine {
       if (!sample || !this.masterGain) {
         return;
       }
+      const partId = event.partId ?? "__default";
+      let partGain = this.partGains.get(partId);
+      if (!partGain) {
+        partGain = context.createGain();
+        partGain.gain.value = this.partVolumes.get(partId) ?? event.trackVolume ?? 1;
+        partGain.connect(this.masterGain);
+        this.partGains.set(partId, partGain);
+      }
       const source = context.createBufferSource();
       const gain = context.createGain();
       const panner = typeof context.createStereoPanner === "function" ? context.createStereoPanner() : undefined;
@@ -107,12 +117,12 @@ export class SamplePlaybackEngine implements PlaybackEngine {
 
       source.buffer = sample.buffer;
       source.playbackRate.value = Math.pow(2, (event.midi - sample.midi) / 12);
-      gain.gain.value = Math.min(1, Math.max(0.001, ((event.velocity ?? 80) / 127) * (event.trackVolume ?? 1)));
+      gain.gain.value = Math.min(1, Math.max(0.001, (event.velocity ?? 80) / 127));
       if (panner) {
         panner.pan.value = Math.min(1, Math.max(-1, event.pan ?? 0));
-        source.connect(gain).connect(panner).connect(this.masterGain);
+        source.connect(gain).connect(panner).connect(partGain);
       } else {
-        source.connect(gain).connect(this.masterGain);
+        source.connect(gain).connect(partGain);
       }
       source.start(eventStart);
       source.stop(eventStart + eventDuration);
@@ -121,6 +131,15 @@ export class SamplePlaybackEngine implements PlaybackEngine {
       };
       this.activeSources.push(source);
     });
+  }
+
+  setPartVolume(partId: string, volume: number): void {
+    const nextVolume = Math.min(1, Math.max(0, volume));
+    this.partVolumes.set(partId, nextVolume);
+    const partGain = this.partGains.get(partId);
+    if (partGain && this.audioContext) {
+      partGain.gain.setTargetAtTime(nextVolume, this.audioContext.currentTime, 0.015);
+    }
   }
 
   pause(): void {
@@ -138,6 +157,8 @@ export class SamplePlaybackEngine implements PlaybackEngine {
       }
     });
     this.activeSources = [];
+    this.partGains.forEach((gain) => gain.disconnect());
+    this.partGains.clear();
     this.masterGain?.disconnect();
     this.masterGain = undefined;
   }

@@ -1,0 +1,509 @@
+{
+  "title": "Railway Adventure",
+  "key": "D major",
+  "timeSignature": "4/4",
+  "openingTempoBpm": 110,
+  "durationSeconds": 182.81,
+  "measureCount": 82,
+  "partCount": 9,
+  "staffCount": 10,
+  "form": [
+    {
+      "id": "departure",
+      "label": "Quiet railway departure",
+      "partId": "cello",
+      "fromMeasure": 1,
+      "toMeasure": 8
+    },
+    {
+      "id": "principal-theme",
+      "label": "Principal trumpet theme",
+      "partId": "trumpet",
+      "fromMeasure": 9,
+      "toMeasure": 16
+    },
+    {
+      "id": "theme-development",
+      "label": "Theme development",
+      "partId": "flute",
+      "fromMeasure": 25,
+      "toMeasure": 40
+    },
+    {
+      "id": "lyrical-theme",
+      "label": "Lyrical middle theme",
+      "partId": "flute",
+      "fromMeasure": 41,
+      "toMeasure": 52
+    },
+    {
+      "id": "grand-chorus",
+      "label": "Grand orchestral chorus",
+      "partId": "trumpet",
+      "fromMeasure": 53,
+      "toMeasure": 68
+    },
+    {
+      "id": "theme-reprise",
+      "label": "Principal theme reprise",
+      "partId": "trumpet",
+      "fromMeasure": 69,
+      "toMeasure": 76
+    },
+    {
+      "id": "arrival",
+      "label": "Soft arrival",
+      "partId": "piano",
+      "fromMeasure": 77,
+      "toMeasure": 82
+    }
+  ],
+  "mainThemeConcertPitch": [
+    [
+      [
+        "A4",
+        "quarter"
+      ],
+      [
+        "F#4",
+        "eighth"
+      ],
+      [
+        "G4",
+        "eighth"
+      ],
+      [
+        "A4",
+        "quarter"
+      ],
+      [
+        "D5",
+        "quarter"
+      ]
+    ],
+    [
+      [
+        "C#5",
+        "quarter"
+      ],
+      [
+        "B4",
+        "eighth"
+      ],
+      [
+        "A4",
+        "eighth"
+      ],
+      [
+        "F#4",
+        "half"
+      ]
+    ],
+    [
+      [
+        "G4",
+        "quarter"
+      ],
+      [
+        "A4",
+        "eighth"
+      ],
+      [
+        "B4",
+        "eighth"
+      ],
+      [
+        "D5",
+        "quarter"
+      ],
+      [
+        "B4",
+        "quarter"
+      ]
+    ],
+    [
+      [
+        "A4",
+        "dotted-half"
+      ],
+      [
+        null,
+        "quarter"
+      ]
+    ],
+    [
+      [
+        "F#4",
+        "quarter"
+      ],
+      [
+        "G4",
+        "eighth"
+      ],
+      [
+        "A4",
+        "eighth"
+      ],
+      [
+        "B4",
+        "quarter"
+      ],
+      [
+        "D5",
+        "quarter"
+      ]
+    ],
+    [
+      [
+        "E5",
+        "quarter"
+      ],
+      [
+        "D5",
+        "eighth"
+      ],
+      [
+        "C#5",
+        "eighth"
+      ],
+      [
+        "B4",
+        "half"
+      ]
+    ],
+    [
+      [
+        "A4",
+        "quarter"
+      ],
+      [
+        "F#4",
+        "quarter"
+      ],
+      [
+        "E4",
+        "quarter"
+      ],
+      [
+        "C#4",
+        "quarter"
+      ]
+    ],
+    [
+      [
+        "D4",
+        "dotted-half"
+      ],
+      [
+        null,
+        "quarter"
+      ]
+    ]
+  ],
+  "lyricalThemeConcertPitch": [
+    [
+      [
+        "F#5",
+        "half"
+      ],
+      [
+        "E5",
+        "quarter"
+      ],
+      [
+        "D5",
+        "quarter"
+      ]
+    ],
+    [
+      [
+        "C#5",
+        "dotted-half"
+      ],
+      [
+        "B4",
+        "quarter"
+      ]
+    ],
+    [
+      [
+        "D5",
+        "quarter"
+      ],
+      [
+        "E5",
+        "quarter"
+      ],
+      [
+        "F#5",
+        "half"
+      ]
+    ],
+    [
+      [
+        "A5",
+        "half"
+      ],
+      [
+        "F#5",
+        "half"
+      ]
+    ],
+    [
+      [
+        "G5",
+        "quarter"
+      ],
+      [
+        "F#5",
+        "quarter"
+      ],
+      [
+        "E5",
+        "quarter"
+      ],
+      [
+        "D5",
+        "quarter"
+      ]
+    ],
+    [
+      [
+        "C#5",
+        "half"
+      ],
+      [
+        "B4",
+        "half"
+      ]
+    ],
+    [
+      [
+        "D5",
+        "dotted-quarter"
+      ],
+      [
+        "E5",
+        "eighth"
+      ],
+      [
+        "F#5",
+        "quarter"
+      ],
+      [
+        "A5",
+        "quarter"
+      ]
+    ],
+    [
+      [
+        "F#5",
+        "dotted-half"
+      ],
+      [
+        null,
+        "quarter"
+      ]
+    ],
+    [
+      [
+        "E5",
+        "half"
+      ],
+      [
+        "D5",
+        "quarter"
+      ],
+      [
+        "C#5",
+        "quarter"
+      ]
+    ],
+    [
+      [
+        "B4",
+        "half"
+      ],
+      [
+        "D5",
+        "half"
+      ]
+    ],
+    [
+      [
+        "C#5",
+        "quarter"
+      ],
+      [
+        "D5",
+        "quarter"
+      ],
+      [
+        "E5",
+        "half"
+      ]
+    ],
+    [
+      [
+        "A4",
+        "dotted-half"
+      ],
+      [
+        null,
+        "quarter"
+      ]
+    ]
+  ],
+  "harmonicProgression": [
+    "D",
+    "D",
+    "G",
+    "A",
+    "D",
+    "Bm",
+    "Em",
+    "A",
+    "D",
+    "A",
+    "Bm",
+    "F#m",
+    "G",
+    "D",
+    "Em",
+    "A",
+    "D",
+    "A",
+    "Bm",
+    "F#m",
+    "G",
+    "D",
+    "Em",
+    "A",
+    "Bm",
+    "G",
+    "D",
+    "A",
+    "Bm",
+    "G",
+    "Em",
+    "A",
+    "D",
+    "F#m",
+    "G",
+    "A",
+    "Bm",
+    "G",
+    "Em",
+    "A",
+    "Bm",
+    "F#m",
+    "G",
+    "D",
+    "Em",
+    "Bm",
+    "G",
+    "F#",
+    "Bm",
+    "G",
+    "Em",
+    "A",
+    "D",
+    "A",
+    "Bm",
+    "F#m",
+    "G",
+    "D",
+    "Em",
+    "A",
+    "D",
+    "A",
+    "Bm",
+    "F#m",
+    "G",
+    "D",
+    "Em",
+    "A",
+    "D",
+    "A",
+    "Bm",
+    "F#m",
+    "G",
+    "D",
+    "Em",
+    "A",
+    "D",
+    "Bm",
+    "G",
+    "A",
+    "D",
+    "D"
+  ],
+  "transpositions": {
+    "clarinet": {
+      "diatonic": -1,
+      "chromatic": -2,
+      "writtenKeyFifths": 4
+    },
+    "trumpet": {
+      "diatonic": -1,
+      "chromatic": -2,
+      "writtenKeyFifths": 4
+    },
+    "horn": {
+      "diatonic": -4,
+      "chromatic": -7,
+      "writtenKeyFifths": 3
+    }
+  },
+  "midiChannelsZeroBased": {
+    "flute": 0,
+    "clarinet": 1,
+    "trumpet": 2,
+    "horn": 3,
+    "violin": 4,
+    "cello": 5,
+    "double-bass": 6,
+    "piano": 7,
+    "percussion": 9
+  },
+  "concertPitchMidiRanges": {
+    "flute": {
+      "min": 69,
+      "max": 95
+    },
+    "clarinet": {
+      "min": 56,
+      "max": 76
+    },
+    "trumpet": {
+      "min": 61,
+      "max": 76
+    },
+    "horn": {
+      "min": 49,
+      "max": 71
+    },
+    "violin": {
+      "min": 61,
+      "max": 88
+    },
+    "cello": {
+      "min": 49,
+      "max": 59
+    },
+    "double-bass": {
+      "min": 37,
+      "max": 47
+    },
+    "piano": {
+      "min": 37,
+      "max": 83
+    },
+    "percussion": {
+      "min": 38,
+      "max": 78
+    }
+  },
+  "difficulty": "Grade 4–5 / intermediate",
+  "generationModel": "deterministic structured canonical AST"
+}

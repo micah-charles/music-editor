@@ -2,6 +2,7 @@ import type { Rational } from "@foxchild/music-core";
 import { toNumber } from "@foxchild/music-core";
 
 export type OsmdCursorLike = {
+  cursorElement?: HTMLElement;
   hide?: () => void;
   next?: () => void;
   reset?: () => void;
@@ -23,10 +24,13 @@ export class OsmdPositionIndex {
   constructor(readonly entries: OsmdPositionEntry[]) {}
 
   stepAtScoreTime(scoreTime: Rational): number {
+    if (this.entries.length === 0) {
+      return 0;
+    }
     const target = quarterBeatsToOsmdTimestamp(scoreTime);
     let low = 0;
     let high = this.entries.length - 1;
-    let result = 0;
+    let result = this.entries[this.entries.length - 1].step;
 
     while (low <= high) {
       const middle = Math.floor((low + high) / 2);
@@ -42,12 +46,12 @@ export class OsmdPositionIndex {
 }
 
 export function cursorSourceTimestamp(cursor: OsmdCursorLike): number | null {
-  const source = cursor.Iterator?.CurrentSourceTimestamp?.RealValue;
-  if (typeof source === "number") {
-    return source;
-  }
   const current = cursor.Iterator?.currentTimeStamp?.RealValue;
-  return typeof current === "number" ? current : null;
+  if (typeof current === "number") {
+    return current;
+  }
+  const source = cursor.Iterator?.CurrentSourceTimestamp?.RealValue;
+  return typeof source === "number" ? source : null;
 }
 
 export function quarterBeatsToOsmdTimestamp(scoreTime: Rational): number {

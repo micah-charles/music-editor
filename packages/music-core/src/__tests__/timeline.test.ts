@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { Midi } from "@tonejs/midi";
 import type { FoxChildMusicScore, MusicEvent } from "../ast/types";
 import { compileScoreTimeline } from "../timeline/compileScoreTimeline";
 import {
@@ -12,6 +13,8 @@ import {
 import { scoreTimeToSeconds, secondsToScoreTime } from "../timeline/tempoMap";
 import { musicXmlToAst } from "../importers/musicXmlToAst";
 import { astToMusicXml } from "../exporters/astToMusicXml";
+import { astToMidi } from "../exporters/astToMidi";
+import { astToPlaybackEvents } from "../playback/astToPlaybackEvents";
 import { migrateScoreWithWarnings } from "../ast/migrateScoreToLatest";
 
 describe("rational musical time", () => {
@@ -92,6 +95,57 @@ describe("score timeline compilation", () => {
     ]);
     expect(toNumber(timeline.playbackDuration)).toBe(16);
     expect(score.parts[0].measures).toHaveLength(2);
+  });
+
+  it("applies independent MusicXML dynamics to each part's playback velocity", () => {
+    const score = musicXmlToAst(`<?xml version="1.0"?>
+<score-partwise version="4.0">
+  <part-list>
+    <score-part id="P1"><part-name>Flute</part-name></score-part>
+    <score-part id="P2"><part-name>Cello</part-name></score-part>
+  </part-list>
+  <part id="P1">
+    <measure number="1">
+      <attributes><divisions>4</divisions><time><beats>4</beats><beat-type>4</beat-type></time></attributes>
+      <direction><direction-type><dynamics><p/></dynamics></direction-type><sound dynamics="45"/></direction>
+      <note><pitch><step>C</step><octave>5</octave></pitch><duration>16</duration><voice>1</voice><type>whole</type></note>
+    </measure>
+    <measure number="2">
+      <direction><direction-type><dynamics><ff/></dynamics></direction-type><sound dynamics="108"/></direction>
+      <note><pitch><step>D</step><octave>5</octave></pitch><duration>16</duration><voice>1</voice><type>whole</type></note>
+    </measure>
+  </part>
+  <part id="P2">
+    <measure number="1">
+      <attributes><divisions>4</divisions><time><beats>4</beats><beat-type>4</beat-type></time></attributes>
+      <direction><direction-type><dynamics><pp/></dynamics></direction-type><sound dynamics="32"/></direction>
+      <note><pitch><step>C</step><octave>3</octave></pitch><duration>16</duration><voice>1</voice><type>whole</type></note>
+    </measure>
+    <measure number="2">
+      <direction><direction-type><dynamics><f/></dynamics></direction-type><sound dynamics="90"/></direction>
+      <note><pitch><step>D</step><octave>3</octave></pitch><duration>16</duration><voice>1</voice><type>whole</type></note>
+    </measure>
+  </part>
+</score-partwise>`);
+
+    expect(score.parts[0].measures[0].events.find((event) => event.type === "direction"))
+      .toMatchObject({ dynamic: "p", extensions: { playbackVelocity: 45 } });
+    expect(astToPlaybackEvents(score)
+      .filter((event) => !event.isRest)
+      .map((event) => [event.partId, event.measureNumber, event.velocity]))
+      .toEqual([
+        ["P1", 1, 45],
+        ["P2", 1, 32],
+        ["P1", 2, 108],
+        ["P2", 2, 90]
+      ]);
+    const midi = new Midi(astToMidi(score));
+    expect(midi.tracks.map((track) => track.notes.map((note) => Math.round(note.velocity * 127))))
+      .toEqual([[45, 108], [32, 90]]);
+
+    score.parts[1].muted = true;
+    expect(new Set(astToPlaybackEvents(score).filter((event) => !event.isRest).map((event) => event.partId)))
+      .toEqual(new Set(["P1"]));
   });
 });
 

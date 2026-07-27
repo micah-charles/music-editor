@@ -1,6 +1,7 @@
 import type { Duration, FoxChildMusicScore, MusicEvent, NoteNotation, Pitch } from "../ast/types";
 import { DURATION_BEATS, durationToBeats, durationToMusicXmlType } from "../rhythm/duration";
 import { keyToFifths } from "../theory/key";
+import { transposePitch } from "../theory/pitch";
 import { parseChordName } from "../chords/chordDetection";
 
 const DIVISIONS = 24;
@@ -10,6 +11,7 @@ export function astToMusicXml(score: FoxChildMusicScore): string {
     return [
       `    <score-part id="${xml(part.id)}">`,
       `      <part-name>${xml(part.name || `Part ${index + 1}`)}</part-name>`,
+      `      <part-abbreviation>${xml(part.name || `Part ${index + 1}`)}</part-abbreviation>`,
       `      <score-instrument id="${xml(part.id)}-instrument">`,
       `        <instrument-name>${xml(part.instrument.name)}</instrument-name>`,
       "      </score-instrument>",
@@ -21,7 +23,7 @@ export function astToMusicXml(score: FoxChildMusicScore): string {
     ].join("\n");
   }).join("\n");
 
-  const parts = score.parts.map((part) => {
+  const parts = score.parts.map((part, partIndex) => {
     const eventStaffs = part.measures.flatMap((measure) => measure.events.map((event) => event.staff ?? 1));
     const declaredStaffs = Object.keys(part.clefs ?? {}).map(Number).filter(Number.isFinite);
     const staffCount = Math.max(1, part.staffCount ?? 1, ...eventStaffs, ...declaredStaffs);
@@ -44,7 +46,7 @@ export function astToMusicXml(score: FoxChildMusicScore): string {
           "      <attributes>",
           `        <divisions>${DIVISIONS}</divisions>`,
           "        <key>",
-          `          <fifths>${score.global.key.fifths ?? keyToFifths(score.global.key.tonic, score.global.key.mode)}</fifths>`,
+          `          <fifths>${part.transposition?.writtenKeyFifths ?? score.global.key.fifths ?? keyToFifths(score.global.key.tonic, score.global.key.mode)}</fifths>`,
           `          <mode>${score.global.key.mode}</mode>`,
           "        </key>",
           "        <time>",
@@ -52,22 +54,31 @@ export function astToMusicXml(score: FoxChildMusicScore): string {
           `          <beat-type>${score.global.timeSignature.beatType}</beat-type>`,
           "        </time>",
           ...(staffCount > 1 ? [`        <staves>${staffCount}</staves>`] : []),
+          ...(part.transposition ? [
+            "        <transpose>",
+            ...(part.transposition.diatonic === undefined ? [] : [`          <diatonic>${part.transposition.diatonic}</diatonic>`]),
+            `          <chromatic>${part.transposition.chromatic}</chromatic>`,
+            ...(part.transposition.octaveChange === undefined ? [] : [`          <octave-change>${part.transposition.octaveChange}</octave-change>`]),
+            "        </transpose>"
+          ] : []),
           clefs,
           "      </attributes>",
-          "      <direction placement=\"above\">",
-          ...(score.global.tempo.label ? [
+          ...(partIndex === 0 ? [
+            "      <direction placement=\"above\">",
+            ...(score.global.tempo.label ? [
+              "        <direction-type>",
+              `          <words>${xml(score.global.tempo.label)}</words>`,
+              "        </direction-type>"
+            ] : []),
             "        <direction-type>",
-            `          <words>${xml(score.global.tempo.label)}</words>`,
-            "        </direction-type>"
-          ] : []),
-          "        <direction-type>",
-          "          <metronome>",
-          "            <beat-unit>quarter</beat-unit>",
-          `            <per-minute>${score.global.tempo.bpm}</per-minute>`,
-          "          </metronome>",
-          "        </direction-type>",
-          `        <sound tempo="${score.global.tempo.bpm}"/>`,
-          "      </direction>"
+            "          <metronome>",
+            "            <beat-unit>quarter</beat-unit>",
+            `            <per-minute>${score.global.tempo.bpm}</per-minute>`,
+            "          </metronome>",
+            "        </direction-type>",
+            `        <sound tempo="${score.global.tempo.bpm}"/>`,
+            "      </direction>"
+          ] : [])
         ].join("\n")
         : keyChange
           ? [
@@ -80,9 +91,9 @@ export function astToMusicXml(score: FoxChildMusicScore): string {
           ].join("\n")
           : "";
 
-      const eventXml = measureEventsToXml(measure.events);
+      const eventXml = measureEventsToXml(measure.events, part.transposition?.chromatic);
       const tempoChanges = (score.global.tempoEvents ?? [])
-        .filter((tempo) => tempo.position.measure === measure.number && !(measureIndex === 0 && tempo.position.beat === 0 && tempo.bpm === score.global.tempo.bpm))
+        .filter((tempo) => partIndex === 0 && tempo.position.measure === measure.number && !(measureIndex === 0 && tempo.position.beat === 0 && tempo.bpm === score.global.tempo.bpm))
         .map((tempo) => tempoDirectionXml(tempo.bpm, tempo.position.beat, tempo.label))
         .join("\n");
       return [
@@ -92,6 +103,9 @@ export function astToMusicXml(score: FoxChildMusicScore): string {
         tempoChanges,
         eventXml,
         measure.repeat?.end || measure.repeat?.endings?.length ? repeatBarlineXml(measure.repeat) : "",
+        measure.extensions?.finalBarline
+          ? "      <barline location=\"right\"><bar-style>light-heavy</bar-style></barline>"
+          : "",
         "    </measure>"
       ].filter(Boolean).join("\n");
     }).join("\n");
@@ -144,7 +158,7 @@ function clefLine(clef: string): number {
   return 2;
 }
 
-function measureEventsToXml(events: MusicEvent[]): string {
+function measureEventsToXml(events: MusicEvent[], transpositionChromatic?: number): string {
   const lanes = new Map<string, MusicEvent[]>();
   const directions = events.filter((event) => event.type === "annotation" || event.type === "direction");
   events.filter((event) => event.type !== "annotation" && event.type !== "direction").forEach((event) => {
@@ -152,7 +166,7 @@ function measureEventsToXml(events: MusicEvent[]): string {
     lanes.set(key, [...(lanes.get(key) ?? []), event]);
   });
 
-  const output: string[] = directions.flatMap(eventToXml);
+  const output: string[] = directions.flatMap((event) => eventToXml(event, transpositionChromatic));
   [...lanes.values()].forEach((lane, laneIndex) => {
     let cursorBeat = 0;
     const ordered = [...lane].sort((left, right) => (left.position?.beat ?? 0) - (right.position?.beat ?? 0));
@@ -162,7 +176,7 @@ function measureEventsToXml(events: MusicEvent[]): string {
         output.push(forwardXml(targetBeat - cursorBeat, event.voice ?? 1, event.staff ?? 1));
         cursorBeat = targetBeat;
       }
-      output.push(...eventToXml(event));
+      output.push(...eventToXml(event, transpositionChromatic));
       if (event.type !== "annotation" && event.type !== "direction") {
         cursorBeat = Math.max(cursorBeat, targetBeat + durationToBeats(event.duration));
       }
@@ -174,7 +188,7 @@ function measureEventsToXml(events: MusicEvent[]): string {
   return output.join("\n");
 }
 
-function eventToXml(event: MusicEvent): string[] {
+function eventToXml(event: MusicEvent, transpositionChromatic?: number): string[] {
   if (event.type === "annotation") {
     return [
       "      <direction placement=\"above\">",
@@ -190,7 +204,8 @@ function eventToXml(event: MusicEvent): string[] {
   if (event.type === "direction") {
     const directionTypes = [
       event.dynamic ? `          <dynamics><${event.dynamic}/></dynamics>` : "",
-      event.text ? `          <words>${xml(event.text)}</words>` : ""
+      event.text ? `          <words>${xml(event.text)}</words>` : "",
+      event.wedge ? `          <wedge type="${event.wedge.type}"${event.wedge.number ? ` number="${event.wedge.number}"` : ""}/>` : ""
     ].filter(Boolean);
     return [
       `      <direction placement="${event.placement ?? "below"}">`,
@@ -210,7 +225,7 @@ function eventToXml(event: MusicEvent): string[] {
 
   if (event.type === "note") {
     return [noteXml({
-      pitch: event.pitch,
+      pitch: writtenPitch(event.pitch, transpositionChromatic),
       duration: event.duration,
       lyric: event.lyric,
       voice: event.voice,
@@ -223,7 +238,7 @@ function eventToXml(event: MusicEvent): string[] {
   return [
     ...(event.semantic?.chordName ? [harmonyXml(event.semantic.chordName)] : []),
     ...event.pitches.map((pitch, index) => noteXml({
-      pitch,
+      pitch: writtenPitch(pitch, transpositionChromatic),
       duration: event.duration,
       chord: index > 0,
       lyric: index === 0 ? event.lyric : undefined,
@@ -232,6 +247,10 @@ function eventToXml(event: MusicEvent): string[] {
       notation: index === 0 ? event.notation : undefined
     }))
   ];
+}
+
+function writtenPitch(pitch: Pitch, transpositionChromatic?: number): Pitch {
+  return transpositionChromatic ? transposePitch(pitch, -transpositionChromatic) : pitch;
 }
 
 function harmonyXml(chordName: string): string {
@@ -258,9 +277,10 @@ function noteXml(options: {
   tie?: Extract<MusicEvent, { type: "note" }>["tie"];
   notation?: NoteNotation;
 }): string {
+  const isGrace = Boolean(options.notation?.grace);
   const durationBeats = durationToBeats(options.duration as never);
   const xmlType = durationToMusicXmlType(options.duration as never);
-  const hasConsistentType = Math.abs(notatedDurationBeats(options.duration) - durationBeats) <= 0.000001;
+  const hasConsistentType = isGrace || Math.abs(notatedDurationBeats(options.duration) - durationBeats) <= 0.000001;
   const dots = hasConsistentType ? Array.from({ length: xmlType.dots }, () => "        <dot/>").join("\n") : "";
   const timeModification = hasConsistentType ? timeModificationXml(options.duration) : "";
   const beams = (options.notation?.beams ?? []).map((beam) => `        <beam number="${beam.number}">${beam.value}</beam>`).join("\n");
@@ -303,8 +323,9 @@ function noteXml(options: {
   return [
     "      <note>",
     options.chord ? "        <chord/>" : "",
+    isGrace ? `        <grace${options.notation?.grace?.slash ? " slash=\"yes\"" : ""}/>` : "",
     pitch,
-    `        <duration>${Math.max(1, Math.round(durationBeats * DIVISIONS))}</duration>`,
+    isGrace ? "" : `        <duration>${Math.max(1, Math.round(durationBeats * DIVISIONS))}</duration>`,
     tieElements,
     `        <voice>${options.voice ?? 1}</voice>`,
     hasConsistentType ? `        <type>${xmlType.type}</type>` : "",

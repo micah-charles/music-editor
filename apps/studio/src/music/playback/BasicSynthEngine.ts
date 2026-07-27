@@ -4,7 +4,9 @@ import { scheduleActivePitchCallbacks, secondsPerBeat } from "./PlaybackEngine";
 export class BasicSynthEngine implements PlaybackEngine {
   name = "Basic Synth";
   private tone: any;
-  private synth: any;
+  private synths = new Map<string, any>();
+  private partVolumes = new Map<string, number>();
+  private masterVolume = 1;
   private stopActivePitchCallbacks?: () => void;
 
   async load(): Promise<void> {
@@ -19,8 +21,7 @@ export class BasicSynthEngine implements PlaybackEngine {
     this.stop();
 
     const Tone = this.tone;
-    this.synth = new Tone.PolySynth(Tone.Synth).toDestination();
-    this.synth.volume.value = volumeToDecibels(options.volume);
+    this.masterVolume = options.volume;
     const transport = Tone.getTransport ? Tone.getTransport() : Tone.Transport;
     const beatSeconds = secondsPerBeat(options);
 
@@ -29,12 +30,20 @@ export class BasicSynthEngine implements PlaybackEngine {
     transport.position = 0;
 
     events.forEach((event) => {
+      const partId = event.partId ?? "__default";
+      let synth = this.synths.get(partId);
+      if (!synth) {
+        synth = new Tone.PolySynth(Tone.Synth).toDestination();
+        const partVolume = this.partVolumes.get(partId) ?? event.trackVolume ?? 1;
+        synth.volume.value = volumeToDecibels(this.masterVolume * partVolume);
+        this.synths.set(partId, synth);
+      }
       transport.schedule((time: number) => {
-        this.synth?.triggerAttackRelease(
+        synth?.triggerAttackRelease(
           event.pitch,
           event.durationBeats * beatSeconds * 0.94,
           time,
-          Math.min(1, Math.max(0.001, ((event.velocity ?? 80) / 127) * (event.trackVolume ?? 1)))
+          Math.min(1, Math.max(0.001, (event.velocity ?? 80) / 127))
         );
       }, event.startBeat * beatSeconds);
     });
@@ -61,8 +70,17 @@ export class BasicSynthEngine implements PlaybackEngine {
     transport?.cancel(0);
     this.stopActivePitchCallbacks?.();
     this.stopActivePitchCallbacks = undefined;
-    this.synth?.dispose?.();
-    this.synth = null;
+    this.synths.forEach((synth) => synth?.dispose?.());
+    this.synths.clear();
+  }
+
+  setPartVolume(partId: string, volume: number): void {
+    const nextVolume = clamp(volume);
+    this.partVolumes.set(partId, nextVolume);
+    const synth = this.synths.get(partId);
+    if (synth) {
+      synth.volume.value = volumeToDecibels(this.masterVolume * nextVolume);
+    }
   }
 
   dispose(): void {
@@ -82,4 +100,8 @@ function volumeToDecibels(volume: number): number {
     return -Infinity;
   }
   return 20 * Math.log10(Math.min(1, Math.max(0, volume)));
+}
+
+function clamp(volume: number): number {
+  return Math.min(1, Math.max(0, volume));
 }

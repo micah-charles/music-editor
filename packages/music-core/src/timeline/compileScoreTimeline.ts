@@ -1,4 +1,4 @@
-import type { FoxChildMusicScore, MusicEvent } from "../ast/types";
+import type { DirectionEvent, FoxChildMusicScore, MusicEvent, Part } from "../ast/types";
 import { durationToBeats } from "../rhythm/duration";
 import { pitchToMidi, pitchToName } from "../theory/pitch";
 import { buildMeasureMap } from "./measureMap";
@@ -18,6 +18,7 @@ export function compileScoreTimeline(score: FoxChildMusicScore): ScoreTimeline {
     const channel = clampChannel(part.channel ?? partIndex);
     const midiProgram = part.instrument.soundFontPreset ?? zeroBasedProgram(part.instrument.midiProgram);
     const midiBank = part.instrument.soundFontBank ?? 0;
+    const dynamicChanges = collectDynamicChanges(part, measureMap);
 
     for (const measure of part.measures) {
       const boundary = measureByNumber.get(measure.number);
@@ -52,7 +53,8 @@ export function compileScoreTimeline(score: FoxChildMusicScore): ScoreTimeline {
           midiBank,
           instrument: part.instrument.name.toLowerCase(),
           trackVolume: clamp(part.volume ?? 1, 0, 1),
-          pan: clamp(part.pan ?? 0, -1, 1)
+          pan: clamp(part.pan ?? 0, -1, 1),
+          dynamicVelocity: dynamicVelocityAt(dynamicChanges, scoreStart)
         }));
 
         if (!event.position) {
@@ -104,6 +106,7 @@ type EventContext = {
   instrument: string;
   trackVolume: number;
   pan: number;
+  dynamicVelocity?: number;
 };
 
 function timelineEventsForMusicEvent(event: MusicEvent, context: EventContext): TimelineEvent[] {
@@ -116,7 +119,7 @@ function timelineEventsForMusicEvent(event: MusicEvent, context: EventContext): 
     scoreStart: context.scoreStart,
     scoreDuration: context.duration,
     soundingDuration: context.duration,
-    velocity: event.type === "note" || event.type === "chord" ? event.velocity ?? 80 : 0,
+    velocity: event.type === "note" || event.type === "chord" ? context.dynamicVelocity ?? event.velocity ?? 80 : 0,
     trackVolume: context.trackVolume,
     pan: context.pan,
     channel: context.channel,
@@ -155,6 +158,78 @@ function timelineEventsForMusicEvent(event: MusicEvent, context: EventContext): 
 
 function eventDuration(event: MusicEvent) {
   return event.type === "annotation" || event.type === "direction" ? ZERO : rationalFromNumber(durationToBeats(event.duration));
+}
+
+type DynamicChange = {
+  scoreStart: ReturnType<typeof rationalFromNumber>;
+  velocity: number;
+  explicit: boolean;
+  order: number;
+};
+
+function collectDynamicChanges(
+  part: Part,
+  measureMap: ReturnType<typeof buildMeasureMap>
+): DynamicChange[] {
+  const boundaryByMeasure = new Map(measureMap.map((boundary) => [boundary.measureNumber, boundary]));
+  let order = 0;
+  return part.measures.flatMap((measure) => {
+    const boundary = boundaryByMeasure.get(measure.number);
+    return measure.events.flatMap((event) => {
+      if (event.type !== "direction" || !event.dynamic) return [];
+      const explicitVelocity = playbackVelocityFromDirection(event);
+      const velocity = explicitVelocity ?? dynamicToVelocity(event.dynamic);
+      const scoreStart = event.position
+        ? musicalPositionToScoreTime(event.position, measureMap)
+        : boundary?.start ?? ZERO;
+      order += 1;
+      return [{
+        scoreStart,
+        velocity,
+        explicit: explicitVelocity !== undefined,
+        order
+      }];
+    });
+  }).sort((left, right) =>
+    compareRational(left.scoreStart, right.scoreStart) || left.order - right.order
+  );
+}
+
+function dynamicVelocityAt(changes: DynamicChange[], scoreStart: ReturnType<typeof rationalFromNumber>): number | undefined {
+  let current: DynamicChange | undefined;
+  for (const change of changes) {
+    if (compareRational(change.scoreStart, scoreStart) > 0) break;
+    if (!current || compareRational(change.scoreStart, current.scoreStart) > 0) {
+      current = change;
+    } else if (compareRational(change.scoreStart, current.scoreStart) === 0 && (change.explicit || !current.explicit)) {
+      current = change;
+    }
+  }
+  return current?.velocity;
+}
+
+function playbackVelocityFromDirection(event: DirectionEvent): number | undefined {
+  const value = Number(event.extensions?.playbackVelocity);
+  return Number.isFinite(value) && value > 0
+    ? Math.min(127, Math.max(1, Math.round(value)))
+    : undefined;
+}
+
+function dynamicToVelocity(dynamic: NonNullable<DirectionEvent["dynamic"]>): number {
+  const velocities: Record<NonNullable<DirectionEvent["dynamic"]>, number> = {
+    ppp: 20,
+    pp: 32,
+    p: 45,
+    mp: 58,
+    mf: 74,
+    f: 90,
+    ff: 108,
+    fff: 120,
+    sf: 100,
+    sfz: 112,
+    fp: 90
+  };
+  return velocities[dynamic];
 }
 
 function compareTimelineEvents(left: TimelineEvent, right: TimelineEvent): number {

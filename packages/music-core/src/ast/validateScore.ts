@@ -73,6 +73,9 @@ export function validateScore(score: unknown): ValidationResult {
       if ("channel" in part && (!Number.isInteger(part.channel) || Number(part.channel) < 0 || Number(part.channel) > 15)) {
         errors.push(`parts[${partIndex}].channel must be an integer from 0 to 15.`);
       }
+      if ("transposition" in part && (!isRecord(part.transposition) || !Number.isInteger(part.transposition.chromatic))) {
+        errors.push(`parts[${partIndex}].transposition.chromatic must be an integer.`);
+      }
       if (!Array.isArray(part.measures) || part.measures.length === 0) {
         errors.push(`parts[${partIndex}].measures must contain at least one measure.`);
         return;
@@ -138,8 +141,8 @@ function validateEvent(event: unknown, path: string, errors: string[]): void {
   }
 
   if (event.type === "direction") {
-    if (!isNonEmptyString(event.dynamic) && !isNonEmptyString(event.text)) {
-      errors.push(`${path} requires a dynamic or text value.`);
+    if (!isNonEmptyString(event.dynamic) && !isNonEmptyString(event.text) && !isRecord(event.wedge)) {
+      errors.push(`${path} requires a dynamic, text, or wedge value.`);
     }
     return;
   }

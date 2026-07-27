@@ -153,6 +153,76 @@ describe("@foxchild/music-core", () => {
     expect(countNotes(roundTrip.parts[0].measures)).toBeGreaterThan(0);
   });
 
+  it("writes MIDI key-signature metadata so MIDI import preserves D major", () => {
+    const score = structuredClone(simpleMelodyAst);
+    score.global.key = { tonic: "D", mode: "major", fifths: 2 };
+
+    const bytes = astToMidi(score);
+    const midi = new Midi(bytes);
+    const imported = midiToAst(bytes);
+
+    expect(midi.header.keySignatures).toEqual([{ key: "D", scale: "major", ticks: 0 }]);
+    expect(imported.global.key).toMatchObject({ tonic: "D", mode: "major" });
+  });
+
+  it("exports full system labels and prints the global tempo only once", () => {
+    const score = structuredClone(simpleMelodyAst);
+    score.parts.push({
+      ...structuredClone(score.parts[0]),
+      id: "second-part",
+      name: "Second Instrument"
+    });
+
+    const xml = astToMusicXml(score);
+
+    expect(xml).toContain("<part-abbreviation>Second Instrument</part-abbreviation>");
+    expect(xml.match(/<words>Moderato<\/words>/g)).toHaveLength(1);
+    expect(xml.match(/<per-minute>90<\/per-minute>/g)).toHaveLength(1);
+  });
+
+  it("preserves durationless MusicXML grace notes without overfilling the measure", () => {
+    const xml = `<?xml version="1.0" encoding="UTF-8"?>
+<score-partwise version="4.0">
+  <part-list><score-part id="P1"><part-name>Piano</part-name></score-part></part-list>
+  <part id="P1">
+    <measure number="1">
+      <attributes><divisions>4</divisions><time><beats>4</beats><beat-type>4</beat-type></time></attributes>
+      <note><pitch><step>C</step><octave>4</octave></pitch><duration>12</duration><voice>1</voice><type>half</type><dot/></note>
+      <note><pitch><step>E</step><octave>4</octave></pitch><duration>2</duration><voice>1</voice><type>eighth</type></note>
+      <note><grace slash="yes"/><pitch><step>D</step><alter>1</alter><octave>4</octave></pitch><voice>1</voice><type>eighth</type></note>
+      <note><pitch><step>F</step><alter>1</alter><octave>4</octave></pitch><duration>2</duration><voice>1</voice><type>eighth</type></note>
+    </measure>
+  </part>
+</score-partwise>`;
+
+    const imported = musicXmlToAst(xml);
+    const events = imported.parts[0].measures[0].events;
+    const grace = events.find((event) => event.type === "note" && event.pitch.step === "D");
+    const finalNote = events.find((event) => event.type === "note" && event.pitch.step === "F");
+
+    expect(grace).toMatchObject({
+      type: "note",
+      position: { measure: 1, beat: 3.5 },
+      duration: { value: "eighth", beats: 0 },
+      notation: { grace: { slash: true } }
+    });
+    expect(finalNote).toMatchObject({ position: { measure: 1, beat: 3.5 }, duration: { beats: 0.5 } });
+    expect(validateScoreMeasures(imported)[0]).toMatchObject({ status: "complete", beatsUsed: 4, beatsExpected: 4 });
+    expect(astToPlaybackEvents(imported).filter((event) => !event.isRest).map((event) => event.pitch)).toEqual(["C4", "E4", "F#4"]);
+
+    const exported = astToMusicXml(imported);
+    expect(exported).toContain('<grace slash="yes"/>');
+    expect(exported).toMatch(/<grace slash="yes"\/>[\s\S]*?<step>D<\/step>[\s\S]*?<type>eighth<\/type>/);
+
+    const roundTrip = musicXmlToAst(exported);
+    const roundTripEvents = roundTrip.parts[0].measures[0].events;
+    const roundTripGrace = roundTripEvents.find((event) => event.type === "note" && event.pitch.step === "D");
+    const roundTripFinal = roundTripEvents.find((event) => event.type === "note" && event.pitch.step === "F");
+    expect(roundTripGrace?.position?.beat).toBe(3.5);
+    expect(roundTripFinal?.position?.beat).toBe(3.5);
+    expect(validateScoreMeasures(roundTrip)[0].status).toBe("complete");
+  });
+
   it("imports MusicXML staves and voices as lanes in one playable part", () => {
     const xml = `<?xml version="1.0" encoding="UTF-8"?>
 <score-partwise version="3.1">
@@ -241,6 +311,31 @@ describe("@foxchild/music-core", () => {
     const roundTrip = musicXmlToAst(exported);
     expect(roundTrip.global.key.fifths).toBe(5);
     expect(roundTrip.global.keyEvents?.map((event) => [event.position.measure, event.fifths])).toEqual([[3, -5]]);
+  });
+
+  it("normalizes duplicate OMR measure numbers to sequential score order", () => {
+    const xml = `<?xml version="1.0" encoding="UTF-8"?>
+<score-partwise version="4.0">
+  <part-list><score-part id="P1"><part-name>Piano</part-name></score-part></part-list>
+  <part id="P1">
+    <measure number="16"><attributes><divisions>4</divisions><key><fifths>1</fifths></key><time><beats>4</beats><beat-type>4</beat-type></time></attributes><note><rest/><duration>16</duration><voice>1</voice><type>whole</type></note></measure>
+    <measure number="16"><note><rest/><duration>16</duration><voice>1</voice><type>whole</type></note></measure>
+    <measure number="17"><attributes><key><fifths>2</fifths></key></attributes><direction><sound tempo="144"/></direction><note><rest/><duration>16</duration><voice>1</voice><type>whole</type></note></measure>
+  </part>
+</score-partwise>`;
+
+    const imported = musicXmlToAst(xml);
+    expect(imported.parts[0].measures.map((measure) => measure.number)).toEqual([1, 2, 3]);
+    expect(imported.parts[0].measures.flatMap((measure) => measure.events)
+      .filter((event) => event.type === "rest")
+      .map((event) => event.position?.measure)).toEqual([1, 2, 3]);
+    expect(imported.global.keyEvents).toEqual([
+      { position: { measure: 3, beat: 0 }, tonic: "D", mode: "major", fifths: 2 }
+    ]);
+    expect(imported.global.tempoEvents).toContainEqual({ position: { measure: 3, beat: 0 }, bpm: 144 });
+    expect(imported.sourceMetadata?.warnings).toContain(
+      "Source MusicXML contained duplicate, non-numeric, or non-increasing measure numbers; FoxChild normalized measures to sequential score order."
+    );
   });
 
   it("recovers Audiveris title credits and text-only tempo changes", () => {
@@ -479,6 +574,48 @@ describe("@foxchild/music-core", () => {
     expect(firstMeasureEvents[0].type).toBe("chord");
     expect(firstMeasureEvents[0].type === "chord" ? firstMeasureEvents[0].pitches.length : 0).toBe(3);
     expect(validation.errors).toEqual([]);
+  });
+
+  it("keeps overlapping MIDI voices and trailing rests on the original score timeline", () => {
+    const midi = new Midi();
+    midi.header.setTempo(120);
+    const piano = midi.addTrack();
+    piano.name = "Piano";
+    const shortTrack = midi.addTrack();
+    shortTrack.name = "Short Track";
+    const cello = midi.addTrack();
+    cello.name = "Cello";
+    cello.instrument.number = 42;
+
+    [0, 4].forEach((barStart) => {
+      piano.addNote({ midi: 48, ticks: barStart * midi.header.ppq, durationTicks: 4 * midi.header.ppq, velocity: 0.8 });
+      [1, 2, 3].forEach((beat) => {
+        piano.addNote({ midi: 72, ticks: (barStart + beat) * midi.header.ppq, durationTicks: midi.header.ppq, velocity: 0.8 });
+      });
+    });
+    shortTrack.addNote({ midi: 60, ticks: 0, durationTicks: midi.header.ppq, velocity: 0.8 });
+    cello.addNote({ midi: 55, ticks: 0, durationTicks: midi.header.ppq, velocity: 0.8 });
+
+    const score = midiToAst(midi.toArray(), { title: "Polyphonic Timeline" });
+    const laterPianoNote = score.parts[0].measures[0].events.find((event) => event.position?.beat === 1);
+    const pianoBassNote = score.parts[0].measures[0].events.find((event) =>
+      (event.type === "note" && event.pitch.octave < 4)
+      || (event.type === "chord" && event.pitches.some((pitch) => pitch.octave < 4))
+    );
+
+    expect(score.parts.map((part) => part.measures.length)).toEqual([2, 2, 2]);
+    expect(score.parts[0]).toMatchObject({ clef: "treble", staffCount: 2, clefs: { 1: "treble", 2: "bass" } });
+    expect(laterPianoNote).toMatchObject({ position: { measure: 1, beat: 1 }, staff: 1 });
+    expect(pianoBassNote).toMatchObject({ staff: 2 });
+    expect(score.parts[1].measures[1].events).toContainEqual(expect.objectContaining({
+      type: "rest",
+      position: { measure: 2, beat: 0 }
+    }));
+    expect(score.parts[2].clef).toBe("bass");
+    expect(score.sourceMetadata?.warnings).toContain(
+      "MIDI does not preserve notation clefs or staff assignments. FoxChild inferred a treble/bass grand staff for: Piano. Review notes near middle C; for ambiguous files, split keyboard hands into separate MIDI tracks before import, or use MusicXML for exact engraving."
+    );
+    expect(validateScore(score).errors).toEqual([]);
   });
 
   it("creates Learning Web compatible questions", () => {

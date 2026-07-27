@@ -4,6 +4,7 @@ import { createScoreFromEvents, slugify } from "../ast/factory";
 import { beatsToDuration, durationToBeats } from "../rhythm/duration";
 import { getBeatsPerMeasure } from "../rhythm/measure";
 import { fifthsToKey } from "../theory/key";
+import { transposePitch } from "../theory/pitch";
 
 const parser = new XMLParser({
   ignoreAttributes: false,
@@ -54,8 +55,9 @@ export function musicXmlToAst(xml: string): FoxChildMusicScore {
   });
 
   const rawParts = records(root.part);
+  const normalizeMeasureNumbers = shouldNormalizeMeasureNumbers(rawParts);
   let detectedTime = { beats: 4, beatType: 4 };
-  const keyTimeline = collectKeyTimeline(rawParts);
+  const keyTimeline = collectKeyTimeline(rawParts, normalizeMeasureNumbers);
   const detectedKey: { tonic: Step; mode: Mode; fifths: number } = keyTimeline.initial
     ?? { tonic: "C", mode: "major", fifths: 0 };
   const hasDetectedKey = keyTimeline.initial !== undefined;
@@ -87,6 +89,7 @@ export function musicXmlToAst(xml: string): FoxChildMusicScore {
     const partId = String(rawPart?.["@_id"] ?? `P${partIndex + 1}`);
     const partInfo = partInfoById.get(partId) ?? { name: `Part ${partIndex + 1}`, midiProgram: 1 };
     const rawMeasures = records(rawPart?.measure);
+    const transposition = readPartTransposition(rawMeasures);
     const lanes = collectLanes(rawMeasures);
     const clefByStaff = collectClefs(rawMeasures);
     let activeDivisions = 1;
@@ -96,14 +99,15 @@ export function musicXmlToAst(xml: string): FoxChildMusicScore {
       if (Number.isFinite(declaredDivisions) && declaredDivisions > 0) {
         activeDivisions = declaredDivisions;
       }
-      const measureNumber = Number(measure?.["@_number"] ?? measureIndex + 1);
+      const measureNumber = canonicalMeasureNumber(measure, measureIndex, normalizeMeasureNumbers);
       let events = lanes.flatMap((lane) => {
         const laneEvents = readMeasureEventsForLane(measure, {
           partIndex,
           measureIndex,
           measureNumber,
           lane,
-          divisions: activeDivisions
+          divisions: activeDivisions,
+          transpositionChromatic: transposition?.chromatic
         });
         return laneEvents;
       });
@@ -137,6 +141,7 @@ export function musicXmlToAst(xml: string): FoxChildMusicScore {
       clef: clefs[staffNumbers[0] ?? 1] ?? "treble",
       staffCount: Math.max(1, ...staffNumbers),
       clefs,
+      ...(transposition ? { transposition } : {}),
       ...(partInfo.channel === undefined ? {} : { channel: partInfo.channel }),
       measures: measures.length > 0 ? measures : [{ number: 1, events: [] }]
     };
@@ -175,8 +180,8 @@ export function musicXmlToAst(xml: string): FoxChildMusicScore {
   } else if (hasDetectedTempo) {
     delete score.global.tempo.label;
   }
-  const firstMeasureNumber = Number(records(rawParts[0]?.measure)[0]?.["@_number"] ?? 1);
-  const tempoEvents = collectTempoEvents(rawParts[0]).filter((tempo) => {
+  const firstMeasureNumber = canonicalMeasureNumber(records(rawParts[0]?.measure)[0] ?? {}, 0, normalizeMeasureNumbers);
+  const tempoEvents = collectTempoEvents(rawParts[0], normalizeMeasureNumbers).filter((tempo) => {
     return !(tempo.position.measure === firstMeasureNumber && tempo.position.beat === 0 && tempo.bpm === detectedTempo);
   });
   if (tempoEvents.length > 0) {
@@ -197,7 +202,27 @@ export function musicXmlToAst(xml: string): FoxChildMusicScore {
   return score;
 }
 
-function collectKeyTimeline(rawParts: Array<Record<string, unknown>>): {
+function readPartTransposition(measures: Array<Record<string, unknown>>): Part["transposition"] | undefined {
+  for (const measure of measures) {
+    const attributes = getRecord(measure.attributes);
+    const transpose = getRecord(attributes?.transpose);
+    if (!transpose) continue;
+    const chromatic = Number(readText(transpose.chromatic));
+    if (!Number.isInteger(chromatic)) continue;
+    const diatonic = Number(readText(transpose.diatonic));
+    const octaveChange = Number(readText(transpose["octave-change"]));
+    const writtenFifths = Number(readText(getRecord(attributes?.key)?.fifths));
+    return {
+      chromatic,
+      ...(Number.isInteger(diatonic) ? { diatonic } : {}),
+      ...(Number.isInteger(octaveChange) ? { octaveChange } : {}),
+      ...(Number.isInteger(writtenFifths) ? { writtenKeyFifths: writtenFifths } : {})
+    };
+  }
+  return undefined;
+}
+
+function collectKeyTimeline(rawParts: Array<Record<string, unknown>>, normalizeMeasureNumbers: boolean): {
   initial?: { tonic: Step; mode: Mode; fifths: number };
   changes: Array<{ position: { measure: number; beat: number }; tonic: Step; mode: Mode; fifths: number }>;
 } {
@@ -224,9 +249,8 @@ function collectKeyTimeline(rawParts: Array<Record<string, unknown>>): {
     if (!initial) {
       initial = value;
     } else {
-      const parsedMeasure = Number(measure?.["@_number"]);
       changes.push({
-        position: { measure: Number.isFinite(parsedMeasure) ? parsedMeasure : measureIndex + 1, beat: 0 },
+        position: { measure: canonicalMeasureNumber(measure, measureIndex, normalizeMeasureNumbers), beat: 0 },
         ...value
       });
     }
@@ -251,15 +275,18 @@ function musicXmlFidelityWarnings(
     }
   };
   addWhenPresent(["accidental"], "Explicit accidental display metadata is normalized; sounding pitch alteration is retained.");
-  addWhenPresent(["grace"], "Grace-note timing is not currently represented for playback.");
+  addWhenPresent(["grace"], "Grace notes are preserved visually, but ornamental grace-note playback timing is not currently represented.");
   addWhenPresent(["ornaments"], "Ornaments are not currently represented for playback.");
   addWhenPresent(["wedge"], "Hairpin wedges are not currently mapped to playback velocity.");
   addWhenPresent(["pedal"], "Pedal notation is not currently represented for playback.");
   addWhenPresent(["fermata"], "Fermata timing is not currently represented for playback.");
-  addWhenPresent(["transpose"], "Transposing-instrument metadata is not currently applied to playback.");
+  addWhenPresent(["transpose"], "Transposing-instrument metadata is preserved; canonical pitches are normalized to concert pitch.");
   addWhenPresent(["fingering"], "Fingering notation is not currently preserved.");
   addWhenPresent(["harmony", "figured-bass"], "Harmony or figured-bass notation is not currently preserved.");
   addWhenPresent(["print", "page-layout", "system-layout"], "Original page and system layout is reflowed by the notation renderer.");
+  if (shouldNormalizeMeasureNumbers(rawParts)) {
+    warnings.push("Source MusicXML contained duplicate, non-numeric, or non-increasing measure numbers; FoxChild normalized measures to sequential score order.");
+  }
   if (hasDetectedKey && detectedKey.fifths === 0 && hasRepeatedExplicitSharps(rawParts)) {
     warnings.push("Possible lost key signature: repeated explicit accidentals detected while key signature is C major.");
   }
@@ -315,6 +342,7 @@ function countInconsistentDurations(rawParts: Array<Record<string, unknown>>): n
       const nextDivisions = Number(readText(getRecord(measure.attributes)?.divisions));
       if (Number.isFinite(nextDivisions) && nextDivisions > 0) divisions = nextDivisions;
       records(measure.note).forEach((note) => {
+        if (note.grace !== undefined) return;
         const durationBeats = Number(readText(note.duration)) / divisions;
         const value = durationValueFromMusicXmlType(readText(note.type), asArray(note.dot).length);
         if (!value || !Number.isFinite(durationBeats)) return;
@@ -396,7 +424,14 @@ function suppressRedundantWholeMeasureRests(events: MusicEvent[], beatsPerMeasur
 
 function readMeasureEventsForLane(
   measure: Record<string, unknown>,
-  context: { partIndex: number; measureIndex: number; measureNumber: number; lane: Lane; divisions: number }
+  context: {
+    partIndex: number;
+    measureIndex: number;
+    measureNumber: number;
+    lane: Lane;
+    divisions: number;
+    transpositionChromatic?: number;
+  }
 ): MusicEvent[] {
   const events: MusicEvent[] = [];
   let timedIndex = 0;
@@ -443,8 +478,14 @@ function readMeasureEventsForLane(
         return;
       }
 
-      const durationBeats = Number(readText(note.duration) || 1) / context.divisions;
-      const duration = durationFromMusicXmlNote(note, durationBeats);
+      const isGrace = note.grace !== undefined;
+      const rawDuration = Number(readText(note.duration));
+      const durationBeats = isGrace
+        ? 0
+        : (Number.isFinite(rawDuration) && rawDuration > 0 ? rawDuration : 1) / context.divisions;
+      const duration = isGrace
+        ? graceDurationFromMusicXmlNote(note)
+        : durationFromMusicXmlNote(note, durationBeats);
       const idPrefix = `xml-${context.partIndex + 1}-${context.measureIndex + 1}-${context.lane.staff}-${context.lane.voice}-${noteIndex + 1}`;
 
       if (note.rest !== undefined) {
@@ -463,11 +504,14 @@ function readMeasureEventsForLane(
         return;
       }
 
-      const nextPitch = {
+      const writtenPitch = {
         step: String(readText(pitch.step) || "C").charAt(0).toUpperCase() as never,
         alter: Number(readText(pitch.alter) || 0),
         octave: Number(readText(pitch.octave) || 4)
       };
+      const nextPitch = context.transpositionChromatic
+        ? transposePitch(writtenPitch, context.transpositionChromatic)
+        : writtenPitch;
       const notation = readNotation(note);
 
       if (note.chord !== undefined && events.length > 0) {
@@ -503,7 +547,9 @@ function readMeasureEventsForLane(
         ...(notation ? { notation } : {}),
         ...readTie(note, `${context.partIndex + 1}:${context.lane.key}:${nextPitch.step}${nextPitch.alter ?? 0}:${nextPitch.octave}`)
       });
-      localBeat += durationBeats;
+      if (!isGrace) {
+        localBeat += durationBeats;
+      }
     });
   });
 
@@ -568,6 +614,10 @@ function readDirections(
     const placement = String(direction["@_placement"] ?? "");
     const staff = Number(readText(direction.staff) || 1);
     const voice = Number(readText(direction.voice) || 1);
+    const rawPlaybackVelocity = Number(getRecord(direction.sound)?.["@_dynamics"]);
+    const playbackVelocity = Number.isFinite(rawPlaybackVelocity) && rawPlaybackVelocity > 0
+      ? Math.min(127, Math.max(1, Math.round(rawPlaybackVelocity)))
+      : undefined;
     return [{
       id: `xml-${context.partIndex + 1}-${context.measureIndex + 1}-direction-${directionIndex + 1}`,
       type: "direction",
@@ -576,6 +626,7 @@ function readDirections(
       voice,
       ...(dynamic ? { dynamic } : {}),
       ...(text ? { text } : {}),
+      ...(playbackVelocity === undefined ? {} : { extensions: { playbackVelocity } }),
       ...(placement === "above" || placement === "below" ? { placement } : {})
     }];
   });
@@ -645,7 +696,10 @@ function readTempoSource(root: Record<string, unknown>): FoxChildMusicScore["glo
     : undefined;
 }
 
-function collectTempoEvents(rawPart: Record<string, unknown> | undefined): NonNullable<FoxChildMusicScore["global"]["tempoEvents"]> {
+function collectTempoEvents(
+  rawPart: Record<string, unknown> | undefined,
+  normalizeMeasureNumbers: boolean
+): NonNullable<FoxChildMusicScore["global"]["tempoEvents"]> {
   if (!rawPart) {
     return [];
   }
@@ -656,7 +710,7 @@ function collectTempoEvents(rawPart: Record<string, unknown> | undefined): NonNu
     if (Number.isFinite(declaredDivisions) && declaredDivisions > 0) {
       divisions = declaredDivisions;
     }
-    const measureNumber = Number(measure["@_number"] ?? measureIndex + 1);
+    const measureNumber = canonicalMeasureNumber(measure, measureIndex, normalizeMeasureNumbers);
     records(measure.direction).forEach((direction) => {
       const tempo = tempoFromDirection(direction);
       if (!tempo) {
@@ -675,6 +729,27 @@ function collectTempoEvents(rawPart: Record<string, unknown> | undefined): NonNu
     }
   });
   return events;
+}
+
+function shouldNormalizeMeasureNumbers(rawParts: Array<Record<string, unknown>>): boolean {
+  const measures = records(rawParts[0]?.measure);
+  let previous = Number.NEGATIVE_INFINITY;
+  return measures.some((measure) => {
+    const parsed = Number(measure["@_number"]);
+    const invalid = !Number.isFinite(parsed) || parsed <= previous;
+    previous = parsed;
+    return invalid;
+  });
+}
+
+function canonicalMeasureNumber(
+  measure: Record<string, unknown>,
+  measureIndex: number,
+  normalizeMeasureNumbers: boolean
+): number {
+  if (normalizeMeasureNumbers) return measureIndex + 1;
+  const parsed = Number(measure["@_number"]);
+  return Number.isFinite(parsed) ? parsed : measureIndex + 1;
 }
 
 function noteLane(note: Record<string, unknown>): Lane {
@@ -709,7 +784,21 @@ function durationFromMusicXmlNote(note: Record<string, unknown>, durationBeats: 
   return duration;
 }
 
+function graceDurationFromMusicXmlNote(note: Record<string, unknown>): Duration {
+  const value = durationValueFromMusicXmlType(readText(note.type), asArray(note.dot).length) ?? "eighth";
+  const duration: Duration = { value, beats: 0 };
+  const tuplet = readTuplet(note);
+  if (tuplet) {
+    duration.tuplet = tuplet;
+  }
+  return duration;
+}
+
 function readNotation(note: Record<string, unknown>): NoteNotation | undefined {
+  const graceRecord = getRecord(note.grace);
+  const grace = note.grace !== undefined
+    ? { slash: String(graceRecord?.["@_slash"] ?? "").toLowerCase() === "yes" }
+    : undefined;
   const notations = getRecord(note.notations);
   const articulationRecord = getRecord(notations?.articulations);
   const supportedArticulations = new Set<ArticulationType>(["staccato", "staccatissimo", "accent", "strong-accent", "tenuto"]);
@@ -740,8 +829,9 @@ function readNotation(note: Record<string, unknown>): NoteNotation | undefined {
       value: value as "begin" | "continue" | "end" | "forward hook" | "backward hook"
     }];
   });
-  return articulations.length || slurs.length || beams.length
+  return grace || articulations.length || slurs.length || beams.length
     ? {
+      ...(grace ? { grace } : {}),
       ...(articulations.length ? { articulations: [...new Set(articulations)] } : {}),
       ...(slurs.length ? { slurs } : {}),
       ...(beams.length ? { beams } : {})
@@ -756,7 +846,9 @@ function mergeNotation(left: NoteNotation | undefined, right: NoteNotation | und
   const articulations = [...new Set([...(left?.articulations ?? []), ...(right?.articulations ?? [])])];
   const slurs = uniqueObjects([...(left?.slurs ?? []), ...(right?.slurs ?? [])]);
   const beams = uniqueObjects([...(left?.beams ?? []), ...(right?.beams ?? [])]);
+  const grace = left?.grace ?? right?.grace;
   return {
+    ...(grace ? { grace } : {}),
     ...(articulations.length ? { articulations } : {}),
     ...(slurs.length ? { slurs } : {}),
     ...(beams.length ? { beams } : {})

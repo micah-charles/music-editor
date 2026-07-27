@@ -9,10 +9,10 @@ export class ScoreCursorController {
     private readonly index: OsmdPositionIndex
   ) {}
 
-  moveTo(scoreTime: Rational, visible: boolean): void {
+  moveTo(scoreTime: Rational, visible: boolean): HTMLElement | null {
     if (!visible || this.index.entries.length === 0) {
       this.cursor.hide?.();
-      return;
+      return null;
     }
 
     const targetStep = this.index.stepAtScoreTime(scoreTime);
@@ -27,8 +27,19 @@ export class ScoreCursorController {
       }
       this.cursor.show?.();
       this.cursor.update?.();
-    } catch {
+      const highlight = this.cursor.cursorElement ?? null;
+      if (highlight) {
+        highlight.classList.add("score-playback-highlight");
+        delete highlight.dataset.playbackHighlightError;
+      }
+      return highlight;
+    } catch (error) {
       this.cursor.hide?.();
+      if (this.cursor.cursorElement) {
+        this.cursor.cursorElement.dataset.playbackHighlightError = error instanceof Error ? error.message : String(error);
+      }
+      console.warn("Unable to update the notation playback highlight.", error);
+      return null;
     }
   }
 }

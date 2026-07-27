@@ -62,6 +62,10 @@ export class SoundFontPlaybackEngine implements PlaybackEngine {
     this.delegate?.pause?.();
   }
 
+  setPartVolume(partId: string, volume: number): void {
+    this.delegate?.setPartVolume?.(partId, volume);
+  }
+
   stop(): void {
     this.delegate?.stop();
   }

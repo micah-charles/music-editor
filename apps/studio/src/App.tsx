@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState, type CSSProperties } from "react";
 import {
   analyseDifficulty,
   astToLearningPack,
@@ -85,6 +85,11 @@ type UiLayoutState = {
 };
 
 const UI_LAYOUT_STORAGE_KEY = "foxchild-ui-3-layout-v1";
+
+function isMeasureTimingValidationMessage(message: string): boolean {
+  return /^Measure \d+: .+ \/ .+ beats; (?:missing|extra) .+ beat\.$/.test(message);
+}
+
 const defaultUiLayout: UiLayoutState = {
   workspace: "score",
   navigationCollapsed: false,
@@ -116,6 +121,7 @@ export function App() {
   const playbackController = usePlaybackSessionController();
   const playbackActiveEvents = usePlaybackActiveEvents();
   const [score, setScore] = useState<FoxChildMusicScore>(() => withMeasureValidation(simpleMelodyAst));
+  const [trackVolumes, setTrackVolumes] = useState<Record<string, number>>(() => playbackVolumesFromScore(simpleMelodyAst));
   const [undoStack, setUndoStack] = useState<FoxChildMusicScore[]>([]);
   const [redoStack, setRedoStack] = useState<FoxChildMusicScore[]>([]);
   const [previewScore, setPreviewScore] = useState<FoxChildMusicScore | null>(null);
@@ -152,8 +158,17 @@ export function App() {
   const heldPitchesRef = useRef(new Map<string, HeldPitch>());
   const performedChordCaptureRef = useRef<{ notes: CompletedHeldPitch[]; timer?: number }>({ notes: [] });
   const replaceOnNextRecordedEventRef = useRef(false);
+  const lastAudibleTrackVolumeRef = useRef<Record<string, number>>(playbackVolumesFromScore(simpleMelodyAst));
 
   const validation = useMemo(() => validateScore(score), [score]);
+  const structuralValidationErrors = useMemo(
+    () => validation.errors.filter((message) => !isMeasureTimingValidationMessage(message)),
+    [validation.errors]
+  );
+  const structuralValidationWarnings = useMemo(
+    () => validation.warnings.filter((message) => !isMeasureTimingValidationMessage(message)),
+    [validation.warnings]
+  );
   const analysis = useMemo(() => analyseDifficulty(score), [score]);
   const musicXml = useMemo(() => astToMusicXml(score), [score]);
   const notationMusicXml = useMemo(() => {
@@ -161,7 +176,7 @@ export function App() {
     return astToMusicXml(visibleParts.length > 0 ? { ...score, parts: visibleParts } : score);
   }, [score]);
   const learningPack = useMemo(() => astToLearningPack(score), [score]);
-  const measureCount = score.parts.reduce((sum, part) => sum + part.measures.length, 0);
+  const measureCount = new Set(score.parts.flatMap((part) => part.measures.map((measure) => measure.number))).size;
 
   const measureIssues = useMemo(() => score.validation?.measures.filter((measure) => measure.status !== "complete") ?? [], [score]);
   const playbackActivePitches = useMemo(() => uniquePitches(playbackActiveEvents.map((event) => event.pitch)), [playbackActiveEvents]);
@@ -181,6 +196,16 @@ export function App() {
       setActivePartId(score.parts[0]?.id ?? "");
     }
   }, [activePartId, score.parts]);
+
+  useEffect(() => {
+    setTrackVolumes((current) => {
+      const next = Object.fromEntries(score.parts.map((part) => [
+        part.id,
+        current[part.id] ?? (part.muted ? 0 : clampVolume(part.volume ?? 1))
+      ]));
+      return sameTrackVolumes(current, next) ? current : next;
+    });
+  }, [score.parts]);
 
   useEffect(() => {
     if (!midiAccess || !selectedMidiInputId) {
@@ -255,6 +280,31 @@ export function App() {
     setScore(decoratedScore);
     setPreviewScore(null);
     setMessage(nextMessage);
+  }
+
+  function togglePartSound(partId: string) {
+    const part = score.parts.find((item) => item.id === partId);
+    if (!part) return;
+    const currentVolume = trackVolumes[partId] ?? (part.muted ? 0 : clampVolume(part.volume ?? 1));
+    if (currentVolume > 0) {
+      lastAudibleTrackVolumeRef.current[partId] = currentVolume;
+      setPartPlaybackVolume(partId, 0);
+      setMessage(`${part.name} muted. Playback continues.`);
+    } else {
+      const restoredVolume = lastAudibleTrackVolumeRef.current[partId] ?? (clampVolume(part.volume ?? 1) || 0.8);
+      setPartPlaybackVolume(partId, restoredVolume);
+      setMessage(`${part.name} restored to ${Math.round(restoredVolume * 100)}%. Playback continues.`);
+    }
+  }
+
+  function setPartPlaybackVolume(partId: string, volume: number) {
+    const nextVolume = clampVolume(volume);
+    if (nextVolume > 0) {
+      lastAudibleTrackVolumeRef.current[partId] = nextVolume;
+    }
+    setTrackVolumes((current) => current[partId] === nextVolume
+      ? current
+      : { ...current, [partId]: nextVolume });
   }
 
   function previewPlayback(nextScore: FoxChildMusicScore, nextMessage: string) {
@@ -584,7 +634,10 @@ export function App() {
   }
 
   const workspaceLabel = workspaces.find((workspace) => workspace.id === uiLayout.workspace)?.label ?? "Score";
-  const validationIssueCount = validation.errors.length + validation.warnings.length + measureIssues.length + (score.sourceMetadata?.warnings?.length ?? 0);
+  const validationIssueCount = structuralValidationErrors.length
+    + structuralValidationWarnings.length
+    + measureIssues.length
+    + (score.sourceMetadata?.warnings?.length ?? 0);
 
   return (
     <div className={`app-shell ui3 keyboard-${keyboardIsVisible ? "open" : "closed"}`}>
@@ -673,8 +726,8 @@ export function App() {
           {uiLayout.validationExpanded ? (
             <div className="validation-details" aria-live="polite">
               {message ? <p className="message-line">{message}</p> : null}
-              {validation.errors.map((error, index) => <p className="validation-error" key={`${index}-${error}`}>{error}</p>)}
-              {validation.warnings.map((warning, index) => <p key={`${index}-${warning}`}>{warning}</p>)}
+              {structuralValidationErrors.map((error, index) => <p className="validation-error" key={`${index}-${error}`}>{error}</p>)}
+              {structuralValidationWarnings.map((warning, index) => <p key={`${index}-${warning}`}>{warning}</p>)}
               {measureIssues.map((issue) => <p key={`${issue.partId}-${issue.measure}`}>Measure {issue.measure}: {issue.status}</p>)}
               {score.sourceMetadata?.warnings?.map((warning, index) => <p key={`source-${index}-${warning}`}>{warning}</p>)}
             </div>
@@ -763,11 +816,46 @@ export function App() {
                     <ScoreMetadataEditor score={score} onChange={(next) => acceptScore(next, "Updated score metadata.")} />
                     <section className="inspector-section track-summary">
                       <div className="inspector-section-heading"><strong>Tracks</strong><span>{score.parts.length}</span></div>
-                      {score.parts.map((part, index) => (
-                        <button type="button" key={part.id} className={activePartId === part.id ? "active" : ""} onClick={() => setActivePartId(part.id)}>
-                          <span className="track-number">{index + 1}</span><span>{part.name}</span><small>{part.instrument.name}</small>
-                        </button>
-                      ))}
+                      {score.parts.map((part, index) => {
+                        const trackVolume = trackVolumes[part.id] ?? (part.muted ? 0 : clampVolume(part.volume ?? 1));
+                        const volumePercent = Math.round(trackVolume * 100);
+                        const isMuted = volumePercent === 0;
+                        return (
+                        <div className={`track-summary-row ${isMuted ? "muted" : ""} ${activePartId === part.id ? "active" : ""}`} key={part.id}>
+                          <div className="track-summary-header">
+                            <button type="button" className={`track-select-button ${activePartId === part.id ? "active" : ""}`} onClick={() => setActivePartId(part.id)}>
+                              <span className="track-number">{index + 1}</span>
+                              <span className="track-name"><strong>{part.name}</strong><small>{part.instrument.name}</small></span>
+                            </button>
+                          <button
+                            type="button"
+                            className={`track-sound-toggle ${isMuted ? "muted" : ""}`}
+                            aria-label={`${isMuted ? "Enable" : "Mute"} ${part.name}`}
+                            aria-pressed={isMuted}
+                            title={`${isMuted ? "Enable" : "Mute"} ${part.name} without stopping playback`}
+                            onClick={() => togglePartSound(part.id)}
+                          >
+                            <span className="track-sound-icon" aria-hidden="true">{isMuted ? "×" : "•"}</span>
+                            {isMuted ? "Off" : "On"}
+                          </button>
+                          </div>
+                          <label className="track-volume-control">
+                            <span className="track-volume-icon" aria-hidden="true">VOL</span>
+                            <input
+                              aria-label={`${part.name} volume`}
+                              type="range"
+                              min={0}
+                              max={100}
+                              step={1}
+                              value={volumePercent}
+                              style={{ "--track-volume": `${volumePercent}%` } as CSSProperties}
+                              onChange={(event) => setPartPlaybackVolume(part.id, Number(event.target.value) / 100)}
+                            />
+                            <output aria-live="polite">{isMuted ? "Off" : `${volumePercent}%`}</output>
+                          </label>
+                        </div>
+                        );
+                      })}
                       <button type="button" onClick={() => selectWorkspace("mixer")}>Open mixer</button>
                     </section>
                   </>
@@ -930,6 +1018,7 @@ export function App() {
 
       <PlaybackControls
         score={previewScore ?? score}
+        trackVolumes={trackVolumes}
         label={previewScore ? `Preview: ${previewScore.metadata.title}` : undefined}
         onPresetCatalogChange={setSoundFontPresetOptions}
         onTempoChange={(bpm) => {
@@ -946,6 +1035,24 @@ export function App() {
 
 function uniquePitches(pitches: string[]): string[] {
   return [...new Set(pitches.map((pitch) => pitch.trim()).filter(Boolean))];
+}
+
+function playbackVolumesFromScore(score: FoxChildMusicScore): Record<string, number> {
+  return Object.fromEntries(score.parts.map((part) => [
+    part.id,
+    part.muted ? 0 : clampVolume(part.volume ?? 1)
+  ]));
+}
+
+function sameTrackVolumes(left: Record<string, number>, right: Record<string, number>): boolean {
+  const leftKeys = Object.keys(left);
+  const rightKeys = Object.keys(right);
+  return leftKeys.length === rightKeys.length
+    && leftKeys.every((partId) => left[partId] === right[partId]);
+}
+
+function clampVolume(volume: number): number {
+  return Math.min(1, Math.max(0, volume));
 }
 
 function errorMessage(error: unknown): string {

@@ -21,6 +21,7 @@ export class PlaybackSessionController {
   private configuration?: PlaybackSessionConfiguration;
   private engine?: PlaybackEngine;
   private listeners = new Set<Listener>();
+  private partVolumes = new Map<string, number>();
   private frame?: number;
   private playGeneration = 0;
   private clock: PlaybackClock;
@@ -96,6 +97,7 @@ export class PlaybackSessionController {
         speed: this.snapshot.speed,
         volume: this.snapshot.volume
       });
+      this.partVolumes.forEach((volume, partId) => this.engine?.setPartVolume?.(partId, volume));
       if (generation !== this.playGeneration) {
         return;
       }
@@ -192,6 +194,13 @@ export class PlaybackSessionController {
     if (wasPlaying) {
       void this.restartAtCurrentPosition();
     }
+  }
+
+  setPartVolumes(volumes: Readonly<Record<string, number>>): void {
+    this.partVolumes = new Map(
+      Object.entries(volumes).map(([partId, volume]) => [partId, clamp(volume, 0, 1)])
+    );
+    this.partVolumes.forEach((volume, partId) => this.engine?.setPartVolume?.(partId, volume));
   }
 
   setLoop(loop?: PlaybackLoop): void {

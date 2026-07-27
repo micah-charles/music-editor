@@ -30,6 +30,8 @@ export class DirectSf2PlaybackEngine implements PlaybackEngine {
   private sfontId?: number;
   private loaded = false;
   private backend?: SynthBackend;
+  private channelsByPart = new Map<string, Set<number>>();
+  private partVolumes = new Map<string, number>();
   private stopActivePitchCallbacks?: () => void;
 
   constructor(private config: DirectSf2PlaybackConfig) {}
@@ -83,6 +85,13 @@ export class DirectSf2PlaybackEngine implements PlaybackEngine {
 
     const channel = this.config.channel ?? 0;
     const program = this.config.program ?? 0;
+    this.channelsByPart.clear();
+    events.forEach((event) => {
+      const partId = event.partId ?? "__default";
+      const partChannels = this.channelsByPart.get(partId) ?? new Set<number>();
+      partChannels.add(clampMidi(event.channel ?? channel));
+      this.channelsByPart.set(partId, partChannels);
+    });
     const smf = playbackEventsToSmf(events, {
       ...options,
       channel,
@@ -95,6 +104,18 @@ export class DirectSf2PlaybackEngine implements PlaybackEngine {
     this.synth.setPlayerTempo(JSSynth.Constants.PlayerSetTempoType.ExternalBpm, Math.max(1, options.bpm * options.speed));
     this.stopActivePitchCallbacks = scheduleActivePitchCallbacks(events, options);
     await this.synth.playPlayer();
+  }
+
+  setPartVolume(partId: string, volume: number): void {
+    const nextVolume = Math.min(1, Math.max(0, volume));
+    this.partVolumes.set(partId, nextVolume);
+    const midiVolume = Math.round(nextVolume * 127);
+    this.channelsByPart.get(partId)?.forEach((channel) => {
+      this.synth?.midiControl(channel, 7, midiVolume);
+      if (midiVolume === 0) {
+        this.synth?.midiAllSoundsOff(channel);
+      }
+    });
   }
 
   pause(): void {
@@ -253,4 +274,8 @@ function isSoundFontBuffer(buffer: ArrayBuffer): boolean {
 
 function ascii(bytes: Uint8Array, start: number, end: number): string {
   return String.fromCharCode(...bytes.slice(start, end));
+}
+
+function clampMidi(value: number): number {
+  return Math.min(15, Math.max(0, Math.round(value)));
 }
