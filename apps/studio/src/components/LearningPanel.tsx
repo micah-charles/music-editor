@@ -151,6 +151,7 @@ export function LearningPanel({
   );
   const [conceptSearch, setConceptSearch] = useState("");
   const previousMidiRef = useRef<string[]>([]);
+  const submissionLockedRef = useRef(false);
 
   useEffect(() => {
     let cancelled = false;
@@ -258,6 +259,7 @@ export function LearningPanel({
     setResolvedItem(undefined);
     setResult(undefined);
     setSelectedResponse(undefined);
+    submissionLockedRef.current = false;
     setAttemptNumber(1);
     setHintVisible(false);
     setShowExplanation(false);
@@ -275,7 +277,7 @@ export function LearningPanel({
     const previous = new Set(previousMidiRef.current);
     const pressed = midiActivePitches.find((pitch) => !previous.has(pitch));
     previousMidiRef.current = midiActivePitches;
-    if (pressed && resolvedItem?.interaction.kind === "music-keyboard" && !result?.passed) {
+    if (pressed && resolvedItem?.interaction.kind === "music-keyboard" && !result) {
       submit(pressed, "web-midi");
     }
   }, [midiActivePitches, resolvedItem, result]);
@@ -350,22 +352,29 @@ export function LearningPanel({
   }
 
   function submit(value = selectedResponse, inputSource = "pointer") {
-    if (!selectedSet || !resolvedItem || value === undefined || result?.passed) return;
-    const attempt = startAttempt(selectedSet, resolvedItem);
-    const completed = submitAttempt(attempt, resolvedItem, value, runtime, {
-      inputSource,
-      attemptNumber
-    });
-    attemptStore.save(completed);
-    setAttempts((current) => [...current, completed]);
-    setSelectedResponse(value);
-    setResult(completed.result);
+    if (!selectedSet || !resolvedItem || value === undefined || result || submissionLockedRef.current) return;
+    submissionLockedRef.current = true;
+    try {
+      const attempt = startAttempt(selectedSet, resolvedItem);
+      const completed = submitAttempt(attempt, resolvedItem, value, runtime, {
+        inputSource,
+        attemptNumber
+      });
+      attemptStore.save(completed);
+      setAttempts((current) => [...current, completed]);
+      setSelectedResponse(value);
+      setResult(completed.result);
+    } catch (error) {
+      submissionLockedRef.current = false;
+      throw error;
+    }
   }
 
   function retry() {
     setAttemptNumber((current) => current + 1);
     setSelectedResponse(undefined);
     setResult(undefined);
+    submissionLockedRef.current = false;
   }
 
   function moveQuestion(direction: -1 | 1) {
@@ -563,7 +572,7 @@ export function LearningPanel({
                     className={[selected ? "selected" : "", mode !== "test" && correct ? "correct" : "", mode !== "test" && incorrect ? "incorrect" : ""].filter(Boolean).join(" ")}
                     aria-pressed={selected}
                     disabled={Boolean(result)}
-                    onClick={() => setSelectedResponse(option.id)}
+                    onClick={() => submit(option.id)}
                   >
                     <span>{String.fromCharCode(65 + index)}</span>
                     {localisedText(option.content, locale)}
@@ -669,10 +678,10 @@ export function LearningPanel({
         </div>
         <div className="learning-dock-controls">
           <button type="button" disabled={sessionPosition === 0} onClick={() => moveQuestion(-1)}>← Previous</button>
-          {resolvedItem?.interaction.kind !== "music-keyboard" && !result ? (
-            <button type="button" className="primary" disabled={selectedResponse === undefined} onClick={() => submit()}>
-              {mode === "test" ? "Save answer" : "Check answer"}
-            </button>
+          {!result ? (
+            <span className="learning-choice-guidance">
+              {resolvedItem?.interaction.kind === "choice" ? "Choose an answer above" : "Complete the question above"}
+            </span>
           ) : (
             <button type="button" className="primary" disabled={!result && currentAttemptState === "unanswered"} onClick={() => moveQuestion(1)}>
               {sessionPosition === sessionIndices.length - 1 ? "Finish" : "Next"} →

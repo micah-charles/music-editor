@@ -7299,7 +7299,15 @@ h3 {
 
 .learning-dock-controls {
   display: flex;
+  align-items: center;
   gap: 7px;
+}
+
+.learning-choice-guidance {
+  color: var(--learning-muted);
+  font-size: 11px;
+  font-weight: 700;
+  white-space: nowrap;
 }
 
 .learning-workspace .learning-dock-controls button {
