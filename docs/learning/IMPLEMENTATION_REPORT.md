@@ -43,10 +43,10 @@ optional input—not a backend dependency.
 
 ## Supported specialised interaction surface
 
-The first production student renderers are multiple choice, written text entry
-and single-note piano/MIDI. Audio and notation stimuli reuse the existing player
-and score viewer. The domain model and assessment registry also retain numeric,
-matching, ordering, notation-entry, rhythm, recording, sight-reading,
+The first production student renderers are multiple choice, written text and
+numeric entry, and single-note piano/MIDI. Audio and notation stimuli reuse the
+existing player and score viewer. The domain model and assessment registry also
+retain matching, ordering, notation-entry, rhythm, recording, sight-reading,
 composition and composite response contracts for later specialised renderers.
 
 ## External work deliberately not simulated
