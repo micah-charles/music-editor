@@ -4,6 +4,7 @@ import {
   createDefaultQuestionFamilyRegistry,
   createDefaultCurriculumRegistry,
   createDefaultSyllabusMatrix,
+  describeQuestionFamilyUniverse,
   syllabusCoverage,
   syllabusSkills
 } from "../index";
@@ -32,5 +33,13 @@ describe("curriculum syllabus matrix", () => {
     expect(coverage.flatMap((entry) => entry.missingAssessmentStrategyIds)).toEqual([]);
     expect(coverage.find((entry) => entry.skillId === "pitch.note-reading")?.missingCurriculumLevels).toEqual({});
     expect(coverage.find((entry) => entry.skillId === "pitch.note-reading")?.estimatedGeneratedInstances).toBeGreaterThan(0);
+  });
+
+  it("exposes exact bounded parameter cardinalities for generated families", () => {
+    const registry = createDefaultQuestionFamilyRegistry();
+    const universe = describeQuestionFamilyUniverse(registry.resolve("note-reading@2"));
+    expect(universe.parameterAxes).toEqual({ midi: 37, clef: 2 });
+    expect(universe.estimatedInstances).toBe(148);
+    expect(describeQuestionFamilyUniverse(registry.resolve("rhythm@2")).estimatedInstances).toBeGreaterThan(0);
   });
 });

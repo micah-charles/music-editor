@@ -1,6 +1,6 @@
 import type { AssessmentStrategyRegistry } from "./registries";
 import type { QuestionFamilyRegistry } from "./questionFamilies";
-import type { CurriculumId, LearningDomain } from "./adaptiveTypes";
+import type { CurriculumId, LearningDomain, ParameterDefinition } from "./adaptiveTypes";
 
 export type SyllabusAreaId =
   | "pitch-notation"
@@ -50,6 +50,17 @@ export interface SyllabusCoverageEntry {
   estimatedGeneratedInstances: number | "unbounded";
   curriculumLevels: Partial<Record<CurriculumId, string[]>>;
   status: "covered" | "partial" | "planned";
+}
+
+/**
+ * A compact description of a generator's legal parameter universe.  This is
+ * deliberately metadata-only: callers can report the size without eagerly
+ * materialising every score/audio instance.
+ */
+export interface QuestionFamilyUniverse {
+  familyId: string;
+  estimatedInstances: number | "unbounded";
+  parameterAxes: Record<string, number | "unbounded">;
 }
 
 export function createDefaultSyllabusMatrix(): SyllabusMatrix {
@@ -173,7 +184,7 @@ export function syllabusCoverage(
       : "covered";
     const familySizes = skill.generatorFamilyIds
       .filter((id) => families.ids().includes(id))
-      .map((id) => estimateFamilyUniverse(families.resolve(id)));
+      .map((id) => describeQuestionFamilyUniverse(families.resolve(id)).estimatedInstances);
     const estimatedGeneratedInstances = familySizes.some((size) => size === "unbounded")
       ? "unbounded"
       : familySizes.reduce<number>((sum, size) => sum + Number(size), 0);
@@ -192,16 +203,36 @@ export function syllabusCoverage(
   });
 }
 
-function estimateFamilyUniverse(family: ReturnType<QuestionFamilyRegistry["resolve"]>): number | "unbounded" {
-  const parameterCount = Object.values(family.parameterSpace).reduce<number | "unbounded">((total, parameter) => {
+/**
+ * Describe the bounded/unbounded generated space for one registered family.
+ * Integer ranges and enum values are exact; open numeric parameters remain
+ * unbounded because their legal values cannot be enumerated safely.
+ */
+export function describeQuestionFamilyUniverse(
+  family: ReturnType<QuestionFamilyRegistry["resolve"]>
+): QuestionFamilyUniverse {
+  const parameterAxes = Object.fromEntries(
+    Object.entries(family.parameterSpace).map(([name, parameter]) => [name, parameterCardinality(parameter)])
+  );
+  const parameterCount = Object.values(parameterAxes).reduce<number | "unbounded">((total, cardinality) => {
     if (total === "unbounded") return total;
-    if (parameter.type === "enum") return total * Math.max(1, parameter.values?.length ?? 0);
-    if (parameter.type === "integer" && parameter.minimum !== undefined && parameter.maximum !== undefined) {
-      return total * Math.max(1, parameter.maximum - parameter.minimum + 1);
-    }
-    if (parameter.type === "boolean") return total * 2;
-    return "unbounded";
+    if (cardinality === "unbounded") return cardinality;
+    return total * cardinality;
   }, 1);
-  if (parameterCount === "unbounded") return parameterCount;
-  return parameterCount * Math.max(1, family.variantIds.length) * Math.max(1, family.conceptIds.length);
+  const variantCount = Math.max(1, family.variantIds.length);
+  const conceptCount = Math.max(1, family.conceptIds.length);
+  return {
+    familyId: family.id,
+    estimatedInstances: parameterCount === "unbounded" ? "unbounded" : parameterCount * variantCount * conceptCount,
+    parameterAxes
+  };
+}
+
+function parameterCardinality(parameter: ParameterDefinition): number | "unbounded" {
+  if (parameter.type === "enum") return Math.max(1, parameter.values?.length ?? 0);
+  if (parameter.type === "integer" && parameter.minimum !== undefined && parameter.maximum !== undefined) {
+    return Math.max(1, parameter.maximum - parameter.minimum + 1);
+  }
+  if (parameter.type === "boolean") return 2;
+  return "unbounded";
 }
