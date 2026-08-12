@@ -21,9 +21,18 @@ const load = (file: string) => normaliseQuestionBankSet(JSON.parse(
 ) as QuestionSet);
 const publishedSets = manifest.sets.map(({ file }) => load(file));
 const adaptivePacks = (manifest.adaptivePacks ?? []).map(({ file }) => load(file));
+const adaptiveItems = adaptivePacks.flatMap(questionItems);
 
 if (publishedSets.length !== 10) throw new Error(`Expected 10 catalogue sets, found ${publishedSets.length}.`);
 if (publishedSets.flatMap(questionItems).length !== 50) throw new Error("Published catalogue is not the expected 50-question bank.");
+const requiredInteractionKinds = [
+  "choice", "hotspot", "text-entry", "numeric-entry", "matching", "drag-drop", "ordering",
+  "music-keyboard", "notation-entry", "composition", "sight-reading", "audio-recording",
+  "score-drag-drop", "rhythm-tap", "composite"
+];
+const authoredInteractionKinds = new Set([...publishedSets.flatMap(questionItems), ...adaptiveItems].map((item) => item.interaction.kind));
+const missingInteractionKinds = requiredInteractionKinds.filter((kind) => !authoredInteractionKinds.has(kind as typeof adaptiveItems[number]["interaction"]["kind"]));
+if (missingInteractionKinds.length) throw new Error(`Authored adaptive pack is missing interaction coverage: ${missingInteractionKinds.join(", ")}`);
 for (const set of [...publishedSets, ...adaptivePacks]) {
   const result = validateQuestionSet(set, {
     assessmentRegistry: runtime.assessments,
@@ -47,4 +56,4 @@ if (session.questions.length !== 10 || session.questions.some((question) => !que
   throw new Error("ABRSM Grade 8 adaptive session failed level routing.");
 }
 
-console.log(`Learning smoke passed: ${publishedSets.length} catalogue sets, ${publishedSets.flatMap(questionItems).length} published items, ${adaptivePacks.flatMap(questionItems).length} authored adaptive items, ${families.ids().length} generated families.`);
+console.log(`Learning smoke passed: ${publishedSets.length} catalogue sets, ${publishedSets.flatMap(questionItems).length} published items, ${adaptiveItems.length} authored adaptive items, ${families.ids().length} generated families, ${authoredInteractionKinds.size} interaction kinds.`);
