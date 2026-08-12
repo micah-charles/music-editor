@@ -18,7 +18,9 @@ const legacyDomainMap: Record<string, LearningDomain> = {
   rhythm: "rhythm",
   tempo: "tempo",
   "ear-training": "ear-training",
-  "sight-reading": "sight-reading"
+  "sight-reading": "sight-reading",
+  "musical-analysis": "error-detection",
+  analysis: "error-detection"
 };
 
 export function migrateQuestionSetsToActivity(
@@ -69,7 +71,9 @@ function migrateAuthoredItem(
   const skillIds = Array.isArray(item.metadata?.skillIds)
     ? item.metadata.skillIds.filter((id): id is string => typeof id === "string")
     : [];
-  const conceptId = skillIds[0] ?? `${domain}.authored.${item.id}`;
+  const conceptId = typeof item.metadata?.conceptId === "string"
+    ? item.metadata.conceptId
+    : skillIds[0] ?? `${domain}.authored.${item.id}`;
   return {
     ...structuredClone(item),
     id: `${set.id}/${item.id}`,

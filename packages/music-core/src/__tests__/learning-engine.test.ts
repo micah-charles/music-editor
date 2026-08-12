@@ -9,6 +9,7 @@ import {
   deterministicShuffle,
   filterCatalogue,
   loadQuestionSet,
+  migrateQuestionSetsToActivity,
   migrateQuestionSet,
   musicLearningDemoSet,
   normaliseQuestionBankSet,
@@ -322,6 +323,9 @@ describe("FCMLIF learning engine", () => {
       assessmentRegistry: new LearningRuntime().assessments,
       generatorRegistry: new LearningRuntime().generators
     }).valid, pack.id).toBe(true));
+    const activity = migrateQuestionSetsToActivity(packs);
+    expect(activity.authoredItems.every((item) => item.metadata?.domain === "error-detection")).toBe(true);
+    expect(activity.authoredItems.some((item) => item.metadata?.conceptId === "musical-analysis.context.modulation")).toBe(true);
   });
 
   it("calculates resumable progress and category filtering for the catalogue", () => {
