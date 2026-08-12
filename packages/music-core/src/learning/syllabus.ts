@@ -116,12 +116,12 @@ export function createDefaultSyllabusMatrix(): SyllabusMatrix {
         generated("terms.ornaments", "Ornaments and instrumental directions", "terms-signs", "Interpret ornaments and common instrumental directions.", ["music-symbols"], ["ornaments@1"], ["exact-identifier@1"])
       ]},
       { id: "melody-composition", title: "Melody & composition", skills: [
-        planned("melody.phrase-structure", "Phrase structure and development", "melody-composition", "Recognise phrases, sequences, repetition and contrast.", ["melody-dictation"], ["rubric@1"]),
+        generated("melody.phrase-structure", "Phrase structure and development", "melody-composition", "Recognise phrases, sequences, repetition and contrast.", ["melody-dictation"], ["phrase-structure@1"], ["exact-identifier@1"]),
         planned("melody.completion", "Melodic completion", "melody-composition", "Complete and develop a melody within tonal and rhythmic constraints.", ["melody-dictation"], ["score-semantic-diff@1", "rubric@1"])
       ]},
       { id: "score-reading", title: "Score reading", skills: [
         generated("score.sight-reading", "Sight reading", "score-reading", "Read and perform a notated phrase with increasing complexity.", ["sight-reading"], ["sight-reading@2"], ["sight-reading@1"]),
-        planned("score.instruments", "Instruments and transposing instruments", "score-reading", "Identify instruments and account for transposing notation.", ["note-reading"], ["exact-identifier@1"]),
+        generated("score.instruments", "Instruments and transposing instruments", "score-reading", "Identify instruments and account for transposing notation.", ["note-reading"], ["instruments@1"], ["exact-identifier@1"]),
         planned("score.open-short", "Open and short score", "score-reading", "Read and reduce multi-part notation.", ["note-reading"], ["score-semantic-diff@1"])
       ]},
       { id: "aural-listening", title: "Aural & listening", skills: [

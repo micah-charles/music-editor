@@ -41,6 +41,7 @@ export function createDefaultMusicGeneratorRegistry(): MusicGeneratorRegistry {
     { ...chordGenerator, id: "chord-display@1" },
     cadenceGenerator,
     transpositionGenerator,
+    instrumentGenerator,
     rhythmFragmentGenerator,
     { ...rhythmFragmentGenerator, id: "note-value-display@2" },
     { ...rhythmFragmentGenerator, id: "time-signature-display@2" },
@@ -48,6 +49,7 @@ export function createDefaultMusicGeneratorRegistry(): MusicGeneratorRegistry {
     scaleGenerator,
     tempoGenerator,
     melodyDictationGenerator,
+    phraseStructureGenerator,
     errorDetectionGenerator
   ].forEach((generator) => registry.register(generator));
   return registry;
@@ -175,6 +177,20 @@ export const transpositionGenerator: MusicQuestionGenerator = {
         noteEvent(`source-note-${index + 1}`, root + offset, "quarter"),
         noteEvent(`transposed-note-${index + 1}`, root + offset + semitones, "quarter")
       ])
+    });
+  }
+};
+
+export const instrumentGenerator: MusicQuestionGenerator = {
+  id: "instrument-display@1",
+  generate(seed, parameters) {
+    const instrument = String(parameters.instrument ?? "piano");
+    const transposition = Number(parameters.transposition ?? 0);
+    return score({
+      id: deterministicId("instrument", seed),
+      title: `${instrument} score example`,
+      instrument: { name: instrument, midiProgram: instrument === "piano" ? 1 : 57 },
+      events: [noteEvent("instrument-note-1", 60 + transposition, "whole")]
     });
   }
 };
@@ -335,6 +351,26 @@ export const melodyDictationGenerator: MusicQuestionGenerator = {
   }
 };
 
+export const phraseStructureGenerator: MusicQuestionGenerator = {
+  id: "phrase-structure-display@1",
+  generate(seed, parameters) {
+    const relation = String(parameters.relation ?? "repeat");
+    const root = Math.round(number(parameters.rootMidi, 60));
+    const source = [0, 2, 4, 5];
+    const second = relation === "repeat"
+      ? source
+      : relation === "sequence"
+        ? source.map((value) => value + 2)
+        : [0, 5, 3, 1];
+    return score({
+      id: deterministicId("phrase-structure", seed),
+      title: "Phrase structure",
+      tempo: 80,
+      events: [...source, ...second].map((offset, index) => noteEvent(`phrase-note-${index + 1}`, root + offset, "quarter"))
+    });
+  }
+};
+
 export const errorDetectionGenerator: MusicQuestionGenerator = {
   id: "error-detection@2",
   generate(seed, parameters) {
@@ -361,6 +397,7 @@ function score(options: {
   fifths?: number;
   tempo?: number;
   timeSignature?: { beats: number; beatType: number };
+  instrument?: { name: string; midiProgram: number };
 }): FoxChildMusicScore {
   const timeSignature = options.timeSignature ?? { beats: 4, beatType: 4 };
   const measureBeats = timeSignature.beats * 4 / timeSignature.beatType;
@@ -381,7 +418,7 @@ function score(options: {
     parts: [{
       id: "learning-part",
       name: "Learning",
-      instrument: { name: "Piano", midiProgram: 1 },
+      instrument: options.instrument ?? { name: "Piano", midiProgram: 1 },
       clef: options.clef ?? "treble",
       measures: eventsToMeasures(options.events, measureBeats)
     }],

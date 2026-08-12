@@ -171,6 +171,23 @@ function familyBlueprints(): FamilyBlueprint[] {
           hint: "Compare the first note of each phrase, then measure the interval between them."
         };
       }),
+    family("instruments@1", "Instruments", "note-reading", "instrument-display@1", "curriculum-peers@1",
+      { instrument: enumeration("piano", "flute", "clarinet", "trumpet", "horn") },
+      ["instrument-identification"], ["transposing-instruments", "families-of-instruments"],
+      (seed, _difficulty, parameters) => {
+        const instruments = ["piano", "flute", "clarinet", "trumpet", "horn"];
+        const instrument = enumValue(parameters.instrument, instruments, pick(seed, instruments));
+        const transpositions: Record<string, number> = { piano: 0, flute: 0, clarinet: 2, trumpet: 2, horn: 7 };
+        return {
+          correct: instrument,
+          candidates: instruments,
+          prompt: "Which instrument is represented by this score part?",
+          generatorParameters: { instrument, transposition: transpositions[instrument] },
+          optionLabels: { clarinet: "Clarinet in B♭", trumpet: "Trumpet in B♭", horn: "Horn in F" },
+          explanation: `${instrument} is the instrument represented; its written part uses the displayed transposition where applicable.`,
+          hint: "Use the instrument label and check whether the written pitch sounds at concert pitch."
+        };
+      }),
     family("key-signatures@2", "Key signatures", "key-signatures", "key-signature-display@1", "common-confusions@1",
       { tonic: enumeration("C", "G", "D", "A", "F", "Bb", "Eb") },
       ["major-key-signature"], ["sharp-keys", "flat-keys"],
@@ -486,6 +503,22 @@ function familyBlueprints(): FamilyBlueprint[] {
           audioOnly: true,
           explanation: `The melody has a ${contour} contour.`,
           hint: "Track whether each new note moves mostly up, mostly down, or changes direction."
+        };
+      }),
+    family("phrase-structure@1", "Phrase structure", "melody-dictation", "phrase-structure-display@1", "curriculum-peers@1",
+      { relation: enumeration("repeat", "sequence", "contrast") },
+      ["phrase-structure"], ["repeat-sequence", "phrase-contrast"],
+      (seed, _difficulty, parameters) => {
+        const relations = ["repeat", "sequence", "contrast"];
+        const relation = enumValue(parameters.relation, relations, pick(seed, relations));
+        return {
+          correct: relation,
+          candidates: relations,
+          prompt: "How are the two phrases related?",
+          generatorParameters: { relation, rootMidi: 60 },
+          optionLabels: { repeat: "Repeated", sequence: "Sequential", contrast: "Contrasting" },
+          explanation: `The second phrase is ${relation === "repeat" ? "a repeat" : `a ${relation}`}.`,
+          hint: "Compare the contour and interval pattern of the second phrase with the first."
         };
       }),
     family("error-detection@2", "Error detection", "error-detection", "error-detection@2", "near-neighbour@1",
