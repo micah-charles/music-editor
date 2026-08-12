@@ -51,6 +51,7 @@ export function createDefaultMusicGeneratorRegistry(): MusicGeneratorRegistry {
     melodyDictationGenerator,
     phraseStructureGenerator,
     melodyCompletionGenerator,
+    auralFeaturesGenerator,
     errorDetectionGenerator
   ].forEach((generator) => registry.register(generator));
   return registry;
@@ -383,6 +384,28 @@ export const melodyCompletionGenerator: MusicQuestionGenerator = {
       title: "Melodic completion",
       tempo: 76,
       events: [...motif.map((offset, index) => noteEvent(`completion-note-${index + 1}`, root + offset, "quarter")), noteEvent("completion-final", completion, "whole")]
+    });
+  }
+};
+
+export const auralFeaturesGenerator: MusicQuestionGenerator = {
+  id: "aural-features-display@1",
+  generate(seed, parameters) {
+    const feature = String(parameters.feature ?? "monophonic");
+    const instrumentName = String(parameters.instrument ?? "Piano");
+    const root = 60;
+    const events: MusicEvent[] = feature === "homophonic"
+      ? [chordEvent("feature-chord-1", root, [0, 4, 7]), chordEvent("feature-chord-2", root + 5, [0, 3, 7])]
+      : feature === "polyphonic"
+        ? [noteEvent("feature-upper-1", root + 12, "whole"), noteEvent("feature-lower-1", root, "whole"), noteEvent("feature-upper-2", root + 14, "whole"), noteEvent("feature-lower-2", root + 2, "whole")]
+        : [0, 2, 4, 5].map((offset, index) => noteEvent(`feature-note-${index + 1}`, root + offset, "quarter"));
+    return score({
+      id: deterministicId("aural-features", seed),
+      title: `${feature} texture example`,
+      tempo: number(parameters.bpm, 84),
+      timeSignature: parameters.meter === "6/8" ? { beats: 6, beatType: 8 } : { beats: 4, beatType: 4 },
+      instrument: { name: instrumentName, midiProgram: instrumentName === "Piano" ? 1 : 73 },
+      events
     });
   }
 };

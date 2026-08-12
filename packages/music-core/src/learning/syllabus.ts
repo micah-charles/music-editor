@@ -127,7 +127,7 @@ export function createDefaultSyllabusMatrix(): SyllabusMatrix {
       { id: "aural-listening", title: "Aural & listening", skills: [
         generated("aural.intervals", "Interval ear training", "aural-listening", "Identify melodic intervals from generated audio.", ["ear-training"], ["ear-training@2"], ["exact-identifier@1"]),
         generated("aural.chords", "Chord ear training", "aural-listening", "Identify chord qualities from generated audio.", ["ear-training"], ["chords@2"], ["exact-identifier@1"]),
-        planned("aural.features", "Musical features and instrumentation", "aural-listening", "Identify texture, sonority, metre, form and instrumentation in an excerpt.", ["ear-training"], ["rubric@1"])
+        generated("aural.features", "Musical features and instrumentation", "aural-listening", "Identify texture, sonority, metre, form and instrumentation in an excerpt.", ["ear-training"], ["aural-features@1"], ["exact-identifier@1"])
       ]},
       { id: "musical-analysis", title: "Musical analysis & context", skills: [
         planned("analysis.form-texture", "Form and texture", "musical-analysis", "Analyse formal structure and texture in a musical example.", ["error-detection"], ["rubric@1"]),

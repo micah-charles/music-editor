@@ -539,6 +539,25 @@ function familyBlueprints(): FamilyBlueprint[] {
           hint: "Sing the phrase internally and choose the pitch that gives the strongest sense of resolution."
         };
       }),
+    family("aural-features@1", "Aural features", "ear-training", "aural-features-display@1", "curriculum-peers@1",
+      { feature: enumeration("monophonic", "homophonic", "polyphonic"), instrument: enumeration("Piano", "Organ", "Strings"), meter: enumeration("4/4", "6/8") },
+      ["aural-features"], ["texture", "metre-and-instrumentation"],
+      (seed, _difficulty, parameters) => {
+        const features = ["monophonic", "homophonic", "polyphonic"];
+        const feature = enumValue(parameters.feature, features, pick(seed, features));
+        const instruments = ["Piano", "Organ", "Strings"];
+        const instrument = enumValue(parameters.instrument, instruments, pick(`${seed}:instrument`, instruments));
+        const meter = enumValue(parameters.meter, ["4/4", "6/8"], "4/4");
+        return {
+          correct: feature,
+          candidates: features,
+          prompt: "Which texture best describes this excerpt?",
+          generatorParameters: { feature, instrument, meter, bpm: meter === "6/8" ? 96 : 84 },
+          audioOnly: true,
+          explanation: `The excerpt is ${feature}, performed with ${instrument.toLowerCase()} sonority in ${meter}.`,
+          hint: "Listen for one line, chordal accompaniment, or multiple independent lines."
+        };
+      }),
     family("error-detection@2", "Error detection", "error-detection", "error-detection@2", "near-neighbour@1",
       { errorIndex: integer(0, 3), errorSemitones: enumeration(1, -1) },
       ["notation-error-position"], ["pitch-error", "scale-error"],
