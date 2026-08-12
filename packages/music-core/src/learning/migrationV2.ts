@@ -74,6 +74,11 @@ function migrateAuthoredItem(
   const conceptId = typeof item.metadata?.conceptId === "string"
     ? item.metadata.conceptId
     : skillIds[0] ?? `${domain}.authored.${item.id}`;
+  const metadata = structuredClone(item.metadata ?? {}) as Record<string, unknown>;
+  const curriculumLevels = isRecord(metadata.curriculumLevels) ? metadata.curriculumLevels : undefined;
+  if (curriculumLevels && Array.isArray(curriculumLevels.abrsm) && !curriculumLevels.trinity) {
+    metadata.curriculumLevels = { ...curriculumLevels, trinity: [...curriculumLevels.abrsm] };
+  }
   return {
     ...structuredClone(item),
     id: `${set.id}/${item.id}`,
@@ -82,7 +87,7 @@ function migrateAuthoredItem(
       id: `${set.id}/${item.id}/${stimulus.id}`
     })),
     metadata: {
-      ...structuredClone(item.metadata ?? {}),
+      ...metadata,
       adaptive: true,
       sourceQuestionSetId: set.id,
       sourceQuestionSetRevision: set.revision,

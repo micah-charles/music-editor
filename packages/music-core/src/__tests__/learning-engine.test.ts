@@ -336,8 +336,12 @@ describe("FCMLIF learning engine", () => {
     const advanced = adaptiveRuntime.start(activity, { mastery: [], recentConceptIds: [], recentInteractionKinds: [], sessionHistory: [] }, {
       curriculumId: "abrsm", level: "Grade 8", domains: ["error-detection"], questionCount: 1
     }, "authored-grade-filter-advanced");
+    const trinityAdvanced = adaptiveRuntime.start(activity, { mastery: [], recentConceptIds: [], recentInteractionKinds: [], sessionHistory: [] }, {
+      curriculumId: "trinity", level: "Grade 8", domains: ["error-detection"], questionCount: 1
+    }, "authored-grade-filter-trinity");
     expect(foundation.questions[0]?.source).toBe("generated");
     expect(advanced.questions[0]?.source).toBe("authored");
+    expect(trinityAdvanced.questions[0]?.source).toBe("authored");
   });
 
   it("calculates resumable progress and category filtering for the catalogue", () => {
