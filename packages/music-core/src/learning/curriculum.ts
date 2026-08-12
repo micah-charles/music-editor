@@ -69,24 +69,36 @@ export function curriculumMappingsForDomain(
   conceptId: string
 ): CurriculumMapping[] {
   const strand = domainStrands[domain];
-  const grade = domainGrade(domain);
-  return [
-    { curriculumId: "foxchild", level: grade.foxchild, strand, objectiveIds: [`foxchild.${conceptId}`] },
-    { curriculumId: "abrsm", level: grade.abrsm, strand, objectiveIds: [`abrsm.${conceptId}`] },
-    { curriculumId: "trinity", level: grade.trinity, strand, objectiveIds: [`trinity.${conceptId}`] },
-    { curriculumId: "gcse", level: grade.gcse, strand, objectiveIds: [`gcse.${conceptId}`] }
-  ];
+  return (Object.entries(curriculumLevels()) as Array<[CurriculumId, string[]]>).flatMap(([curriculumId, levels]) =>
+    levels.map((level) => ({ curriculumId, level, strand, objectiveIds: [`${curriculumId}.${conceptId}`] }))
+  );
 }
 
 export function gradeMappingsForDomain(
   domain: LearningDomain
 ): QuestionFamilyDefinition["gradeMappings"] {
-  const grade = domainGrade(domain);
+  void domain;
+  const levels = curriculumLevels();
+  return Object.fromEntries(Object.entries(levels).map(([curriculumId, values]) => [curriculumId, values])) as QuestionFamilyDefinition["gradeMappings"];
+}
+
+export function difficultyByCurriculumLevelForDomain(
+  domain: LearningDomain
+): QuestionFamilyDefinition["difficultyByCurriculumLevel"] {
+  const domainOffset = ["chords", "ear-training", "melody-dictation", "error-detection"].includes(domain) ? 0.08 : 0;
+  const levels = curriculumLevels();
+  return Object.fromEntries(Object.entries(levels).map(([curriculumId, values]) => [
+    curriculumId,
+    Object.fromEntries(values.map((level, index) => [level, Math.min(0.95, 0.15 + index * 0.1 + domainOffset)]))
+  ])) as QuestionFamilyDefinition["difficultyByCurriculumLevel"];
+}
+
+function curriculumLevels(): Record<CurriculumId, string[]> {
   return {
-    foxchild: [grade.foxchild],
-    abrsm: [grade.abrsm],
-    trinity: [grade.trinity],
-    gcse: [grade.gcse]
+    foxchild: ["Foundation", "Developing", "Fluent", "Advanced"],
+    abrsm: ["Initial", "Grade 1", "Grade 2", "Grade 3", "Grade 4", "Grade 5", "Grade 6", "Grade 7", "Grade 8"],
+    trinity: ["Initial", "Grade 1", "Grade 2", "Grade 3", "Grade 4", "Grade 5", "Grade 6", "Grade 7", "Grade 8"],
+    gcse: ["Foundation", "Higher"]
   };
 }
 

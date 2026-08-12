@@ -66,6 +66,7 @@ export interface QuestionFamilyDefinition {
   distractorStrategyId: string;
   curriculum: CurriculumMapping[];
   gradeMappings: Partial<Record<CurriculumId, string[]>>;
+  difficultyByCurriculumLevel: Partial<Record<CurriculumId, Record<string, number>>>;
 }
 
 export interface GeneratorConfiguration {

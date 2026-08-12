@@ -59,6 +59,21 @@ describe("adaptive learning v2", () => {
     });
   });
 
+  it("makes every family selectable at ABRSM Grade 8 with a higher target difficulty", () => {
+    const activity = createDefaultLearningActivity();
+    activity.curriculumConstraints.curricula = ["abrsm"];
+    activity.curriculumConstraints.levels = ["Grade 8"];
+    const session = new AdaptiveLearningRuntime(activity).start(activity, emptyLearner, {
+      curriculumId: "abrsm",
+      level: "Grade 8",
+      questionCount: 6
+    }, "abrsm-grade-8", new Date("2026-08-12T10:00:00.000Z"));
+    expect(session.questions).toHaveLength(6);
+    expect(session.questions.every((question) => question.gradeMappings.abrsm?.includes("Grade 8"))).toBe(true);
+    const families = createDefaultQuestionFamilyRegistry().list();
+    expect(families.every((family) => (family.difficultyByCurriculumLevel.abrsm?.["Grade 8"] ?? 0) >= 0.8)).toBe(true);
+  });
+
   it("generates deterministic identity, canonical AST, answers, and distractors for every family", async () => {
     const engine = new QuestionFamilyEngine();
     for (const familyId of engine.families.ids()) {

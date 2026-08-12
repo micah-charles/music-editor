@@ -1,6 +1,6 @@
 import { pitchToName, midiToPitch } from "../theory/pitch";
 import { createDefaultMusicGeneratorRegistry } from "./generators";
-import { curriculumMappingsForDomain, gradeMappingsForDomain } from "./curriculum";
+import { curriculumMappingsForDomain, difficultyByCurriculumLevelForDomain, gradeMappingsForDomain } from "./curriculum";
 import { createDefaultDistractorRegistry, type DistractorRegistry } from "./distractors";
 import type {
   GeneratedLearningQuestion,
@@ -647,7 +647,8 @@ function family(
       generatorId,
       distractorStrategyId,
       curriculum: qualifiedConceptIds.flatMap((conceptId) => curriculumMappingsForDomain(domain, conceptId)),
-      gradeMappings: gradeMappingsForDomain(domain)
+      gradeMappings: gradeMappingsForDomain(domain),
+      difficultyByCurriculumLevel: difficultyByCurriculumLevelForDomain(domain)
     },
     build
   };

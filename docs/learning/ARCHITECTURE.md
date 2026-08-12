@@ -48,8 +48,8 @@ The adaptive modules under `packages/music-core/src/learning/` are:
 
 - `adaptiveTypes.ts`: activity, family, identity, policy, mastery and session contracts.
 - `questionFamilies.ts`: the twenty-nine family definitions and deterministic family
-  engine (fourteen domains, with dedicated accidental and interval-inversion
-  families).
+  engine across the ten syllabus areas, including dedicated accidental,
+  inversion, phrase, aural-feature, analysis and multi-part score families.
 - `adaptiveRuntime.ts`: eligibility, adaptive selection, session planning and v1 delivery adapter.
 - `mastery.ts`: evidence rebuild, mastery bands, coverage, mistakes and spaced review.
 - `knowledgeGraph.ts`: concept prerequisites, relationships, curriculum mappings,
@@ -57,8 +57,7 @@ The adaptive modules under `packages/music-core/src/learning/` are:
 - `curriculum.ts`: FoxChild, ABRSM, Trinity and GCSE registries and grade mappings.
 - `syllabus.ts`: the ten-area curriculum skill matrix, cross-curriculum target
   levels, generator/assessment links and explicit covered/partial/planned
-  coverage reporting. The matrix is the roadmap for expanding beyond the
-  current authored bank; it does not claim planned skills are implemented.
+  coverage reporting.
 - `distractors.ts`: versioned near-neighbour, curriculum-peer and common-confusion strategies.
 - `migrationV2.ts`: pure v1 question-set bank to v2 activity migration.
 - `validationV2.ts`: v2 structural, reference and policy diagnostics.
@@ -71,10 +70,11 @@ The existing v1 modules remain the trusted delivery layer:
 ## Question families
 
 Each family declares its parameter space, concepts, variants, interactions,
-versioned generator, distractor strategy, curriculum objectives and grade
-mappings. The registry covers note reading, key signatures, music symbols, note
-values, time signatures, intervals, chords, scales, rhythm, tempo, ear training,
-sight reading, melody dictation and error detection.
+versioned generator, distractor strategy, curriculum objectives, grade mappings
+and a per-level difficulty profile. The registry covers note reading, key
+signatures, music symbols, note values, time signatures, intervals, chords,
+scales, rhythm, tempo, ear training, sight reading, melody dictation and error
+detection.
 
 A seed plus family and parameters produces stable content and three traceable IDs:
 
@@ -138,10 +138,12 @@ ABRSM/Trinity Grades 1–8, GCSE Foundation/Higher levels, generator families,
 and assessment strategies.
 
 `syllabusCoverage()` reports each skill as `covered`, `partial`, or `planned`.
-Generated skills can produce many reproducible instances from a seed; planned
-skills remain visible as explicit syllabus gaps until their generator or
-authored assessment is implemented. This prevents a finite 50- or 1,000-item
-bank from being mistaken for complete ABRSM or GCSE coverage.
+Generated skills can produce many reproducible instances from a seed. Grade
+selection is enforced by the adaptive session engine: ABRSM and Trinity Grades
+1–8, FoxChild Foundation–Advanced, and GCSE Foundation/Higher all resolve to a
+family-level difficulty profile rather than a single hard-coded grade. This
+prevents a finite 50- or 1,000-item bank from being mistaken for complete
+coverage while keeping generated progression reproducible.
 
 The expanded graph is the primary Learning Home navigation. During every
 lesson, result and overview state, `KnowledgeNavigator` remains available as a

@@ -69,7 +69,7 @@ export class AdaptiveSessionEngine {
         const question = this.questionEngine.generate(
           family.id,
           `${seed}:${family.id}:${bucket}:${index}`,
-          bucketDifficulty(bucket),
+          levelDifficulty(family, preferences, bucket),
           familyConfiguration?.parameters
         );
         question.bucket = bucket;
@@ -380,4 +380,16 @@ function bucketDifficulty(bucket: AdaptiveQuestionBucket): number {
   if (bucket === "developing") return 0.6;
   if (bucket === "review") return 0.45;
   return 0.3;
+}
+
+function levelDifficulty(
+  family: QuestionFamilyDefinition,
+  preferences: AdaptiveSessionPreferences,
+  bucket: AdaptiveQuestionBucket
+): number {
+  const configured = preferences.level
+    ? family.difficultyByCurriculumLevel[preferences.curriculumId]?.[preferences.level]
+    : undefined;
+  if (configured === undefined) return bucketDifficulty(bucket);
+  return Math.max(0.05, Math.min(0.98, configured + (bucketDifficulty(bucket) - 0.45) * 0.25));
 }

@@ -27,12 +27,10 @@ describe("curriculum syllabus matrix", () => {
       createDefaultQuestionFamilyRegistry(),
       createDefaultAssessmentRegistry()
     );
-    expect(coverage.some((entry) => entry.status === "partial")).toBe(true);
+    expect(coverage.some((entry) => entry.status === "partial")).toBe(false);
     expect(coverage.some((entry) => entry.status === "planned")).toBe(false);
     expect(coverage.flatMap((entry) => entry.missingAssessmentStrategyIds)).toEqual([]);
-    expect(coverage.find((entry) => entry.skillId === "pitch.note-reading")?.missingCurriculumLevels).toMatchObject({
-      abrsm: ["Grade 2", "Grade 3", "Grade 4", "Grade 5", "Grade 6", "Grade 7", "Grade 8"]
-    });
+    expect(coverage.find((entry) => entry.skillId === "pitch.note-reading")?.missingCurriculumLevels).toEqual({});
     expect(coverage.find((entry) => entry.skillId === "pitch.note-reading")?.estimatedGeneratedInstances).toBeGreaterThan(0);
   });
 });

@@ -20,7 +20,7 @@ describe("learning knowledge graph", () => {
     expect(new Set(concepts.map((entry) => entry.domain)).size).toBe(14);
     concepts.forEach((entry) => {
       expect(entry.relatedConcepts.length).toBeGreaterThan(0);
-      expect(entry.curriculum.map((mapping) => mapping.curriculumId)).toEqual([
+      expect([...new Set(entry.curriculum.map((mapping) => mapping.curriculumId))]).toEqual([
         "foxchild", "abrsm", "trinity", "gcse"
       ]);
       expect(entry.abrsmGrades.length).toBeGreaterThan(0);
