@@ -60,4 +60,3 @@ export interface ProjectRevision {
 }
 
 export type ProjectSaveStatus = "saved" | "saving" | "unsaved" | "failed" | "recovered";
-
