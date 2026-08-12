@@ -46,6 +46,7 @@ export interface SyllabusCoverageEntry {
   generatorFamilyIds: string[];
   missingGeneratorFamilyIds: string[];
   missingAssessmentStrategyIds: string[];
+  missingCurriculumLevels: Partial<Record<CurriculumId, string[]>>;
   curriculumLevels: Partial<Record<CurriculumId, string[]>>;
   status: "covered" | "partial" | "planned";
 }
@@ -147,9 +148,26 @@ export function syllabusCoverage(
   return syllabusSkills(matrix).map((skill) => {
     const missingGeneratorFamilyIds = skill.generatorFamilyIds.filter((id) => !families.ids().includes(id));
     const missingAssessmentStrategyIds = skill.assessmentStrategyIds.filter((id) => !assessments.has(id));
+    const mappedLevels: Partial<Record<CurriculumId, Set<string>>> = {};
+    skill.generatorFamilyIds
+      .filter((id) => families.ids().includes(id))
+      .map((id) => families.resolve(id))
+      .flatMap((family) => family.curriculum)
+      .forEach((mapping) => {
+        const levels = mappedLevels[mapping.curriculumId] ?? new Set<string>();
+        levels.add(mapping.level);
+        mappedLevels[mapping.curriculumId] = levels;
+      });
+    const missingCurriculumLevels: Partial<Record<CurriculumId, string[]>> = {};
+    (Object.keys(skill.curriculumLevels) as CurriculumId[]).forEach((curriculumId) => {
+      const required = skill.curriculumLevels[curriculumId] ?? [];
+      const mapped = mappedLevels[curriculumId] ?? new Set<string>();
+      const missing = required.filter((level) => !mapped.has(level));
+      if (missing.length) missingCurriculumLevels[curriculumId] = missing;
+    });
     const status = skill.coverageMode === "planned"
       ? "planned"
-      : missingGeneratorFamilyIds.length || missingAssessmentStrategyIds.length
+      : missingGeneratorFamilyIds.length || missingAssessmentStrategyIds.length || Object.keys(missingCurriculumLevels).length
         ? "partial"
         : "covered";
     return {
@@ -159,6 +177,7 @@ export function syllabusCoverage(
       generatorFamilyIds: skill.generatorFamilyIds,
       missingGeneratorFamilyIds,
       missingAssessmentStrategyIds,
+      missingCurriculumLevels,
       curriculumLevels: skill.curriculumLevels,
       status
     };
