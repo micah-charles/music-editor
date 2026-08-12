@@ -46,8 +46,8 @@ optional input—not a backend dependency.
 The first production student renderers are multiple choice, written text,
 numeric entry, ordering, matching, rhythm tapping, notation entry, sight-reading performance, audio recording, composition, score correction, and single-note piano/MIDI. Audio and notation
 stimuli reuse the existing player and score viewer. The domain model and assessment
-registry also retain notation-entry, rhythm, recording, sight-reading,
-composition and composite response contracts for later specialised renderers.
+registry also retain generic drag/drop, hotspot and composite response contracts
+for later specialised renderers.
 
 ## External work deliberately not simulated
 
