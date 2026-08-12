@@ -158,7 +158,7 @@
           "id": "context-09",
           "type": "selected-response",
           "version": 1,
-          "metadata": { "skillIds": ["musical-analysis.form-texture"], "conceptId": "musical-analysis.form-texture.aural-form", "curriculumLevels": { "abrsm": ["Grade 7", "Grade 8"], "gcse": ["Higher"] }, "difficulty": 0.91, "tags": ["aural", "rondo", "audio"] },
+          "metadata": { "skillIds": ["musical-analysis.form-texture"], "conceptId": "musical-analysis.form-texture.aural-form", "linkedGroupId": "gcse-listening-01", "curriculumLevels": { "abrsm": ["Grade 7", "Grade 8"], "gcse": ["Higher"] }, "difficulty": 0.91, "tags": ["aural", "rondo", "audio"] },
           "variables": {},
           "stimulus": [
             { "id": "context-09-score", "kind": "notation", "source": { "mode": "generator", "generatorId": "analysis-example-display@1", "seed": "context-09", "parameters": { "analysisType": "form", "answer": "rondo" } }, "visibility": "hidden", "playback": { "enabled": true }, "accessibility": { "description": { "en-GB": "A generated musical excerpt for aural form analysis." } } },
@@ -186,6 +186,42 @@
           "feedback": { "mode": "after-submit", "correct": { "message": { "en-GB": "Correct. That is a valid harmonic observation supported by the evidence." } }, "incorrect": { "message": { "en-GB": "Name a specific feature such as chromatic bass or suspension." } }, "showCorrectAnswer": "after-final-attempt" },
           "hints": [{ "id": "context-10-hint", "content": { "en-GB": "Look for the named harmonic devices in the description." } }],
           "explanation": { "content": { "en-GB": "A high-level written response should identify a precise, observable feature rather than make an unsupported stylistic claim." } }
+        },
+        {
+          "id": "context-11",
+          "type": "selected-response",
+          "version": 1,
+          "metadata": { "skillIds": ["musical-analysis.form-texture"], "conceptId": "musical-analysis.form-texture.aural-texture", "linkedGroupId": "gcse-listening-01", "curriculumLevels": { "gcse": ["Higher"], "abrsm": ["Grade 7", "Grade 8"] }, "difficulty": 0.9, "tags": ["aural", "texture", "linked-listening"] },
+          "variables": {},
+          "stimulus": [
+            { "id": "context-11-score", "kind": "notation", "source": { "mode": "generator", "generatorId": "analysis-example-display@1", "seed": "context-09", "parameters": { "analysisType": "form", "answer": "rondo" } }, "visibility": "hidden", "playback": { "enabled": true }, "accessibility": { "description": { "en-GB": "The same generated excerpt used in the linked form question." } } },
+            { "id": "context-11-audio", "kind": "audio", "source": { "mode": "render-score", "notationStimulusId": "context-11-score", "instrument": { "soundId": "gm-acoustic-grand-piano" } }, "playback": { "enabled": true, "maxReplays": 4 }, "accessibility": { "description": { "en-GB": "Replay the shared excerpt." } } }
+          ],
+          "prompt": { "content": { "en-GB": "Using the same excerpt, which texture is most likely in the contrasting episode?" }, "format": "plain-text" },
+          "interaction": { "kind": "choice", "responseId": "context-11-response", "cardinality": "single", "display": "buttons", "shuffleOptions": false, "options": [{ "id": "answer-homophonic", "content": { "en-GB": "Homophonic" } }, { "id": "answer-monophonic", "content": { "en-GB": "Monophonic" } }, { "id": "answer-unison", "content": { "en-GB": "Unison" } }, { "id": "answer-solo", "content": { "en-GB": "Solo line only" } }] },
+          "response": { "id": "context-11-response", "baseType": "identifier", "cardinality": "single", "correct": { "value": "answer-homophonic" } },
+          "assessment": { "strategy": "exact-identifier@1", "maximumScore": 1, "passingScore": 1, "attemptPolicy": { "maximumAttempts": 2, "scorePolicy": "best" } },
+          "feedback": { "mode": "after-submit", "correct": { "message": { "en-GB": "Correct. The accompaniment and melody combine into a homophonic texture." } }, "incorrect": { "message": { "en-GB": "Listen for a dominant melody supported by chordal accompaniment." } }, "showCorrectAnswer": "after-final-attempt" },
+          "hints": [{ "id": "context-11-hint", "content": { "en-GB": "Separate the foreground melody from the supporting harmony." } }],
+          "explanation": { "content": { "en-GB": "Linked listening questions reuse the same excerpt while moving from formal observation to textural evidence." } }
+        },
+        {
+          "id": "context-12",
+          "type": "selected-response",
+          "version": 1,
+          "metadata": { "skillIds": ["musical-analysis.context"], "conceptId": "musical-analysis.context.aural-cadence", "linkedGroupId": "gcse-listening-01", "curriculumLevels": { "gcse": ["Higher"], "abrsm": ["Grade 7", "Grade 8"] }, "difficulty": 0.93, "tags": ["aural", "cadence", "linked-listening"] },
+          "variables": {},
+          "stimulus": [
+            { "id": "context-12-score", "kind": "notation", "source": { "mode": "generator", "generatorId": "analysis-example-display@1", "seed": "context-09", "parameters": { "analysisType": "form", "answer": "rondo" } }, "visibility": "hidden", "playback": { "enabled": true }, "accessibility": { "description": { "en-GB": "The same generated excerpt used in the linked form question." } } },
+            { "id": "context-12-audio", "kind": "audio", "source": { "mode": "render-score", "notationStimulusId": "context-12-score", "instrument": { "soundId": "gm-acoustic-grand-piano" } }, "playback": { "enabled": true, "maxReplays": 4 }, "accessibility": { "description": { "en-GB": "Replay the shared excerpt." } } }
+          ],
+          "prompt": { "content": { "en-GB": "Which evidence would best support a cadential reading of the final phrase?" }, "format": "plain-text" },
+          "interaction": { "kind": "choice", "responseId": "context-12-response", "cardinality": "single", "display": "buttons", "shuffleOptions": false, "options": [{ "id": "answer-dominant-tonic", "content": { "en-GB": "A dominant-to-tonic resolution" } }, { "id": "answer-steady-pedal", "content": { "en-GB": "A repeated ostinato alone" } }, { "id": "answer-register-change", "content": { "en-GB": "A change of register alone" } }, { "id": "answer-louder-dynamic", "content": { "en-GB": "A louder dynamic alone" } }] },
+          "response": { "id": "context-12-response", "baseType": "identifier", "cardinality": "single", "correct": { "value": "answer-dominant-tonic" } },
+          "assessment": { "strategy": "exact-identifier@1", "maximumScore": 1, "passingScore": 1, "attemptPolicy": { "maximumAttempts": 2, "scorePolicy": "best" } },
+          "feedback": { "mode": "after-submit", "correct": { "message": { "en-GB": "Correct. Harmonic arrival is stronger evidence of cadence than dynamics or register alone." } }, "incorrect": { "message": { "en-GB": "Listen for a functional harmonic arrival, not only a change in sound colour." } }, "showCorrectAnswer": "after-final-attempt" },
+          "hints": [{ "id": "context-12-hint", "content": { "en-GB": "Cadence evidence comes from harmonic function and resolution." } }],
+          "explanation": { "content": { "en-GB": "This linked question asks for a specific analytical claim supported by the shared recording." } }
         }
       ]
     }

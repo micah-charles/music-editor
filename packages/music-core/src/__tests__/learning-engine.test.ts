@@ -316,7 +316,7 @@ describe("FCMLIF learning engine", () => {
       readFileSync(new URL(`question-sets/${file}`, publicRoot), "utf8")
     ) as QuestionSet));
     expect(packs).toHaveLength(1);
-    expect(packs.flatMap(questionItems)).toHaveLength(10);
+    expect(packs.flatMap(questionItems)).toHaveLength(12);
     expect(packs[0].metadata.tags).toEqual(expect.arrayContaining(["abrsm-grade-8", "gcse"]));
     expect(questionItems(packs[0]).some((item) => item.metadata?.curriculumLevels &&
       (item.metadata.curriculumLevels as { abrsm?: string[] }).abrsm?.includes("Grade 8"))).toBe(true);
@@ -327,6 +327,7 @@ describe("FCMLIF learning engine", () => {
     const activity = migrateQuestionSetsToActivity(packs);
     expect(activity.authoredItems.every((item) => item.metadata?.domain === "error-detection")).toBe(true);
     expect(activity.authoredItems.some((item) => item.metadata?.conceptId === "musical-analysis.context.modulation")).toBe(true);
+    expect(activity.authoredItems.filter((item) => item.metadata?.linkedGroupId === "gcse-listening-01")).toHaveLength(3);
     activity.sessionPolicy.authoredItemShare = 1;
     const adaptiveRuntime = new AdaptiveLearningRuntime(activity);
     const foundation = adaptiveRuntime.start(activity, { mastery: [], recentConceptIds: [], recentInteractionKinds: [], sessionHistory: [] }, {
