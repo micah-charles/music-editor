@@ -1,0 +1,821 @@
+{
+  "format": "foxchild.music-learning.question-set",
+  "schemaVersion": "1.0.0",
+  "id": "set-interval-ear-training-01",
+  "revision": 1,
+  "status": "published",
+  "metadata": {
+    "title": {
+      "en-GB": "Interval Ear Training"
+    },
+    "description": {
+      "en-GB": "Identify five ascending melodic intervals by ear."
+    },
+    "language": "en-GB",
+    "authors": [
+      "FoxChild Music Learning Generator"
+    ],
+    "subject": "Music",
+    "domain": "ear-training",
+    "skillIds": [
+      "ear.interval.identify"
+    ],
+    "difficulty": "mixed",
+    "tags": []
+  },
+  "defaults": {
+    "locale": "en-GB",
+    "attemptPolicy": {
+      "maximumAttempts": 3,
+      "scorePolicy": "best"
+    }
+  },
+  "assets": [],
+  "variables": {},
+  "delivery": {
+    "mode": "practice",
+    "navigation": "linear",
+    "showProgress": true
+  },
+  "sections": [
+    {
+      "id": "section-1",
+      "title": {
+        "en-GB": "Interval Ear Training"
+      },
+      "delivery": {},
+      "items": [
+        {
+          "id": "interval-ear-01",
+          "type": "selected-response",
+          "version": 1,
+          "metadata": {
+            "skillIds": [
+              "ear.interval.identify"
+            ],
+            "difficulty": 1,
+            "tags": [
+              "ear-training",
+              "interval"
+            ]
+          },
+          "variables": {},
+          "stimulus": [
+            {
+              "id": "hidden-score",
+              "kind": "notation",
+              "source": {
+                "mode": "generator",
+                "generatorId": "interval-display@1",
+                "seed": "interval-2-001",
+                "parameters": {
+                  "rootMidi": 60,
+                  "semitones": 2,
+                  "direction": "ascending",
+                  "duration": "1/4"
+                }
+              },
+              "presentation": {
+                "renderer": "foxchild-score",
+                "layout": "single-system",
+                "scale": 1.4,
+                "showCursor": false,
+                "editable": false
+              },
+              "playback": {
+                "enabled": true
+              },
+              "accessibility": {
+                "description": {
+                  "en-GB": "Hidden notation for an ascending Major second."
+                }
+              },
+              "visibility": "hidden"
+            },
+            {
+              "id": "audio-playback",
+              "kind": "audio",
+              "source": {
+                "mode": "render-score",
+                "notationStimulusId": "hidden-score",
+                "instrument": {
+                  "soundId": "gm-acoustic-grand-piano"
+                }
+              },
+              "playback": {
+                "enabled": true,
+                "maxReplays": 4,
+                "tempo": {
+                  "mode": "override",
+                  "bpm": 84
+                }
+              }
+            }
+          ],
+          "prompt": {
+            "content": {
+              "en-GB": "Which ascending interval do you hear?"
+            },
+            "format": "plain-text"
+          },
+          "interaction": {
+            "kind": "choice",
+            "responseId": "response-main",
+            "cardinality": "single",
+            "display": "buttons",
+            "shuffleOptions": true,
+            "optionOrderSeed": "interval-ear-01-options",
+            "options": [
+              {
+                "id": "m2",
+                "content": {
+                  "en-GB": "Minor second"
+                }
+              },
+              {
+                "id": "M2",
+                "content": {
+                  "en-GB": "Major second"
+                }
+              },
+              {
+                "id": "m3",
+                "content": {
+                  "en-GB": "Minor third"
+                }
+              },
+              {
+                "id": "M3",
+                "content": {
+                  "en-GB": "Major third"
+                }
+              }
+            ]
+          },
+          "response": {
+            "id": "response-main",
+            "baseType": "identifier",
+            "cardinality": "single",
+            "correct": {
+              "value": "M2"
+            }
+          },
+          "assessment": {
+            "strategy": "exact-identifier@1",
+            "maximumScore": 1,
+            "passingScore": 1,
+            "attemptPolicy": {
+              "maximumAttempts": 3,
+              "scorePolicy": "best"
+            }
+          },
+          "feedback": {
+            "mode": "after-submit",
+            "correct": {
+              "message": {
+                "en-GB": "Correct. The two notes form a Major second."
+              }
+            },
+            "incorrect": {
+              "message": {
+                "en-GB": "Not quite. Review the notation or concept and try again."
+              }
+            },
+            "showCorrectAnswer": "after-final-attempt"
+          },
+          "hints": [
+            {
+              "id": "interval-ear-01-hint-1",
+              "content": {
+                "en-GB": "Listen to the distance between the two notes."
+              }
+            }
+          ],
+          "explanation": {
+            "content": {
+              "en-GB": "The two notes form a Major second."
+            }
+          },
+          "delivery": {},
+          "analytics": {}
+        },
+        {
+          "id": "interval-ear-02",
+          "type": "selected-response",
+          "version": 1,
+          "metadata": {
+            "skillIds": [
+              "ear.interval.identify"
+            ],
+            "difficulty": 1,
+            "tags": [
+              "ear-training",
+              "interval"
+            ]
+          },
+          "variables": {},
+          "stimulus": [
+            {
+              "id": "hidden-score",
+              "kind": "notation",
+              "source": {
+                "mode": "generator",
+                "generatorId": "interval-display@1",
+                "seed": "interval-3-001",
+                "parameters": {
+                  "rootMidi": 60,
+                  "semitones": 3,
+                  "direction": "ascending",
+                  "duration": "1/4"
+                }
+              },
+              "presentation": {
+                "renderer": "foxchild-score",
+                "layout": "single-system",
+                "scale": 1.4,
+                "showCursor": false,
+                "editable": false
+              },
+              "playback": {
+                "enabled": true
+              },
+              "accessibility": {
+                "description": {
+                  "en-GB": "Hidden notation for an ascending Minor third."
+                }
+              },
+              "visibility": "hidden"
+            },
+            {
+              "id": "audio-playback",
+              "kind": "audio",
+              "source": {
+                "mode": "render-score",
+                "notationStimulusId": "hidden-score",
+                "instrument": {
+                  "soundId": "gm-acoustic-grand-piano"
+                }
+              },
+              "playback": {
+                "enabled": true,
+                "maxReplays": 4,
+                "tempo": {
+                  "mode": "override",
+                  "bpm": 84
+                }
+              }
+            }
+          ],
+          "prompt": {
+            "content": {
+              "en-GB": "Which ascending interval do you hear?"
+            },
+            "format": "plain-text"
+          },
+          "interaction": {
+            "kind": "choice",
+            "responseId": "response-main",
+            "cardinality": "single",
+            "display": "buttons",
+            "shuffleOptions": true,
+            "optionOrderSeed": "interval-ear-02-options",
+            "options": [
+              {
+                "id": "M2",
+                "content": {
+                  "en-GB": "Major second"
+                }
+              },
+              {
+                "id": "m3",
+                "content": {
+                  "en-GB": "Minor third"
+                }
+              },
+              {
+                "id": "M3",
+                "content": {
+                  "en-GB": "Major third"
+                }
+              },
+              {
+                "id": "P4",
+                "content": {
+                  "en-GB": "Perfect fourth"
+                }
+              }
+            ]
+          },
+          "response": {
+            "id": "response-main",
+            "baseType": "identifier",
+            "cardinality": "single",
+            "correct": {
+              "value": "m3"
+            }
+          },
+          "assessment": {
+            "strategy": "exact-identifier@1",
+            "maximumScore": 1,
+            "passingScore": 1,
+            "attemptPolicy": {
+              "maximumAttempts": 3,
+              "scorePolicy": "best"
+            }
+          },
+          "feedback": {
+            "mode": "after-submit",
+            "correct": {
+              "message": {
+                "en-GB": "Correct. The two notes form a Minor third."
+              }
+            },
+            "incorrect": {
+              "message": {
+                "en-GB": "Not quite. Review the notation or concept and try again."
+              }
+            },
+            "showCorrectAnswer": "after-final-attempt"
+          },
+          "hints": [
+            {
+              "id": "interval-ear-02-hint-1",
+              "content": {
+                "en-GB": "Listen to the distance between the two notes."
+              }
+            }
+          ],
+          "explanation": {
+            "content": {
+              "en-GB": "The two notes form a Minor third."
+            }
+          },
+          "delivery": {},
+          "analytics": {}
+        },
+        {
+          "id": "interval-ear-03",
+          "type": "selected-response",
+          "version": 1,
+          "metadata": {
+            "skillIds": [
+              "ear.interval.identify"
+            ],
+            "difficulty": 1,
+            "tags": [
+              "ear-training",
+              "interval"
+            ]
+          },
+          "variables": {},
+          "stimulus": [
+            {
+              "id": "hidden-score",
+              "kind": "notation",
+              "source": {
+                "mode": "generator",
+                "generatorId": "interval-display@1",
+                "seed": "interval-4-001",
+                "parameters": {
+                  "rootMidi": 60,
+                  "semitones": 4,
+                  "direction": "ascending",
+                  "duration": "1/4"
+                }
+              },
+              "presentation": {
+                "renderer": "foxchild-score",
+                "layout": "single-system",
+                "scale": 1.4,
+                "showCursor": false,
+                "editable": false
+              },
+              "playback": {
+                "enabled": true
+              },
+              "accessibility": {
+                "description": {
+                  "en-GB": "Hidden notation for an ascending Major third."
+                }
+              },
+              "visibility": "hidden"
+            },
+            {
+              "id": "audio-playback",
+              "kind": "audio",
+              "source": {
+                "mode": "render-score",
+                "notationStimulusId": "hidden-score",
+                "instrument": {
+                  "soundId": "gm-acoustic-grand-piano"
+                }
+              },
+              "playback": {
+                "enabled": true,
+                "maxReplays": 4,
+                "tempo": {
+                  "mode": "override",
+                  "bpm": 84
+                }
+              }
+            }
+          ],
+          "prompt": {
+            "content": {
+              "en-GB": "Which ascending interval do you hear?"
+            },
+            "format": "plain-text"
+          },
+          "interaction": {
+            "kind": "choice",
+            "responseId": "response-main",
+            "cardinality": "single",
+            "display": "buttons",
+            "shuffleOptions": true,
+            "optionOrderSeed": "interval-ear-03-options",
+            "options": [
+              {
+                "id": "m3",
+                "content": {
+                  "en-GB": "Minor third"
+                }
+              },
+              {
+                "id": "M3",
+                "content": {
+                  "en-GB": "Major third"
+                }
+              },
+              {
+                "id": "P4",
+                "content": {
+                  "en-GB": "Perfect fourth"
+                }
+              },
+              {
+                "id": "P5",
+                "content": {
+                  "en-GB": "Perfect fifth"
+                }
+              }
+            ]
+          },
+          "response": {
+            "id": "response-main",
+            "baseType": "identifier",
+            "cardinality": "single",
+            "correct": {
+              "value": "M3"
+            }
+          },
+          "assessment": {
+            "strategy": "exact-identifier@1",
+            "maximumScore": 1,
+            "passingScore": 1,
+            "attemptPolicy": {
+              "maximumAttempts": 3,
+              "scorePolicy": "best"
+            }
+          },
+          "feedback": {
+            "mode": "after-submit",
+            "correct": {
+              "message": {
+                "en-GB": "Correct. The two notes form a Major third."
+              }
+            },
+            "incorrect": {
+              "message": {
+                "en-GB": "Not quite. Review the notation or concept and try again."
+              }
+            },
+            "showCorrectAnswer": "after-final-attempt"
+          },
+          "hints": [
+            {
+              "id": "interval-ear-03-hint-1",
+              "content": {
+                "en-GB": "Listen to the distance between the two notes."
+              }
+            }
+          ],
+          "explanation": {
+            "content": {
+              "en-GB": "The two notes form a Major third."
+            }
+          },
+          "delivery": {},
+          "analytics": {}
+        },
+        {
+          "id": "interval-ear-04",
+          "type": "selected-response",
+          "version": 1,
+          "metadata": {
+            "skillIds": [
+              "ear.interval.identify"
+            ],
+            "difficulty": 2,
+            "tags": [
+              "ear-training",
+              "interval"
+            ]
+          },
+          "variables": {},
+          "stimulus": [
+            {
+              "id": "hidden-score",
+              "kind": "notation",
+              "source": {
+                "mode": "generator",
+                "generatorId": "interval-display@1",
+                "seed": "interval-5-001",
+                "parameters": {
+                  "rootMidi": 60,
+                  "semitones": 5,
+                  "direction": "ascending",
+                  "duration": "1/4"
+                }
+              },
+              "presentation": {
+                "renderer": "foxchild-score",
+                "layout": "single-system",
+                "scale": 1.4,
+                "showCursor": false,
+                "editable": false
+              },
+              "playback": {
+                "enabled": true
+              },
+              "accessibility": {
+                "description": {
+                  "en-GB": "Hidden notation for an ascending Perfect fourth."
+                }
+              },
+              "visibility": "hidden"
+            },
+            {
+              "id": "audio-playback",
+              "kind": "audio",
+              "source": {
+                "mode": "render-score",
+                "notationStimulusId": "hidden-score",
+                "instrument": {
+                  "soundId": "gm-acoustic-grand-piano"
+                }
+              },
+              "playback": {
+                "enabled": true,
+                "maxReplays": 4,
+                "tempo": {
+                  "mode": "override",
+                  "bpm": 84
+                }
+              }
+            }
+          ],
+          "prompt": {
+            "content": {
+              "en-GB": "Which ascending interval do you hear?"
+            },
+            "format": "plain-text"
+          },
+          "interaction": {
+            "kind": "choice",
+            "responseId": "response-main",
+            "cardinality": "single",
+            "display": "buttons",
+            "shuffleOptions": true,
+            "optionOrderSeed": "interval-ear-04-options",
+            "options": [
+              {
+                "id": "M3",
+                "content": {
+                  "en-GB": "Major third"
+                }
+              },
+              {
+                "id": "P4",
+                "content": {
+                  "en-GB": "Perfect fourth"
+                }
+              },
+              {
+                "id": "TT",
+                "content": {
+                  "en-GB": "Tritone"
+                }
+              },
+              {
+                "id": "P5",
+                "content": {
+                  "en-GB": "Perfect fifth"
+                }
+              }
+            ]
+          },
+          "response": {
+            "id": "response-main",
+            "baseType": "identifier",
+            "cardinality": "single",
+            "correct": {
+              "value": "P4"
+            }
+          },
+          "assessment": {
+            "strategy": "exact-identifier@1",
+            "maximumScore": 1,
+            "passingScore": 1,
+            "attemptPolicy": {
+              "maximumAttempts": 3,
+              "scorePolicy": "best"
+            }
+          },
+          "feedback": {
+            "mode": "after-submit",
+            "correct": {
+              "message": {
+                "en-GB": "Correct. The two notes form a Perfect fourth."
+              }
+            },
+            "incorrect": {
+              "message": {
+                "en-GB": "Not quite. Review the notation or concept and try again."
+              }
+            },
+            "showCorrectAnswer": "after-final-attempt"
+          },
+          "hints": [
+            {
+              "id": "interval-ear-04-hint-1",
+              "content": {
+                "en-GB": "Listen to the distance between the two notes."
+              }
+            }
+          ],
+          "explanation": {
+            "content": {
+              "en-GB": "The two notes form a Perfect fourth."
+            }
+          },
+          "delivery": {},
+          "analytics": {}
+        },
+        {
+          "id": "interval-ear-05",
+          "type": "selected-response",
+          "version": 1,
+          "metadata": {
+            "skillIds": [
+              "ear.interval.identify"
+            ],
+            "difficulty": 2,
+            "tags": [
+              "ear-training",
+              "interval"
+            ]
+          },
+          "variables": {},
+          "stimulus": [
+            {
+              "id": "hidden-score",
+              "kind": "notation",
+              "source": {
+                "mode": "generator",
+                "generatorId": "interval-display@1",
+                "seed": "interval-7-001",
+                "parameters": {
+                  "rootMidi": 60,
+                  "semitones": 7,
+                  "direction": "ascending",
+                  "duration": "1/4"
+                }
+              },
+              "presentation": {
+                "renderer": "foxchild-score",
+                "layout": "single-system",
+                "scale": 1.4,
+                "showCursor": false,
+                "editable": false
+              },
+              "playback": {
+                "enabled": true
+              },
+              "accessibility": {
+                "description": {
+                  "en-GB": "Hidden notation for an ascending Perfect fifth."
+                }
+              },
+              "visibility": "hidden"
+            },
+            {
+              "id": "audio-playback",
+              "kind": "audio",
+              "source": {
+                "mode": "render-score",
+                "notationStimulusId": "hidden-score",
+                "instrument": {
+                  "soundId": "gm-acoustic-grand-piano"
+                }
+              },
+              "playback": {
+                "enabled": true,
+                "maxReplays": 4,
+                "tempo": {
+                  "mode": "override",
+                  "bpm": 84
+                }
+              }
+            }
+          ],
+          "prompt": {
+            "content": {
+              "en-GB": "Which ascending interval do you hear?"
+            },
+            "format": "plain-text"
+          },
+          "interaction": {
+            "kind": "choice",
+            "responseId": "response-main",
+            "cardinality": "single",
+            "display": "buttons",
+            "shuffleOptions": true,
+            "optionOrderSeed": "interval-ear-05-options",
+            "options": [
+              {
+                "id": "P4",
+                "content": {
+                  "en-GB": "Perfect fourth"
+                }
+              },
+              {
+                "id": "TT",
+                "content": {
+                  "en-GB": "Tritone"
+                }
+              },
+              {
+                "id": "P5",
+                "content": {
+                  "en-GB": "Perfect fifth"
+                }
+              },
+              {
+                "id": "M6",
+                "content": {
+                  "en-GB": "Major sixth"
+                }
+              }
+            ]
+          },
+          "response": {
+            "id": "response-main",
+            "baseType": "identifier",
+            "cardinality": "single",
+            "correct": {
+              "value": "P5"
+            }
+          },
+          "assessment": {
+            "strategy": "exact-identifier@1",
+            "maximumScore": 1,
+            "passingScore": 1,
+            "attemptPolicy": {
+              "maximumAttempts": 3,
+              "scorePolicy": "best"
+            }
+          },
+          "feedback": {
+            "mode": "after-submit",
+            "correct": {
+              "message": {
+                "en-GB": "Correct. The two notes form a Perfect fifth."
+              }
+            },
+            "incorrect": {
+              "message": {
+                "en-GB": "Not quite. Review the notation or concept and try again."
+              }
+            },
+            "showCorrectAnswer": "after-final-attempt"
+          },
+          "hints": [
+            {
+              "id": "interval-ear-05-hint-1",
+              "content": {
+                "en-GB": "Listen to the distance between the two notes."
+              }
+            }
+          ],
+          "explanation": {
+            "content": {
+              "en-GB": "The two notes form a Perfect fifth."
+            }
+          },
+          "delivery": {},
+          "analytics": {}
+        }
+      ]
+    }
+  ]
+}

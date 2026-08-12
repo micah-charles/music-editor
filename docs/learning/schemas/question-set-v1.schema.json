@@ -1,0 +1,155 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://foxchild.example/schemas/music-learning/question-set-v1.schema.json",
+  "title": "FoxChild Music Learning Question Set v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["format", "schemaVersion", "id", "revision", "status", "metadata", "sections"],
+  "properties": {
+    "format": { "const": "foxchild.music-learning.question-set" },
+    "schemaVersion": { "const": "1.0.0" },
+    "id": { "$ref": "#/$defs/id" },
+    "revision": { "type": "integer", "minimum": 1 },
+    "status": { "enum": ["draft", "review", "published", "retired"] },
+    "metadata": { "$ref": "#/$defs/metadata" },
+    "defaults": { "type": "object" },
+    "assets": { "type": "array", "items": { "$ref": "#/$defs/asset" }, "default": [] },
+    "variables": { "type": "object", "default": {} },
+    "delivery": { "type": "object", "default": {} },
+    "sections": { "type": "array", "minItems": 1, "items": { "$ref": "#/$defs/section" } }
+  },
+  "$defs": {
+    "id": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 160,
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._:@/-]*$"
+    },
+    "localeMap": {
+      "type": "object",
+      "minProperties": 1,
+      "additionalProperties": { "type": "string" }
+    },
+    "metadata": {
+      "type": "object",
+      "required": ["title", "language"],
+      "properties": {
+        "title": { "$ref": "#/$defs/localeMap" },
+        "description": { "$ref": "#/$defs/localeMap" },
+        "language": { "type": "string", "minLength": 2 },
+        "authors": { "type": "array", "items": { "type": "string" } },
+        "subject": { "type": "string" },
+        "domain": { "type": "string" },
+        "skillIds": { "type": "array", "items": { "$ref": "#/$defs/id" } },
+        "difficulty": {},
+        "tags": { "type": "array", "items": { "type": "string" } },
+        "accessibility": { "type": "object" }
+      },
+      "additionalProperties": true
+    },
+    "asset": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "kind", "uri"],
+      "properties": {
+        "id": { "$ref": "#/$defs/id" },
+        "kind": { "enum": ["image", "audio", "video", "midi", "musicxml", "score-ast", "symbol", "font-resource", "data"] },
+        "uri": { "type": "string", "minLength": 1 },
+        "mimeType": { "type": "string" },
+        "sha256": { "type": "string" },
+        "metadata": { "type": "object" }
+      }
+    },
+    "section": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "items"],
+      "properties": {
+        "id": { "$ref": "#/$defs/id" },
+        "title": { "$ref": "#/$defs/localeMap" },
+        "delivery": { "type": "object" },
+        "items": { "type": "array", "minItems": 1, "items": { "$ref": "#/$defs/item" } }
+      }
+    },
+    "item": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "type", "version", "stimulus", "prompt", "interaction", "response", "assessment"],
+      "properties": {
+        "id": { "$ref": "#/$defs/id" },
+        "type": { "enum": ["selected-response", "text-entry", "numeric-entry", "matching", "ordering", "drag-drop", "hotspot", "keyboard-input", "midi-input", "notation-entry", "rhythm-tapping", "audio-recording", "sight-reading", "score-correction", "composition", "composite"] },
+        "version": { "type": "integer", "minimum": 1 },
+        "metadata": { "type": "object" },
+        "variables": { "type": "object" },
+        "stimulus": { "type": "array", "items": { "$ref": "#/$defs/stimulus" } },
+        "prompt": { "$ref": "#/$defs/prompt" },
+        "interaction": { "$ref": "#/$defs/interaction" },
+        "response": { "$ref": "#/$defs/response" },
+        "assessment": { "$ref": "#/$defs/assessment" },
+        "feedback": { "type": "object" },
+        "hints": { "type": "array", "items": { "type": "object" } },
+        "explanation": { "type": "object" },
+        "delivery": { "type": "object" },
+        "analytics": { "type": "object" }
+      }
+    },
+    "stimulus": {
+      "type": "object",
+      "required": ["id", "kind"],
+      "properties": {
+        "id": { "$ref": "#/$defs/id" },
+        "kind": { "enum": ["text", "rich-text", "notation", "audio", "image", "video", "music-symbol", "piano-keyboard", "metronome", "mixed"] },
+        "visibility": { "enum": ["visible", "hidden"] },
+        "content": {},
+        "format": { "type": "string" },
+        "source": { "type": "object" },
+        "presentation": { "type": "object" },
+        "playback": { "type": "object" },
+        "accessibility": { "type": "object" }
+      },
+      "additionalProperties": true
+    },
+    "prompt": {
+      "type": "object",
+      "required": ["content"],
+      "properties": {
+        "content": { "$ref": "#/$defs/localeMap" },
+        "format": { "enum": ["plain-text", "markdown", "sanitised-html"] },
+        "ariaLabel": { "$ref": "#/$defs/localeMap" }
+      },
+      "additionalProperties": false
+    },
+    "interaction": {
+      "type": "object",
+      "required": ["kind", "responseId"],
+      "properties": {
+        "kind": { "enum": ["choice", "text-entry", "numeric-entry", "matching", "ordering", "drag-drop", "score-drag-drop", "hotspot", "music-keyboard", "notation-entry", "rhythm-tap", "audio-recording", "sight-reading", "composition", "composite"] },
+        "responseId": { "$ref": "#/$defs/id" }
+      },
+      "additionalProperties": true
+    },
+    "response": {
+      "type": "object",
+      "required": ["id", "baseType"],
+      "properties": {
+        "id": { "$ref": "#/$defs/id" },
+        "baseType": { "enum": ["identifier", "identifier-set", "string", "number", "boolean", "pitch", "pitch-set", "pitch-sequence", "rhythm", "score-ast", "score-patch", "midi-performance", "audio-recording", "mapping", "ordering"] },
+        "cardinality": { "enum": ["single", "multiple", "ordered", "record"] },
+        "correct": {}
+      },
+      "additionalProperties": true
+    },
+    "assessment": {
+      "type": "object",
+      "required": ["strategy", "maximumScore"],
+      "properties": {
+        "strategy": { "type": "string", "pattern": "^[A-Za-z0-9._-]+@[0-9]+$" },
+        "maximumScore": { "type": "number", "minimum": 0 },
+        "passingScore": { "type": "number", "minimum": 0 },
+        "parameters": { "type": "object" },
+        "attemptPolicy": { "type": "object" }
+      },
+      "additionalProperties": false
+    }
+  }
+}

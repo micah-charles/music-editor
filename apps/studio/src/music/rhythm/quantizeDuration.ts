@@ -8,6 +8,7 @@ const durationBeats: Record<NoteDurationValue, number> = {
   quarter: 1,
   eighth: 0.5,
   sixteenth: 0.25,
+  "thirty-second": 0.125,
   "dotted-half": 3,
   "dotted-quarter": 1.5,
   "dotted-eighth": 0.75

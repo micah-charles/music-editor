@@ -1,5 +1,10 @@
 import { midiToPitch, parsePitchName, pitchToMidi, pitchToName } from "@foxchild/music-core";
-import type { CSSProperties, MouseEvent as ReactMouseEvent, TouchEvent as ReactTouchEvent } from "react";
+import type {
+  CSSProperties,
+  KeyboardEvent as ReactKeyboardEvent,
+  MouseEvent as ReactMouseEvent,
+  TouchEvent as ReactTouchEvent
+} from "react";
 
 export type PianoKeyboardProps = {
   range?: { from: string; to: string };
@@ -13,6 +18,7 @@ export type PianoKeyboardProps = {
   onInsertNote?: (pitch: string) => void;
   onInsertChord?: (pitches: string[]) => void;
   onKeyPress?: (pitch: string, modifiers: { shiftKey: boolean }) => void;
+  keyboardNavigable?: boolean;
 };
 
 type PianoKey = {
@@ -35,7 +41,8 @@ export function PianoKeyboard({
   onKeyUp,
   onInsertNote,
   onInsertChord,
-  onKeyPress
+  onKeyPress,
+  keyboardNavigable = false
 }: PianoKeyboardProps) {
   const keys = buildKeys(range.from, range.to);
   const whiteKeys = keys.filter((key) => !key.isBlack);
@@ -67,6 +74,12 @@ export function PianoKeyboard({
     pressKey(pitch, false);
   }
 
+  function keyboardDown(pitch: string, event: ReactKeyboardEvent<HTMLButtonElement>) {
+    if (!keyboardNavigable || (event.key !== "Enter" && event.key !== " ")) return;
+    event.preventDefault();
+    if (!event.repeat) pressKey(pitch, event.shiftKey);
+  }
+
   function keyClass(key: PianoKey) {
     return [
       "piano-key",
@@ -88,12 +101,16 @@ export function PianoKeyboard({
             type="button"
             className={keyClass(key)}
             aria-label={`Piano key ${key.pitch}`}
-            tabIndex={-1}
+            tabIndex={keyboardNavigable ? 0 : -1}
             onMouseDown={(event) => mouseDown(key.pitch, event)}
             onMouseUp={() => onKeyUp?.(key.pitch)}
             onMouseLeave={() => onKeyUp?.(key.pitch)}
             onTouchStart={(event) => touchStart(key.pitch, event)}
             onTouchEnd={() => onKeyUp?.(key.pitch)}
+            onKeyDown={(event) => keyboardDown(key.pitch, event)}
+            onKeyUp={(event) => {
+              if (event.key === "Enter" || event.key === " ") onKeyUp?.(key.pitch);
+            }}
           >
             <span>{key.pitch}</span>
           </button>
@@ -106,12 +123,17 @@ export function PianoKeyboard({
             type="button"
             className={keyClass(key)}
             style={{ left: `${(key.whiteIndex / whiteKeys.length) * 100}%` }}
-            tabIndex={-1}
+            aria-label={`Piano key ${key.pitch}`}
+            tabIndex={keyboardNavigable ? 0 : -1}
             onMouseDown={(event) => mouseDown(key.pitch, event)}
             onMouseUp={() => onKeyUp?.(key.pitch)}
             onMouseLeave={() => onKeyUp?.(key.pitch)}
             onTouchStart={(event) => touchStart(key.pitch, event)}
             onTouchEnd={() => onKeyUp?.(key.pitch)}
+            onKeyDown={(event) => keyboardDown(key.pitch, event)}
+            onKeyUp={(event) => {
+              if (event.key === "Enter" || event.key === " ") onKeyUp?.(key.pitch);
+            }}
           >
             <span>{key.pitch}</span>
           </button>

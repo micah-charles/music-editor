@@ -1,0 +1,194 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://foxchild.example/schemas/music-learning/learning-activity-v2.schema.json",
+  "title": "FoxChild Music Learning Activity v2",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "format",
+    "schemaVersion",
+    "id",
+    "revision",
+    "status",
+    "metadata",
+    "authoredItems",
+    "questionFamilies",
+    "generatorConfiguration",
+    "curriculumConstraints",
+    "sessionPolicy",
+    "masteryPolicy",
+    "reviewPolicy"
+  ],
+  "properties": {
+    "format": { "const": "foxchild.music-learning.activity" },
+    "schemaVersion": { "const": "2.0.0" },
+    "id": { "$ref": "#/$defs/id" },
+    "revision": { "type": "integer", "minimum": 1 },
+    "status": { "enum": ["draft", "review", "published", "retired"] },
+    "metadata": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["title", "language"],
+      "properties": {
+        "title": { "$ref": "#/$defs/localeMap" },
+        "description": { "$ref": "#/$defs/localeMap" },
+        "language": { "type": "string", "minLength": 2 },
+        "authors": { "type": "array", "items": { "type": "string" } },
+        "tags": { "type": "array", "items": { "type": "string" } }
+      }
+    },
+    "authoredItems": {
+      "type": "array",
+      "items": { "$ref": "question-set-v1.schema.json#/$defs/item" }
+    },
+    "questionFamilies": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": { "$ref": "#/$defs/versionedId" }
+    },
+    "generatorConfiguration": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["defaultSeed", "families"],
+      "properties": {
+        "defaultSeed": { "type": "string", "minLength": 1 },
+        "families": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["familyId", "enabled"],
+            "properties": {
+              "familyId": { "$ref": "#/$defs/versionedId" },
+              "enabled": { "type": "boolean" },
+              "weight": { "type": "number", "exclusiveMinimum": 0 },
+              "parameters": { "type": "object" }
+            }
+          }
+        }
+      }
+    },
+    "curriculumConstraints": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["curricula"],
+      "properties": {
+        "curricula": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": { "enum": ["foxchild", "abrsm", "trinity", "gcse"] }
+        },
+        "levels": { "type": "array", "items": { "type": "string" } },
+        "domains": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": { "$ref": "#/$defs/domain" }
+        },
+        "conceptIds": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": { "$ref": "#/$defs/id" }
+        }
+      }
+    },
+    "sessionPolicy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "questionCount",
+        "adaptiveMix",
+        "avoidRecentConcepts",
+        "avoidRepeatedInteractionTypes"
+      ],
+      "properties": {
+        "questionCount": { "type": "integer", "minimum": 1, "maximum": 100 },
+        "adaptiveMix": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["review", "developing", "new", "challenge"],
+          "properties": {
+            "review": { "type": "number", "minimum": 0, "maximum": 1 },
+            "developing": { "type": "number", "minimum": 0, "maximum": 1 },
+            "new": { "type": "number", "minimum": 0, "maximum": 1 },
+            "challenge": { "type": "number", "minimum": 0, "maximum": 1 }
+          }
+        },
+        "avoidRecentConcepts": { "type": "integer", "minimum": 0 },
+        "avoidRepeatedInteractionTypes": { "type": "boolean" },
+        "authoredItemShare": { "type": "number", "minimum": 0, "maximum": 1 }
+      }
+    },
+    "masteryPolicy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "learningRate",
+        "incorrectPenalty",
+        "secureThreshold",
+        "masteredThreshold",
+        "minimumEvidenceForMastery"
+      ],
+      "properties": {
+        "learningRate": { "type": "number", "exclusiveMinimum": 0, "maximum": 1 },
+        "incorrectPenalty": { "type": "number", "minimum": 0, "maximum": 1 },
+        "secureThreshold": { "type": "number", "minimum": 0, "maximum": 1 },
+        "masteredThreshold": { "type": "number", "minimum": 0, "maximum": 1 },
+        "minimumEvidenceForMastery": { "type": "integer", "minimum": 1 }
+      }
+    },
+    "reviewPolicy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "initialIntervalHours",
+        "correctIntervalMultiplier",
+        "incorrectIntervalHours",
+        "maximumIntervalDays"
+      ],
+      "properties": {
+        "initialIntervalHours": { "type": "number", "exclusiveMinimum": 0 },
+        "correctIntervalMultiplier": { "type": "number", "exclusiveMinimum": 1 },
+        "incorrectIntervalHours": { "type": "number", "exclusiveMinimum": 0 },
+        "maximumIntervalDays": { "type": "number", "exclusiveMinimum": 0 }
+      }
+    }
+  },
+  "$defs": {
+    "id": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 220,
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._:@/-]*$"
+    },
+    "versionedId": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9._-]+@[0-9]+$"
+    },
+    "localeMap": {
+      "type": "object",
+      "minProperties": 1,
+      "additionalProperties": { "type": "string" }
+    },
+    "domain": {
+      "enum": [
+        "note-reading",
+        "key-signatures",
+        "music-symbols",
+        "note-values",
+        "time-signatures",
+        "intervals",
+        "chords",
+        "scales",
+        "rhythm",
+        "tempo",
+        "ear-training",
+        "sight-reading",
+        "melody-dictation",
+        "error-detection"
+      ]
+    }
+  }
+}

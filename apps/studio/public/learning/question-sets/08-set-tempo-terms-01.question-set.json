@@ -1,0 +1,616 @@
+{
+  "format": "foxchild.music-learning.question-set",
+  "schemaVersion": "1.0.0",
+  "id": "set-tempo-terms-01",
+  "revision": 1,
+  "status": "published",
+  "metadata": {
+    "title": {
+      "en-GB": "Tempo Terms"
+    },
+    "description": {
+      "en-GB": "Match common Italian tempo words to their meanings."
+    },
+    "language": "en-GB",
+    "authors": [
+      "FoxChild Music Learning Generator"
+    ],
+    "subject": "Music",
+    "domain": "tempo",
+    "skillIds": [
+      "theory.tempo-term.meaning"
+    ],
+    "difficulty": "mixed",
+    "tags": []
+  },
+  "defaults": {
+    "locale": "en-GB",
+    "attemptPolicy": {
+      "maximumAttempts": 3,
+      "scorePolicy": "best"
+    }
+  },
+  "assets": [],
+  "variables": {},
+  "delivery": {
+    "mode": "practice",
+    "navigation": "linear",
+    "showProgress": true
+  },
+  "sections": [
+    {
+      "id": "section-1",
+      "title": {
+        "en-GB": "Tempo Terms"
+      },
+      "delivery": {},
+      "items": [
+        {
+          "id": "tempo-term-01",
+          "type": "selected-response",
+          "version": 1,
+          "metadata": {
+            "skillIds": [
+              "theory.tempo-term.meaning"
+            ],
+            "difficulty": 1,
+            "tags": [
+              "tempo"
+            ]
+          },
+          "variables": {},
+          "stimulus": [
+            {
+              "id": "tempo-term",
+              "kind": "text",
+              "content": {
+                "en-GB": "Largo"
+              },
+              "presentation": {
+                "role": "large-term"
+              }
+            }
+          ],
+          "prompt": {
+            "content": {
+              "en-GB": "What does Largo mean?"
+            },
+            "format": "plain-text"
+          },
+          "interaction": {
+            "kind": "choice",
+            "responseId": "response-main",
+            "cardinality": "single",
+            "display": "buttons",
+            "shuffleOptions": true,
+            "optionOrderSeed": "tempo-term-01-options",
+            "options": [
+              {
+                "id": "largo",
+                "content": {
+                  "en-GB": "Very slow and broad"
+                }
+              },
+              {
+                "id": "adagio",
+                "content": {
+                  "en-GB": "Slow"
+                }
+              },
+              {
+                "id": "andante",
+                "content": {
+                  "en-GB": "At a walking pace"
+                }
+              },
+              {
+                "id": "allegro",
+                "content": {
+                  "en-GB": "Fast and lively"
+                }
+              }
+            ]
+          },
+          "response": {
+            "id": "response-main",
+            "baseType": "identifier",
+            "cardinality": "single",
+            "correct": {
+              "value": "largo"
+            }
+          },
+          "assessment": {
+            "strategy": "exact-identifier@1",
+            "maximumScore": 1,
+            "passingScore": 1,
+            "attemptPolicy": {
+              "maximumAttempts": 3,
+              "scorePolicy": "best"
+            }
+          },
+          "feedback": {
+            "mode": "after-submit",
+            "correct": {
+              "message": {
+                "en-GB": "Correct. Largo means very slow and broad."
+              }
+            },
+            "incorrect": {
+              "message": {
+                "en-GB": "Not quite. Review the notation or concept and try again."
+              }
+            },
+            "showCorrectAnswer": "after-final-attempt"
+          },
+          "hints": [
+            {
+              "id": "tempo-term-01-hint-1",
+              "content": {
+                "en-GB": "Think about the traditional Italian tempo vocabulary."
+              }
+            }
+          ],
+          "explanation": {
+            "content": {
+              "en-GB": "Largo means very slow and broad."
+            }
+          },
+          "delivery": {},
+          "analytics": {}
+        },
+        {
+          "id": "tempo-term-02",
+          "type": "selected-response",
+          "version": 1,
+          "metadata": {
+            "skillIds": [
+              "theory.tempo-term.meaning"
+            ],
+            "difficulty": 1,
+            "tags": [
+              "tempo"
+            ]
+          },
+          "variables": {},
+          "stimulus": [
+            {
+              "id": "tempo-term",
+              "kind": "text",
+              "content": {
+                "en-GB": "Adagio"
+              },
+              "presentation": {
+                "role": "large-term"
+              }
+            }
+          ],
+          "prompt": {
+            "content": {
+              "en-GB": "What does Adagio mean?"
+            },
+            "format": "plain-text"
+          },
+          "interaction": {
+            "kind": "choice",
+            "responseId": "response-main",
+            "cardinality": "single",
+            "display": "buttons",
+            "shuffleOptions": true,
+            "optionOrderSeed": "tempo-term-02-options",
+            "options": [
+              {
+                "id": "adagio",
+                "content": {
+                  "en-GB": "Slow"
+                }
+              },
+              {
+                "id": "largo",
+                "content": {
+                  "en-GB": "Very slow and broad"
+                }
+              },
+              {
+                "id": "andante",
+                "content": {
+                  "en-GB": "At a walking pace"
+                }
+              },
+              {
+                "id": "allegro",
+                "content": {
+                  "en-GB": "Fast and lively"
+                }
+              }
+            ]
+          },
+          "response": {
+            "id": "response-main",
+            "baseType": "identifier",
+            "cardinality": "single",
+            "correct": {
+              "value": "adagio"
+            }
+          },
+          "assessment": {
+            "strategy": "exact-identifier@1",
+            "maximumScore": 1,
+            "passingScore": 1,
+            "attemptPolicy": {
+              "maximumAttempts": 3,
+              "scorePolicy": "best"
+            }
+          },
+          "feedback": {
+            "mode": "after-submit",
+            "correct": {
+              "message": {
+                "en-GB": "Correct. Adagio means slow."
+              }
+            },
+            "incorrect": {
+              "message": {
+                "en-GB": "Not quite. Review the notation or concept and try again."
+              }
+            },
+            "showCorrectAnswer": "after-final-attempt"
+          },
+          "hints": [
+            {
+              "id": "tempo-term-02-hint-1",
+              "content": {
+                "en-GB": "Think about the traditional Italian tempo vocabulary."
+              }
+            }
+          ],
+          "explanation": {
+            "content": {
+              "en-GB": "Adagio means slow."
+            }
+          },
+          "delivery": {},
+          "analytics": {}
+        },
+        {
+          "id": "tempo-term-03",
+          "type": "selected-response",
+          "version": 1,
+          "metadata": {
+            "skillIds": [
+              "theory.tempo-term.meaning"
+            ],
+            "difficulty": 1,
+            "tags": [
+              "tempo"
+            ]
+          },
+          "variables": {},
+          "stimulus": [
+            {
+              "id": "tempo-term",
+              "kind": "text",
+              "content": {
+                "en-GB": "Andante"
+              },
+              "presentation": {
+                "role": "large-term"
+              }
+            }
+          ],
+          "prompt": {
+            "content": {
+              "en-GB": "What does Andante mean?"
+            },
+            "format": "plain-text"
+          },
+          "interaction": {
+            "kind": "choice",
+            "responseId": "response-main",
+            "cardinality": "single",
+            "display": "buttons",
+            "shuffleOptions": true,
+            "optionOrderSeed": "tempo-term-03-options",
+            "options": [
+              {
+                "id": "andante",
+                "content": {
+                  "en-GB": "At a walking pace"
+                }
+              },
+              {
+                "id": "largo",
+                "content": {
+                  "en-GB": "Very slow and broad"
+                }
+              },
+              {
+                "id": "adagio",
+                "content": {
+                  "en-GB": "Slow"
+                }
+              },
+              {
+                "id": "allegro",
+                "content": {
+                  "en-GB": "Fast and lively"
+                }
+              }
+            ]
+          },
+          "response": {
+            "id": "response-main",
+            "baseType": "identifier",
+            "cardinality": "single",
+            "correct": {
+              "value": "andante"
+            }
+          },
+          "assessment": {
+            "strategy": "exact-identifier@1",
+            "maximumScore": 1,
+            "passingScore": 1,
+            "attemptPolicy": {
+              "maximumAttempts": 3,
+              "scorePolicy": "best"
+            }
+          },
+          "feedback": {
+            "mode": "after-submit",
+            "correct": {
+              "message": {
+                "en-GB": "Correct. Andante means at a walking pace."
+              }
+            },
+            "incorrect": {
+              "message": {
+                "en-GB": "Not quite. Review the notation or concept and try again."
+              }
+            },
+            "showCorrectAnswer": "after-final-attempt"
+          },
+          "hints": [
+            {
+              "id": "tempo-term-03-hint-1",
+              "content": {
+                "en-GB": "Think about the traditional Italian tempo vocabulary."
+              }
+            }
+          ],
+          "explanation": {
+            "content": {
+              "en-GB": "Andante means at a walking pace."
+            }
+          },
+          "delivery": {},
+          "analytics": {}
+        },
+        {
+          "id": "tempo-term-04",
+          "type": "selected-response",
+          "version": 1,
+          "metadata": {
+            "skillIds": [
+              "theory.tempo-term.meaning"
+            ],
+            "difficulty": 1,
+            "tags": [
+              "tempo"
+            ]
+          },
+          "variables": {},
+          "stimulus": [
+            {
+              "id": "tempo-term",
+              "kind": "text",
+              "content": {
+                "en-GB": "Allegro"
+              },
+              "presentation": {
+                "role": "large-term"
+              }
+            }
+          ],
+          "prompt": {
+            "content": {
+              "en-GB": "What does Allegro mean?"
+            },
+            "format": "plain-text"
+          },
+          "interaction": {
+            "kind": "choice",
+            "responseId": "response-main",
+            "cardinality": "single",
+            "display": "buttons",
+            "shuffleOptions": true,
+            "optionOrderSeed": "tempo-term-04-options",
+            "options": [
+              {
+                "id": "allegro",
+                "content": {
+                  "en-GB": "Fast and lively"
+                }
+              },
+              {
+                "id": "largo",
+                "content": {
+                  "en-GB": "Very slow and broad"
+                }
+              },
+              {
+                "id": "adagio",
+                "content": {
+                  "en-GB": "Slow"
+                }
+              },
+              {
+                "id": "andante",
+                "content": {
+                  "en-GB": "At a walking pace"
+                }
+              }
+            ]
+          },
+          "response": {
+            "id": "response-main",
+            "baseType": "identifier",
+            "cardinality": "single",
+            "correct": {
+              "value": "allegro"
+            }
+          },
+          "assessment": {
+            "strategy": "exact-identifier@1",
+            "maximumScore": 1,
+            "passingScore": 1,
+            "attemptPolicy": {
+              "maximumAttempts": 3,
+              "scorePolicy": "best"
+            }
+          },
+          "feedback": {
+            "mode": "after-submit",
+            "correct": {
+              "message": {
+                "en-GB": "Correct. Allegro means fast and lively."
+              }
+            },
+            "incorrect": {
+              "message": {
+                "en-GB": "Not quite. Review the notation or concept and try again."
+              }
+            },
+            "showCorrectAnswer": "after-final-attempt"
+          },
+          "hints": [
+            {
+              "id": "tempo-term-04-hint-1",
+              "content": {
+                "en-GB": "Think about the traditional Italian tempo vocabulary."
+              }
+            }
+          ],
+          "explanation": {
+            "content": {
+              "en-GB": "Allegro means fast and lively."
+            }
+          },
+          "delivery": {},
+          "analytics": {}
+        },
+        {
+          "id": "tempo-term-05",
+          "type": "selected-response",
+          "version": 1,
+          "metadata": {
+            "skillIds": [
+              "theory.tempo-term.meaning"
+            ],
+            "difficulty": 1,
+            "tags": [
+              "tempo"
+            ]
+          },
+          "variables": {},
+          "stimulus": [
+            {
+              "id": "tempo-term",
+              "kind": "text",
+              "content": {
+                "en-GB": "Presto"
+              },
+              "presentation": {
+                "role": "large-term"
+              }
+            }
+          ],
+          "prompt": {
+            "content": {
+              "en-GB": "What does Presto mean?"
+            },
+            "format": "plain-text"
+          },
+          "interaction": {
+            "kind": "choice",
+            "responseId": "response-main",
+            "cardinality": "single",
+            "display": "buttons",
+            "shuffleOptions": true,
+            "optionOrderSeed": "tempo-term-05-options",
+            "options": [
+              {
+                "id": "presto",
+                "content": {
+                  "en-GB": "Very fast"
+                }
+              },
+              {
+                "id": "largo",
+                "content": {
+                  "en-GB": "Very slow and broad"
+                }
+              },
+              {
+                "id": "adagio",
+                "content": {
+                  "en-GB": "Slow"
+                }
+              },
+              {
+                "id": "andante",
+                "content": {
+                  "en-GB": "At a walking pace"
+                }
+              }
+            ]
+          },
+          "response": {
+            "id": "response-main",
+            "baseType": "identifier",
+            "cardinality": "single",
+            "correct": {
+              "value": "presto"
+            }
+          },
+          "assessment": {
+            "strategy": "exact-identifier@1",
+            "maximumScore": 1,
+            "passingScore": 1,
+            "attemptPolicy": {
+              "maximumAttempts": 3,
+              "scorePolicy": "best"
+            }
+          },
+          "feedback": {
+            "mode": "after-submit",
+            "correct": {
+              "message": {
+                "en-GB": "Correct. Presto means very fast."
+              }
+            },
+            "incorrect": {
+              "message": {
+                "en-GB": "Not quite. Review the notation or concept and try again."
+              }
+            },
+            "showCorrectAnswer": "after-final-attempt"
+          },
+          "hints": [
+            {
+              "id": "tempo-term-05-hint-1",
+              "content": {
+                "en-GB": "Think about the traditional Italian tempo vocabulary."
+              }
+            }
+          ],
+          "explanation": {
+            "content": {
+              "en-GB": "Presto means very fast."
+            }
+          },
+          "delivery": {},
+          "analytics": {}
+        }
+      ]
+    }
+  ]
+}

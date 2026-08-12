@@ -1,0 +1,736 @@
+{
+  "format": "foxchild.music-learning.question-set",
+  "schemaVersion": "1.0.0",
+  "id": "set-time-signatures-01",
+  "revision": 1,
+  "status": "published",
+  "metadata": {
+    "title": {
+      "en-GB": "Time Signatures"
+    },
+    "description": {
+      "en-GB": "Understand simple and compound metres."
+    },
+    "language": "en-GB",
+    "authors": [
+      "FoxChild Music Learning Generator"
+    ],
+    "subject": "Music",
+    "domain": "rhythm",
+    "skillIds": [
+      "rhythm.time-signature.understand"
+    ],
+    "difficulty": "mixed",
+    "tags": []
+  },
+  "defaults": {
+    "locale": "en-GB",
+    "attemptPolicy": {
+      "maximumAttempts": 3,
+      "scorePolicy": "best"
+    }
+  },
+  "assets": [],
+  "variables": {},
+  "delivery": {
+    "mode": "practice",
+    "navigation": "linear",
+    "showProgress": true
+  },
+  "sections": [
+    {
+      "id": "section-1",
+      "title": {
+        "en-GB": "Time Signatures"
+      },
+      "delivery": {},
+      "items": [
+        {
+          "id": "time-signature-01",
+          "type": "selected-response",
+          "version": 1,
+          "metadata": {
+            "skillIds": [
+              "rhythm.time-signature.understand"
+            ],
+            "difficulty": 1,
+            "tags": [
+              "time-signature"
+            ]
+          },
+          "variables": {},
+          "stimulus": [
+            {
+              "id": "meter-score",
+              "kind": "notation",
+              "source": {
+                "mode": "generator",
+                "generatorId": "rhythm-fragment@1",
+                "seed": "meter-2-4",
+                "parameters": {
+                  "timeSignature": {
+                    "beats": 2,
+                    "beatType": 4
+                  },
+                  "pattern": [
+                    "1/4"
+                  ],
+                  "showNotes": true
+                }
+              },
+              "presentation": {
+                "renderer": "foxchild-score",
+                "layout": "single-system",
+                "scale": 1.4,
+                "showCursor": false,
+                "editable": false
+              },
+              "playback": {
+                "enabled": false
+              },
+              "accessibility": {
+                "description": {
+                  "en-GB": "A short score in 2/4."
+                }
+              }
+            }
+          ],
+          "prompt": {
+            "content": {
+              "en-GB": "What does the 2/4 time signature mean?"
+            },
+            "format": "plain-text"
+          },
+          "interaction": {
+            "kind": "choice",
+            "responseId": "response-main",
+            "cardinality": "single",
+            "display": "buttons",
+            "shuffleOptions": true,
+            "optionOrderSeed": "time-signature-01-options",
+            "options": [
+              {
+                "id": "opt-two",
+                "content": {
+                  "en-GB": "Two crotchet beats in each bar"
+                }
+              },
+              {
+                "id": "opt-three",
+                "content": {
+                  "en-GB": "Three crotchet beats in each bar"
+                }
+              },
+              {
+                "id": "opt-four",
+                "content": {
+                  "en-GB": "Four crotchet beats in each bar"
+                }
+              },
+              {
+                "id": "opt-six",
+                "content": {
+                  "en-GB": "Six crotchet beats in each bar"
+                }
+              }
+            ]
+          },
+          "response": {
+            "id": "response-main",
+            "baseType": "identifier",
+            "cardinality": "single",
+            "correct": {
+              "value": "opt-two"
+            }
+          },
+          "assessment": {
+            "strategy": "exact-identifier@1",
+            "maximumScore": 1,
+            "passingScore": 1,
+            "attemptPolicy": {
+              "maximumAttempts": 3,
+              "scorePolicy": "best"
+            }
+          },
+          "feedback": {
+            "mode": "after-submit",
+            "correct": {
+              "message": {
+                "en-GB": "Correct. 2/4 contains two crotchet beats per bar."
+              }
+            },
+            "incorrect": {
+              "message": {
+                "en-GB": "Not quite. Review the notation or concept and try again."
+              }
+            },
+            "showCorrectAnswer": "after-final-attempt"
+          },
+          "hints": [
+            {
+              "id": "time-signature-01-hint-1",
+              "content": {
+                "en-GB": "Read the top number for quantity and the bottom number for beat unit."
+              }
+            }
+          ],
+          "explanation": {
+            "content": {
+              "en-GB": "2/4 contains two crotchet beats per bar."
+            }
+          },
+          "delivery": {},
+          "analytics": {}
+        },
+        {
+          "id": "time-signature-02",
+          "type": "selected-response",
+          "version": 1,
+          "metadata": {
+            "skillIds": [
+              "rhythm.time-signature.understand"
+            ],
+            "difficulty": 1,
+            "tags": [
+              "time-signature"
+            ]
+          },
+          "variables": {},
+          "stimulus": [
+            {
+              "id": "meter-score",
+              "kind": "notation",
+              "source": {
+                "mode": "generator",
+                "generatorId": "rhythm-fragment@1",
+                "seed": "meter-3-4",
+                "parameters": {
+                  "timeSignature": {
+                    "beats": 3,
+                    "beatType": 4
+                  },
+                  "pattern": [
+                    "1/4"
+                  ],
+                  "showNotes": true
+                }
+              },
+              "presentation": {
+                "renderer": "foxchild-score",
+                "layout": "single-system",
+                "scale": 1.4,
+                "showCursor": false,
+                "editable": false
+              },
+              "playback": {
+                "enabled": false
+              },
+              "accessibility": {
+                "description": {
+                  "en-GB": "A short score in 3/4."
+                }
+              }
+            }
+          ],
+          "prompt": {
+            "content": {
+              "en-GB": "What does the 3/4 time signature mean?"
+            },
+            "format": "plain-text"
+          },
+          "interaction": {
+            "kind": "choice",
+            "responseId": "response-main",
+            "cardinality": "single",
+            "display": "buttons",
+            "shuffleOptions": true,
+            "optionOrderSeed": "time-signature-02-options",
+            "options": [
+              {
+                "id": "opt-two",
+                "content": {
+                  "en-GB": "Two crotchet beats in each bar"
+                }
+              },
+              {
+                "id": "opt-three",
+                "content": {
+                  "en-GB": "Three crotchet beats in each bar"
+                }
+              },
+              {
+                "id": "opt-four",
+                "content": {
+                  "en-GB": "Four crotchet beats in each bar"
+                }
+              },
+              {
+                "id": "opt-six",
+                "content": {
+                  "en-GB": "Six quaver beats in two groups"
+                }
+              }
+            ]
+          },
+          "response": {
+            "id": "response-main",
+            "baseType": "identifier",
+            "cardinality": "single",
+            "correct": {
+              "value": "opt-three"
+            }
+          },
+          "assessment": {
+            "strategy": "exact-identifier@1",
+            "maximumScore": 1,
+            "passingScore": 1,
+            "attemptPolicy": {
+              "maximumAttempts": 3,
+              "scorePolicy": "best"
+            }
+          },
+          "feedback": {
+            "mode": "after-submit",
+            "correct": {
+              "message": {
+                "en-GB": "Correct. 3/4 contains three crotchet beats per bar."
+              }
+            },
+            "incorrect": {
+              "message": {
+                "en-GB": "Not quite. Review the notation or concept and try again."
+              }
+            },
+            "showCorrectAnswer": "after-final-attempt"
+          },
+          "hints": [
+            {
+              "id": "time-signature-02-hint-1",
+              "content": {
+                "en-GB": "Read the top number for quantity and the bottom number for beat unit."
+              }
+            }
+          ],
+          "explanation": {
+            "content": {
+              "en-GB": "3/4 contains three crotchet beats per bar."
+            }
+          },
+          "delivery": {},
+          "analytics": {}
+        },
+        {
+          "id": "time-signature-03",
+          "type": "selected-response",
+          "version": 1,
+          "metadata": {
+            "skillIds": [
+              "rhythm.time-signature.understand"
+            ],
+            "difficulty": 1,
+            "tags": [
+              "time-signature"
+            ]
+          },
+          "variables": {},
+          "stimulus": [
+            {
+              "id": "meter-score",
+              "kind": "notation",
+              "source": {
+                "mode": "generator",
+                "generatorId": "rhythm-fragment@1",
+                "seed": "meter-4-4",
+                "parameters": {
+                  "timeSignature": {
+                    "beats": 4,
+                    "beatType": 4
+                  },
+                  "pattern": [
+                    "1/4"
+                  ],
+                  "showNotes": true
+                }
+              },
+              "presentation": {
+                "renderer": "foxchild-score",
+                "layout": "single-system",
+                "scale": 1.4,
+                "showCursor": false,
+                "editable": false
+              },
+              "playback": {
+                "enabled": false
+              },
+              "accessibility": {
+                "description": {
+                  "en-GB": "A short score in 4/4."
+                }
+              }
+            }
+          ],
+          "prompt": {
+            "content": {
+              "en-GB": "What does the 4/4 time signature mean?"
+            },
+            "format": "plain-text"
+          },
+          "interaction": {
+            "kind": "choice",
+            "responseId": "response-main",
+            "cardinality": "single",
+            "display": "buttons",
+            "shuffleOptions": true,
+            "optionOrderSeed": "time-signature-03-options",
+            "options": [
+              {
+                "id": "opt-two",
+                "content": {
+                  "en-GB": "Two minim beats in each bar"
+                }
+              },
+              {
+                "id": "opt-three",
+                "content": {
+                  "en-GB": "Three crotchet beats in each bar"
+                }
+              },
+              {
+                "id": "opt-four",
+                "content": {
+                  "en-GB": "Four crotchet beats in each bar"
+                }
+              },
+              {
+                "id": "opt-six",
+                "content": {
+                  "en-GB": "Six quaver beats in each bar"
+                }
+              }
+            ]
+          },
+          "response": {
+            "id": "response-main",
+            "baseType": "identifier",
+            "cardinality": "single",
+            "correct": {
+              "value": "opt-four"
+            }
+          },
+          "assessment": {
+            "strategy": "exact-identifier@1",
+            "maximumScore": 1,
+            "passingScore": 1,
+            "attemptPolicy": {
+              "maximumAttempts": 3,
+              "scorePolicy": "best"
+            }
+          },
+          "feedback": {
+            "mode": "after-submit",
+            "correct": {
+              "message": {
+                "en-GB": "Correct. 4/4 contains four crotchet beats per bar."
+              }
+            },
+            "incorrect": {
+              "message": {
+                "en-GB": "Not quite. Review the notation or concept and try again."
+              }
+            },
+            "showCorrectAnswer": "after-final-attempt"
+          },
+          "hints": [
+            {
+              "id": "time-signature-03-hint-1",
+              "content": {
+                "en-GB": "Read the top number for quantity and the bottom number for beat unit."
+              }
+            }
+          ],
+          "explanation": {
+            "content": {
+              "en-GB": "4/4 contains four crotchet beats per bar."
+            }
+          },
+          "delivery": {},
+          "analytics": {}
+        },
+        {
+          "id": "time-signature-04",
+          "type": "selected-response",
+          "version": 1,
+          "metadata": {
+            "skillIds": [
+              "rhythm.time-signature.understand"
+            ],
+            "difficulty": 2,
+            "tags": [
+              "time-signature"
+            ]
+          },
+          "variables": {},
+          "stimulus": [
+            {
+              "id": "meter-score",
+              "kind": "notation",
+              "source": {
+                "mode": "generator",
+                "generatorId": "rhythm-fragment@1",
+                "seed": "meter-6-8",
+                "parameters": {
+                  "timeSignature": {
+                    "beats": 6,
+                    "beatType": 8
+                  },
+                  "pattern": [
+                    "1/8"
+                  ],
+                  "showNotes": true
+                }
+              },
+              "presentation": {
+                "renderer": "foxchild-score",
+                "layout": "single-system",
+                "scale": 1.4,
+                "showCursor": false,
+                "editable": false
+              },
+              "playback": {
+                "enabled": false
+              },
+              "accessibility": {
+                "description": {
+                  "en-GB": "A short score in 6/8."
+                }
+              }
+            }
+          ],
+          "prompt": {
+            "content": {
+              "en-GB": "What does the 6/8 time signature mean?"
+            },
+            "format": "plain-text"
+          },
+          "interaction": {
+            "kind": "choice",
+            "responseId": "response-main",
+            "cardinality": "single",
+            "display": "buttons",
+            "shuffleOptions": true,
+            "optionOrderSeed": "time-signature-04-options",
+            "options": [
+              {
+                "id": "opt-six-even",
+                "content": {
+                  "en-GB": "Six unrelated quaver beats"
+                }
+              },
+              {
+                "id": "opt-two-groups",
+                "content": {
+                  "en-GB": "Six quavers grouped as two dotted-crotchet beats"
+                }
+              },
+              {
+                "id": "opt-three",
+                "content": {
+                  "en-GB": "Three crotchet beats"
+                }
+              },
+              {
+                "id": "opt-four",
+                "content": {
+                  "en-GB": "Four quaver beats"
+                }
+              }
+            ]
+          },
+          "response": {
+            "id": "response-main",
+            "baseType": "identifier",
+            "cardinality": "single",
+            "correct": {
+              "value": "opt-two-groups"
+            }
+          },
+          "assessment": {
+            "strategy": "exact-identifier@1",
+            "maximumScore": 1,
+            "passingScore": 1,
+            "attemptPolicy": {
+              "maximumAttempts": 3,
+              "scorePolicy": "best"
+            }
+          },
+          "feedback": {
+            "mode": "after-submit",
+            "correct": {
+              "message": {
+                "en-GB": "Correct. 6/8 is normally felt as two groups of three quavers."
+              }
+            },
+            "incorrect": {
+              "message": {
+                "en-GB": "Not quite. Review the notation or concept and try again."
+              }
+            },
+            "showCorrectAnswer": "after-final-attempt"
+          },
+          "hints": [
+            {
+              "id": "time-signature-04-hint-1",
+              "content": {
+                "en-GB": "Read the top number for quantity and the bottom number for beat unit."
+              }
+            }
+          ],
+          "explanation": {
+            "content": {
+              "en-GB": "6/8 is normally felt as two groups of three quavers."
+            }
+          },
+          "delivery": {},
+          "analytics": {}
+        },
+        {
+          "id": "time-signature-05",
+          "type": "selected-response",
+          "version": 1,
+          "metadata": {
+            "skillIds": [
+              "rhythm.time-signature.understand"
+            ],
+            "difficulty": 2,
+            "tags": [
+              "time-signature"
+            ]
+          },
+          "variables": {},
+          "stimulus": [
+            {
+              "id": "meter-score",
+              "kind": "notation",
+              "source": {
+                "mode": "generator",
+                "generatorId": "rhythm-fragment@1",
+                "seed": "meter-9-8",
+                "parameters": {
+                  "timeSignature": {
+                    "beats": 9,
+                    "beatType": 8
+                  },
+                  "pattern": [
+                    "1/8"
+                  ],
+                  "showNotes": true
+                }
+              },
+              "presentation": {
+                "renderer": "foxchild-score",
+                "layout": "single-system",
+                "scale": 1.4,
+                "showCursor": false,
+                "editable": false
+              },
+              "playback": {
+                "enabled": false
+              },
+              "accessibility": {
+                "description": {
+                  "en-GB": "A short score in 9/8."
+                }
+              }
+            }
+          ],
+          "prompt": {
+            "content": {
+              "en-GB": "What does the 9/8 time signature mean?"
+            },
+            "format": "plain-text"
+          },
+          "interaction": {
+            "kind": "choice",
+            "responseId": "response-main",
+            "cardinality": "single",
+            "display": "buttons",
+            "shuffleOptions": true,
+            "optionOrderSeed": "time-signature-05-options",
+            "options": [
+              {
+                "id": "opt-two",
+                "content": {
+                  "en-GB": "Two groups of three quavers"
+                }
+              },
+              {
+                "id": "opt-three-groups",
+                "content": {
+                  "en-GB": "Three groups of three quavers"
+                }
+              },
+              {
+                "id": "opt-nine-crotchets",
+                "content": {
+                  "en-GB": "Nine crotchet beats"
+                }
+              },
+              {
+                "id": "opt-four",
+                "content": {
+                  "en-GB": "Four groups of two quavers"
+                }
+              }
+            ]
+          },
+          "response": {
+            "id": "response-main",
+            "baseType": "identifier",
+            "cardinality": "single",
+            "correct": {
+              "value": "opt-three-groups"
+            }
+          },
+          "assessment": {
+            "strategy": "exact-identifier@1",
+            "maximumScore": 1,
+            "passingScore": 1,
+            "attemptPolicy": {
+              "maximumAttempts": 3,
+              "scorePolicy": "best"
+            }
+          },
+          "feedback": {
+            "mode": "after-submit",
+            "correct": {
+              "message": {
+                "en-GB": "Correct. 9/8 is normally felt as three dotted-crotchet beats."
+              }
+            },
+            "incorrect": {
+              "message": {
+                "en-GB": "Not quite. Review the notation or concept and try again."
+              }
+            },
+            "showCorrectAnswer": "after-final-attempt"
+          },
+          "hints": [
+            {
+              "id": "time-signature-05-hint-1",
+              "content": {
+                "en-GB": "Read the top number for quantity and the bottom number for beat unit."
+              }
+            }
+          ],
+          "explanation": {
+            "content": {
+              "en-GB": "9/8 is normally felt as three dotted-crotchet beats."
+            }
+          },
+          "delivery": {},
+          "analytics": {}
+        }
+      ]
+    }
+  ]
+}

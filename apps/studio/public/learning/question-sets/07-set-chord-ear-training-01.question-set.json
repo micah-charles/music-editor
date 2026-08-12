@@ -1,0 +1,821 @@
+{
+  "format": "foxchild.music-learning.question-set",
+  "schemaVersion": "1.0.0",
+  "id": "set-chord-ear-training-01",
+  "revision": 1,
+  "status": "published",
+  "metadata": {
+    "title": {
+      "en-GB": "Chord Ear Training"
+    },
+    "description": {
+      "en-GB": "Identify five common chord qualities by ear."
+    },
+    "language": "en-GB",
+    "authors": [
+      "FoxChild Music Learning Generator"
+    ],
+    "subject": "Music",
+    "domain": "ear-training",
+    "skillIds": [
+      "ear.chord.quality.identify"
+    ],
+    "difficulty": "mixed",
+    "tags": []
+  },
+  "defaults": {
+    "locale": "en-GB",
+    "attemptPolicy": {
+      "maximumAttempts": 3,
+      "scorePolicy": "best"
+    }
+  },
+  "assets": [],
+  "variables": {},
+  "delivery": {
+    "mode": "practice",
+    "navigation": "linear",
+    "showProgress": true
+  },
+  "sections": [
+    {
+      "id": "section-1",
+      "title": {
+        "en-GB": "Chord Ear Training"
+      },
+      "delivery": {},
+      "items": [
+        {
+          "id": "chord-ear-01",
+          "type": "selected-response",
+          "version": 1,
+          "metadata": {
+            "skillIds": [
+              "ear.chord.quality.identify"
+            ],
+            "difficulty": 2,
+            "tags": [
+              "ear-training",
+              "chord"
+            ]
+          },
+          "variables": {},
+          "stimulus": [
+            {
+              "id": "hidden-score",
+              "kind": "notation",
+              "source": {
+                "mode": "generator",
+                "generatorId": "chord-display@1",
+                "seed": "chord-major-001",
+                "parameters": {
+                  "rootMidi": 60,
+                  "quality": "major",
+                  "voicing": "close",
+                  "duration": "1/1"
+                }
+              },
+              "presentation": {
+                "renderer": "foxchild-score",
+                "layout": "single-system",
+                "scale": 1.4,
+                "showCursor": false,
+                "editable": false
+              },
+              "playback": {
+                "enabled": true
+              },
+              "accessibility": {
+                "description": {
+                  "en-GB": "Hidden notation for C major."
+                }
+              },
+              "visibility": "hidden"
+            },
+            {
+              "id": "audio-playback",
+              "kind": "audio",
+              "source": {
+                "mode": "render-score",
+                "notationStimulusId": "hidden-score",
+                "instrument": {
+                  "soundId": "gm-acoustic-grand-piano"
+                }
+              },
+              "playback": {
+                "enabled": true,
+                "maxReplays": 4,
+                "tempo": {
+                  "mode": "override",
+                  "bpm": 72
+                }
+              }
+            }
+          ],
+          "prompt": {
+            "content": {
+              "en-GB": "Which chord quality do you hear?"
+            },
+            "format": "plain-text"
+          },
+          "interaction": {
+            "kind": "choice",
+            "responseId": "response-main",
+            "cardinality": "single",
+            "display": "buttons",
+            "shuffleOptions": true,
+            "optionOrderSeed": "chord-ear-01-options",
+            "options": [
+              {
+                "id": "major",
+                "content": {
+                  "en-GB": "Major triad"
+                }
+              },
+              {
+                "id": "minor",
+                "content": {
+                  "en-GB": "Minor triad"
+                }
+              },
+              {
+                "id": "diminished",
+                "content": {
+                  "en-GB": "Diminished triad"
+                }
+              },
+              {
+                "id": "augmented",
+                "content": {
+                  "en-GB": "Augmented triad"
+                }
+              }
+            ]
+          },
+          "response": {
+            "id": "response-main",
+            "baseType": "identifier",
+            "cardinality": "single",
+            "correct": {
+              "value": "major"
+            }
+          },
+          "assessment": {
+            "strategy": "exact-identifier@1",
+            "maximumScore": 1,
+            "passingScore": 1,
+            "attemptPolicy": {
+              "maximumAttempts": 3,
+              "scorePolicy": "best"
+            }
+          },
+          "feedback": {
+            "mode": "after-submit",
+            "correct": {
+              "message": {
+                "en-GB": "Correct. The chord is a major triad."
+              }
+            },
+            "incorrect": {
+              "message": {
+                "en-GB": "Not quite. Review the notation or concept and try again."
+              }
+            },
+            "showCorrectAnswer": "after-final-attempt"
+          },
+          "hints": [
+            {
+              "id": "chord-ear-01-hint-1",
+              "content": {
+                "en-GB": "Listen for the colour of the third and fifth."
+              }
+            }
+          ],
+          "explanation": {
+            "content": {
+              "en-GB": "The chord is a major triad."
+            }
+          },
+          "delivery": {},
+          "analytics": {}
+        },
+        {
+          "id": "chord-ear-02",
+          "type": "selected-response",
+          "version": 1,
+          "metadata": {
+            "skillIds": [
+              "ear.chord.quality.identify"
+            ],
+            "difficulty": 2,
+            "tags": [
+              "ear-training",
+              "chord"
+            ]
+          },
+          "variables": {},
+          "stimulus": [
+            {
+              "id": "hidden-score",
+              "kind": "notation",
+              "source": {
+                "mode": "generator",
+                "generatorId": "chord-display@1",
+                "seed": "chord-minor-001",
+                "parameters": {
+                  "rootMidi": 57,
+                  "quality": "minor",
+                  "voicing": "close",
+                  "duration": "1/1"
+                }
+              },
+              "presentation": {
+                "renderer": "foxchild-score",
+                "layout": "single-system",
+                "scale": 1.4,
+                "showCursor": false,
+                "editable": false
+              },
+              "playback": {
+                "enabled": true
+              },
+              "accessibility": {
+                "description": {
+                  "en-GB": "Hidden notation for A minor."
+                }
+              },
+              "visibility": "hidden"
+            },
+            {
+              "id": "audio-playback",
+              "kind": "audio",
+              "source": {
+                "mode": "render-score",
+                "notationStimulusId": "hidden-score",
+                "instrument": {
+                  "soundId": "gm-acoustic-grand-piano"
+                }
+              },
+              "playback": {
+                "enabled": true,
+                "maxReplays": 4,
+                "tempo": {
+                  "mode": "override",
+                  "bpm": 72
+                }
+              }
+            }
+          ],
+          "prompt": {
+            "content": {
+              "en-GB": "Which chord quality do you hear?"
+            },
+            "format": "plain-text"
+          },
+          "interaction": {
+            "kind": "choice",
+            "responseId": "response-main",
+            "cardinality": "single",
+            "display": "buttons",
+            "shuffleOptions": true,
+            "optionOrderSeed": "chord-ear-02-options",
+            "options": [
+              {
+                "id": "major",
+                "content": {
+                  "en-GB": "Major triad"
+                }
+              },
+              {
+                "id": "minor",
+                "content": {
+                  "en-GB": "Minor triad"
+                }
+              },
+              {
+                "id": "diminished",
+                "content": {
+                  "en-GB": "Diminished triad"
+                }
+              },
+              {
+                "id": "sus4",
+                "content": {
+                  "en-GB": "Suspended fourth"
+                }
+              }
+            ]
+          },
+          "response": {
+            "id": "response-main",
+            "baseType": "identifier",
+            "cardinality": "single",
+            "correct": {
+              "value": "minor"
+            }
+          },
+          "assessment": {
+            "strategy": "exact-identifier@1",
+            "maximumScore": 1,
+            "passingScore": 1,
+            "attemptPolicy": {
+              "maximumAttempts": 3,
+              "scorePolicy": "best"
+            }
+          },
+          "feedback": {
+            "mode": "after-submit",
+            "correct": {
+              "message": {
+                "en-GB": "Correct. The chord is a minor triad."
+              }
+            },
+            "incorrect": {
+              "message": {
+                "en-GB": "Not quite. Review the notation or concept and try again."
+              }
+            },
+            "showCorrectAnswer": "after-final-attempt"
+          },
+          "hints": [
+            {
+              "id": "chord-ear-02-hint-1",
+              "content": {
+                "en-GB": "Listen for the colour of the third and fifth."
+              }
+            }
+          ],
+          "explanation": {
+            "content": {
+              "en-GB": "The chord is a minor triad."
+            }
+          },
+          "delivery": {},
+          "analytics": {}
+        },
+        {
+          "id": "chord-ear-03",
+          "type": "selected-response",
+          "version": 1,
+          "metadata": {
+            "skillIds": [
+              "ear.chord.quality.identify"
+            ],
+            "difficulty": 3,
+            "tags": [
+              "ear-training",
+              "chord"
+            ]
+          },
+          "variables": {},
+          "stimulus": [
+            {
+              "id": "hidden-score",
+              "kind": "notation",
+              "source": {
+                "mode": "generator",
+                "generatorId": "chord-display@1",
+                "seed": "chord-diminished-001",
+                "parameters": {
+                  "rootMidi": 59,
+                  "quality": "diminished",
+                  "voicing": "close",
+                  "duration": "1/1"
+                }
+              },
+              "presentation": {
+                "renderer": "foxchild-score",
+                "layout": "single-system",
+                "scale": 1.4,
+                "showCursor": false,
+                "editable": false
+              },
+              "playback": {
+                "enabled": true
+              },
+              "accessibility": {
+                "description": {
+                  "en-GB": "Hidden notation for B diminished."
+                }
+              },
+              "visibility": "hidden"
+            },
+            {
+              "id": "audio-playback",
+              "kind": "audio",
+              "source": {
+                "mode": "render-score",
+                "notationStimulusId": "hidden-score",
+                "instrument": {
+                  "soundId": "gm-acoustic-grand-piano"
+                }
+              },
+              "playback": {
+                "enabled": true,
+                "maxReplays": 4,
+                "tempo": {
+                  "mode": "override",
+                  "bpm": 72
+                }
+              }
+            }
+          ],
+          "prompt": {
+            "content": {
+              "en-GB": "Which chord quality do you hear?"
+            },
+            "format": "plain-text"
+          },
+          "interaction": {
+            "kind": "choice",
+            "responseId": "response-main",
+            "cardinality": "single",
+            "display": "buttons",
+            "shuffleOptions": true,
+            "optionOrderSeed": "chord-ear-03-options",
+            "options": [
+              {
+                "id": "major",
+                "content": {
+                  "en-GB": "Major triad"
+                }
+              },
+              {
+                "id": "minor",
+                "content": {
+                  "en-GB": "Minor triad"
+                }
+              },
+              {
+                "id": "diminished",
+                "content": {
+                  "en-GB": "Diminished triad"
+                }
+              },
+              {
+                "id": "augmented",
+                "content": {
+                  "en-GB": "Augmented triad"
+                }
+              }
+            ]
+          },
+          "response": {
+            "id": "response-main",
+            "baseType": "identifier",
+            "cardinality": "single",
+            "correct": {
+              "value": "diminished"
+            }
+          },
+          "assessment": {
+            "strategy": "exact-identifier@1",
+            "maximumScore": 1,
+            "passingScore": 1,
+            "attemptPolicy": {
+              "maximumAttempts": 3,
+              "scorePolicy": "best"
+            }
+          },
+          "feedback": {
+            "mode": "after-submit",
+            "correct": {
+              "message": {
+                "en-GB": "Correct. The chord is a diminished triad."
+              }
+            },
+            "incorrect": {
+              "message": {
+                "en-GB": "Not quite. Review the notation or concept and try again."
+              }
+            },
+            "showCorrectAnswer": "after-final-attempt"
+          },
+          "hints": [
+            {
+              "id": "chord-ear-03-hint-1",
+              "content": {
+                "en-GB": "Listen for the colour of the third and fifth."
+              }
+            }
+          ],
+          "explanation": {
+            "content": {
+              "en-GB": "The chord is a diminished triad."
+            }
+          },
+          "delivery": {},
+          "analytics": {}
+        },
+        {
+          "id": "chord-ear-04",
+          "type": "selected-response",
+          "version": 1,
+          "metadata": {
+            "skillIds": [
+              "ear.chord.quality.identify"
+            ],
+            "difficulty": 3,
+            "tags": [
+              "ear-training",
+              "chord"
+            ]
+          },
+          "variables": {},
+          "stimulus": [
+            {
+              "id": "hidden-score",
+              "kind": "notation",
+              "source": {
+                "mode": "generator",
+                "generatorId": "chord-display@1",
+                "seed": "chord-augmented-001",
+                "parameters": {
+                  "rootMidi": 60,
+                  "quality": "augmented",
+                  "voicing": "close",
+                  "duration": "1/1"
+                }
+              },
+              "presentation": {
+                "renderer": "foxchild-score",
+                "layout": "single-system",
+                "scale": 1.4,
+                "showCursor": false,
+                "editable": false
+              },
+              "playback": {
+                "enabled": true
+              },
+              "accessibility": {
+                "description": {
+                  "en-GB": "Hidden notation for C augmented."
+                }
+              },
+              "visibility": "hidden"
+            },
+            {
+              "id": "audio-playback",
+              "kind": "audio",
+              "source": {
+                "mode": "render-score",
+                "notationStimulusId": "hidden-score",
+                "instrument": {
+                  "soundId": "gm-acoustic-grand-piano"
+                }
+              },
+              "playback": {
+                "enabled": true,
+                "maxReplays": 4,
+                "tempo": {
+                  "mode": "override",
+                  "bpm": 72
+                }
+              }
+            }
+          ],
+          "prompt": {
+            "content": {
+              "en-GB": "Which chord quality do you hear?"
+            },
+            "format": "plain-text"
+          },
+          "interaction": {
+            "kind": "choice",
+            "responseId": "response-main",
+            "cardinality": "single",
+            "display": "buttons",
+            "shuffleOptions": true,
+            "optionOrderSeed": "chord-ear-04-options",
+            "options": [
+              {
+                "id": "major",
+                "content": {
+                  "en-GB": "Major triad"
+                }
+              },
+              {
+                "id": "minor",
+                "content": {
+                  "en-GB": "Minor triad"
+                }
+              },
+              {
+                "id": "diminished",
+                "content": {
+                  "en-GB": "Diminished triad"
+                }
+              },
+              {
+                "id": "augmented",
+                "content": {
+                  "en-GB": "Augmented triad"
+                }
+              }
+            ]
+          },
+          "response": {
+            "id": "response-main",
+            "baseType": "identifier",
+            "cardinality": "single",
+            "correct": {
+              "value": "augmented"
+            }
+          },
+          "assessment": {
+            "strategy": "exact-identifier@1",
+            "maximumScore": 1,
+            "passingScore": 1,
+            "attemptPolicy": {
+              "maximumAttempts": 3,
+              "scorePolicy": "best"
+            }
+          },
+          "feedback": {
+            "mode": "after-submit",
+            "correct": {
+              "message": {
+                "en-GB": "Correct. The chord is a augmented triad."
+              }
+            },
+            "incorrect": {
+              "message": {
+                "en-GB": "Not quite. Review the notation or concept and try again."
+              }
+            },
+            "showCorrectAnswer": "after-final-attempt"
+          },
+          "hints": [
+            {
+              "id": "chord-ear-04-hint-1",
+              "content": {
+                "en-GB": "Listen for the colour of the third and fifth."
+              }
+            }
+          ],
+          "explanation": {
+            "content": {
+              "en-GB": "The chord is a augmented triad."
+            }
+          },
+          "delivery": {},
+          "analytics": {}
+        },
+        {
+          "id": "chord-ear-05",
+          "type": "selected-response",
+          "version": 1,
+          "metadata": {
+            "skillIds": [
+              "ear.chord.quality.identify"
+            ],
+            "difficulty": 3,
+            "tags": [
+              "ear-training",
+              "chord"
+            ]
+          },
+          "variables": {},
+          "stimulus": [
+            {
+              "id": "hidden-score",
+              "kind": "notation",
+              "source": {
+                "mode": "generator",
+                "generatorId": "chord-display@1",
+                "seed": "chord-dominant7-001",
+                "parameters": {
+                  "rootMidi": 55,
+                  "quality": "dominant7",
+                  "voicing": "close",
+                  "duration": "1/1"
+                }
+              },
+              "presentation": {
+                "renderer": "foxchild-score",
+                "layout": "single-system",
+                "scale": 1.4,
+                "showCursor": false,
+                "editable": false
+              },
+              "playback": {
+                "enabled": true
+              },
+              "accessibility": {
+                "description": {
+                  "en-GB": "Hidden notation for G dominant seventh."
+                }
+              },
+              "visibility": "hidden"
+            },
+            {
+              "id": "audio-playback",
+              "kind": "audio",
+              "source": {
+                "mode": "render-score",
+                "notationStimulusId": "hidden-score",
+                "instrument": {
+                  "soundId": "gm-acoustic-grand-piano"
+                }
+              },
+              "playback": {
+                "enabled": true,
+                "maxReplays": 4,
+                "tempo": {
+                  "mode": "override",
+                  "bpm": 72
+                }
+              }
+            }
+          ],
+          "prompt": {
+            "content": {
+              "en-GB": "Which chord quality do you hear?"
+            },
+            "format": "plain-text"
+          },
+          "interaction": {
+            "kind": "choice",
+            "responseId": "response-main",
+            "cardinality": "single",
+            "display": "buttons",
+            "shuffleOptions": true,
+            "optionOrderSeed": "chord-ear-05-options",
+            "options": [
+              {
+                "id": "major7",
+                "content": {
+                  "en-GB": "Major seventh chord"
+                }
+              },
+              {
+                "id": "minor7",
+                "content": {
+                  "en-GB": "Minor seventh chord"
+                }
+              },
+              {
+                "id": "dominant7",
+                "content": {
+                  "en-GB": "Dominant seventh chord"
+                }
+              },
+              {
+                "id": "diminished7",
+                "content": {
+                  "en-GB": "Diminished seventh chord"
+                }
+              }
+            ]
+          },
+          "response": {
+            "id": "response-main",
+            "baseType": "identifier",
+            "cardinality": "single",
+            "correct": {
+              "value": "dominant7"
+            }
+          },
+          "assessment": {
+            "strategy": "exact-identifier@1",
+            "maximumScore": 1,
+            "passingScore": 1,
+            "attemptPolicy": {
+              "maximumAttempts": 3,
+              "scorePolicy": "best"
+            }
+          },
+          "feedback": {
+            "mode": "after-submit",
+            "correct": {
+              "message": {
+                "en-GB": "Correct. The chord is a dominant seventh chord."
+              }
+            },
+            "incorrect": {
+              "message": {
+                "en-GB": "Not quite. Review the notation or concept and try again."
+              }
+            },
+            "showCorrectAnswer": "after-final-attempt"
+          },
+          "hints": [
+            {
+              "id": "chord-ear-05-hint-1",
+              "content": {
+                "en-GB": "Listen for the colour of the third and fifth."
+              }
+            }
+          ],
+          "explanation": {
+            "content": {
+              "en-GB": "The chord is a dominant seventh chord."
+            }
+          },
+          "delivery": {},
+          "analytics": {}
+        }
+      ]
+    }
+  ]
+}

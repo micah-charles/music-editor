@@ -1,0 +1,626 @@
+{
+  "format": "foxchild.music-learning.question-set",
+  "schemaVersion": "1.0.0",
+  "id": "set-note-values-01",
+  "revision": 1,
+  "status": "published",
+  "metadata": {
+    "title": {
+      "en-GB": "Note Values"
+    },
+    "description": {
+      "en-GB": "Identify common note durations in crotchet beats."
+    },
+    "language": "en-GB",
+    "authors": [
+      "FoxChild Music Learning Generator"
+    ],
+    "subject": "Music",
+    "domain": "rhythm",
+    "skillIds": [
+      "rhythm.note-value.identify"
+    ],
+    "difficulty": "mixed",
+    "tags": []
+  },
+  "defaults": {
+    "locale": "en-GB",
+    "attemptPolicy": {
+      "maximumAttempts": 3,
+      "scorePolicy": "best"
+    }
+  },
+  "assets": [],
+  "variables": {},
+  "delivery": {
+    "mode": "practice",
+    "navigation": "linear",
+    "showProgress": true
+  },
+  "sections": [
+    {
+      "id": "section-1",
+      "title": {
+        "en-GB": "Note Values"
+      },
+      "delivery": {},
+      "items": [
+        {
+          "id": "note-value-01",
+          "type": "selected-response",
+          "version": 1,
+          "metadata": {
+            "skillIds": [
+              "rhythm.note-value.identify"
+            ],
+            "difficulty": 1,
+            "tags": [
+              "note-values"
+            ]
+          },
+          "variables": {},
+          "stimulus": [
+            {
+              "id": "note-value",
+              "kind": "music-symbol",
+              "content": {
+                "symbolId": "whole-note"
+              },
+              "accessibility": {
+                "description": {
+                  "en-GB": "Semibreve"
+                }
+              }
+            }
+          ],
+          "prompt": {
+            "content": {
+              "en-GB": "How many crotchet beats does this semibreve last?"
+            },
+            "format": "plain-text"
+          },
+          "interaction": {
+            "kind": "choice",
+            "responseId": "response-main",
+            "cardinality": "single",
+            "display": "buttons",
+            "shuffleOptions": true,
+            "optionOrderSeed": "note-value-01-options",
+            "options": [
+              {
+                "id": "opt-4",
+                "content": {
+                  "en-GB": "4 crotchet beats"
+                }
+              },
+              {
+                "id": "opt-2",
+                "content": {
+                  "en-GB": "2 crotchet beats"
+                }
+              },
+              {
+                "id": "opt-1",
+                "content": {
+                  "en-GB": "1 crotchet beat"
+                }
+              },
+              {
+                "id": "opt-half",
+                "content": {
+                  "en-GB": "Half a crotchet beat"
+                }
+              }
+            ]
+          },
+          "response": {
+            "id": "response-main",
+            "baseType": "identifier",
+            "cardinality": "single",
+            "correct": {
+              "value": "opt-4"
+            }
+          },
+          "assessment": {
+            "strategy": "exact-identifier@1",
+            "maximumScore": 1,
+            "passingScore": 1,
+            "attemptPolicy": {
+              "maximumAttempts": 3,
+              "scorePolicy": "best"
+            }
+          },
+          "feedback": {
+            "mode": "after-submit",
+            "correct": {
+              "message": {
+                "en-GB": "Correct. A semibreve lasts four crotchet beats in 4/4."
+              }
+            },
+            "incorrect": {
+              "message": {
+                "en-GB": "Not quite. Review the notation or concept and try again."
+              }
+            },
+            "showCorrectAnswer": "after-final-attempt"
+          },
+          "hints": [
+            {
+              "id": "note-value-01-hint-1",
+              "content": {
+                "en-GB": "Remember that a dot adds half of the original duration."
+              }
+            }
+          ],
+          "explanation": {
+            "content": {
+              "en-GB": "A semibreve lasts four crotchet beats in 4/4."
+            }
+          },
+          "delivery": {},
+          "analytics": {}
+        },
+        {
+          "id": "note-value-02",
+          "type": "selected-response",
+          "version": 1,
+          "metadata": {
+            "skillIds": [
+              "rhythm.note-value.identify"
+            ],
+            "difficulty": 1,
+            "tags": [
+              "note-values"
+            ]
+          },
+          "variables": {},
+          "stimulus": [
+            {
+              "id": "note-value",
+              "kind": "music-symbol",
+              "content": {
+                "symbolId": "half-note"
+              },
+              "accessibility": {
+                "description": {
+                  "en-GB": "Minim"
+                }
+              }
+            }
+          ],
+          "prompt": {
+            "content": {
+              "en-GB": "How many crotchet beats does this minim last?"
+            },
+            "format": "plain-text"
+          },
+          "interaction": {
+            "kind": "choice",
+            "responseId": "response-main",
+            "cardinality": "single",
+            "display": "buttons",
+            "shuffleOptions": true,
+            "optionOrderSeed": "note-value-02-options",
+            "options": [
+              {
+                "id": "opt-4",
+                "content": {
+                  "en-GB": "4 crotchet beats"
+                }
+              },
+              {
+                "id": "opt-2",
+                "content": {
+                  "en-GB": "2 crotchet beats"
+                }
+              },
+              {
+                "id": "opt-1",
+                "content": {
+                  "en-GB": "1 crotchet beat"
+                }
+              },
+              {
+                "id": "opt-half",
+                "content": {
+                  "en-GB": "Half a crotchet beat"
+                }
+              }
+            ]
+          },
+          "response": {
+            "id": "response-main",
+            "baseType": "identifier",
+            "cardinality": "single",
+            "correct": {
+              "value": "opt-2"
+            }
+          },
+          "assessment": {
+            "strategy": "exact-identifier@1",
+            "maximumScore": 1,
+            "passingScore": 1,
+            "attemptPolicy": {
+              "maximumAttempts": 3,
+              "scorePolicy": "best"
+            }
+          },
+          "feedback": {
+            "mode": "after-submit",
+            "correct": {
+              "message": {
+                "en-GB": "Correct. A minim lasts two crotchet beats."
+              }
+            },
+            "incorrect": {
+              "message": {
+                "en-GB": "Not quite. Review the notation or concept and try again."
+              }
+            },
+            "showCorrectAnswer": "after-final-attempt"
+          },
+          "hints": [
+            {
+              "id": "note-value-02-hint-1",
+              "content": {
+                "en-GB": "Remember that a dot adds half of the original duration."
+              }
+            }
+          ],
+          "explanation": {
+            "content": {
+              "en-GB": "A minim lasts two crotchet beats."
+            }
+          },
+          "delivery": {},
+          "analytics": {}
+        },
+        {
+          "id": "note-value-03",
+          "type": "selected-response",
+          "version": 1,
+          "metadata": {
+            "skillIds": [
+              "rhythm.note-value.identify"
+            ],
+            "difficulty": 1,
+            "tags": [
+              "note-values"
+            ]
+          },
+          "variables": {},
+          "stimulus": [
+            {
+              "id": "note-value",
+              "kind": "music-symbol",
+              "content": {
+                "symbolId": "quarter-note"
+              },
+              "accessibility": {
+                "description": {
+                  "en-GB": "Crotchet"
+                }
+              }
+            }
+          ],
+          "prompt": {
+            "content": {
+              "en-GB": "How many crotchet beats does this crotchet last?"
+            },
+            "format": "plain-text"
+          },
+          "interaction": {
+            "kind": "choice",
+            "responseId": "response-main",
+            "cardinality": "single",
+            "display": "buttons",
+            "shuffleOptions": true,
+            "optionOrderSeed": "note-value-03-options",
+            "options": [
+              {
+                "id": "opt-4",
+                "content": {
+                  "en-GB": "4 crotchet beats"
+                }
+              },
+              {
+                "id": "opt-2",
+                "content": {
+                  "en-GB": "2 crotchet beats"
+                }
+              },
+              {
+                "id": "opt-1",
+                "content": {
+                  "en-GB": "1 crotchet beat"
+                }
+              },
+              {
+                "id": "opt-half",
+                "content": {
+                  "en-GB": "Half a crotchet beat"
+                }
+              }
+            ]
+          },
+          "response": {
+            "id": "response-main",
+            "baseType": "identifier",
+            "cardinality": "single",
+            "correct": {
+              "value": "opt-1"
+            }
+          },
+          "assessment": {
+            "strategy": "exact-identifier@1",
+            "maximumScore": 1,
+            "passingScore": 1,
+            "attemptPolicy": {
+              "maximumAttempts": 3,
+              "scorePolicy": "best"
+            }
+          },
+          "feedback": {
+            "mode": "after-submit",
+            "correct": {
+              "message": {
+                "en-GB": "Correct. A crotchet lasts one crotchet beat."
+              }
+            },
+            "incorrect": {
+              "message": {
+                "en-GB": "Not quite. Review the notation or concept and try again."
+              }
+            },
+            "showCorrectAnswer": "after-final-attempt"
+          },
+          "hints": [
+            {
+              "id": "note-value-03-hint-1",
+              "content": {
+                "en-GB": "Remember that a dot adds half of the original duration."
+              }
+            }
+          ],
+          "explanation": {
+            "content": {
+              "en-GB": "A crotchet lasts one crotchet beat."
+            }
+          },
+          "delivery": {},
+          "analytics": {}
+        },
+        {
+          "id": "note-value-04",
+          "type": "selected-response",
+          "version": 1,
+          "metadata": {
+            "skillIds": [
+              "rhythm.note-value.identify"
+            ],
+            "difficulty": 1,
+            "tags": [
+              "note-values"
+            ]
+          },
+          "variables": {},
+          "stimulus": [
+            {
+              "id": "note-value",
+              "kind": "music-symbol",
+              "content": {
+                "symbolId": "eighth-note"
+              },
+              "accessibility": {
+                "description": {
+                  "en-GB": "Quaver"
+                }
+              }
+            }
+          ],
+          "prompt": {
+            "content": {
+              "en-GB": "How many crotchet beats does this quaver last?"
+            },
+            "format": "plain-text"
+          },
+          "interaction": {
+            "kind": "choice",
+            "responseId": "response-main",
+            "cardinality": "single",
+            "display": "buttons",
+            "shuffleOptions": true,
+            "optionOrderSeed": "note-value-04-options",
+            "options": [
+              {
+                "id": "opt-2",
+                "content": {
+                  "en-GB": "2 crotchet beats"
+                }
+              },
+              {
+                "id": "opt-1",
+                "content": {
+                  "en-GB": "1 crotchet beat"
+                }
+              },
+              {
+                "id": "opt-half",
+                "content": {
+                  "en-GB": "Half a crotchet beat"
+                }
+              },
+              {
+                "id": "opt-quarter",
+                "content": {
+                  "en-GB": "A quarter of a crotchet beat"
+                }
+              }
+            ]
+          },
+          "response": {
+            "id": "response-main",
+            "baseType": "identifier",
+            "cardinality": "single",
+            "correct": {
+              "value": "opt-half"
+            }
+          },
+          "assessment": {
+            "strategy": "exact-identifier@1",
+            "maximumScore": 1,
+            "passingScore": 1,
+            "attemptPolicy": {
+              "maximumAttempts": 3,
+              "scorePolicy": "best"
+            }
+          },
+          "feedback": {
+            "mode": "after-submit",
+            "correct": {
+              "message": {
+                "en-GB": "Correct. A quaver lasts half a crotchet beat."
+              }
+            },
+            "incorrect": {
+              "message": {
+                "en-GB": "Not quite. Review the notation or concept and try again."
+              }
+            },
+            "showCorrectAnswer": "after-final-attempt"
+          },
+          "hints": [
+            {
+              "id": "note-value-04-hint-1",
+              "content": {
+                "en-GB": "Remember that a dot adds half of the original duration."
+              }
+            }
+          ],
+          "explanation": {
+            "content": {
+              "en-GB": "A quaver lasts half a crotchet beat."
+            }
+          },
+          "delivery": {},
+          "analytics": {}
+        },
+        {
+          "id": "note-value-05",
+          "type": "selected-response",
+          "version": 1,
+          "metadata": {
+            "skillIds": [
+              "rhythm.note-value.identify"
+            ],
+            "difficulty": 2,
+            "tags": [
+              "note-values"
+            ]
+          },
+          "variables": {},
+          "stimulus": [
+            {
+              "id": "note-value",
+              "kind": "music-symbol",
+              "content": {
+                "symbolId": "dotted-half-note"
+              },
+              "accessibility": {
+                "description": {
+                  "en-GB": "Dotted minim"
+                }
+              }
+            }
+          ],
+          "prompt": {
+            "content": {
+              "en-GB": "How many crotchet beats does this dotted minim last?"
+            },
+            "format": "plain-text"
+          },
+          "interaction": {
+            "kind": "choice",
+            "responseId": "response-main",
+            "cardinality": "single",
+            "display": "buttons",
+            "shuffleOptions": true,
+            "optionOrderSeed": "note-value-05-options",
+            "options": [
+              {
+                "id": "opt-2",
+                "content": {
+                  "en-GB": "2 crotchet beats"
+                }
+              },
+              {
+                "id": "opt-3",
+                "content": {
+                  "en-GB": "3 crotchet beats"
+                }
+              },
+              {
+                "id": "opt-4",
+                "content": {
+                  "en-GB": "4 crotchet beats"
+                }
+              },
+              {
+                "id": "opt-1.5",
+                "content": {
+                  "en-GB": "1.5 crotchet beats"
+                }
+              }
+            ]
+          },
+          "response": {
+            "id": "response-main",
+            "baseType": "identifier",
+            "cardinality": "single",
+            "correct": {
+              "value": "opt-3"
+            }
+          },
+          "assessment": {
+            "strategy": "exact-identifier@1",
+            "maximumScore": 1,
+            "passingScore": 1,
+            "attemptPolicy": {
+              "maximumAttempts": 3,
+              "scorePolicy": "best"
+            }
+          },
+          "feedback": {
+            "mode": "after-submit",
+            "correct": {
+              "message": {
+                "en-GB": "Correct. A dot adds half the original value: 2 + 1 = 3 beats."
+              }
+            },
+            "incorrect": {
+              "message": {
+                "en-GB": "Not quite. Review the notation or concept and try again."
+              }
+            },
+            "showCorrectAnswer": "after-final-attempt"
+          },
+          "hints": [
+            {
+              "id": "note-value-05-hint-1",
+              "content": {
+                "en-GB": "Remember that a dot adds half of the original duration."
+              }
+            }
+          ],
+          "explanation": {
+            "content": {
+              "en-GB": "A dot adds half the original value: 2 + 1 = 3 beats."
+            }
+          },
+          "delivery": {},
+          "analytics": {}
+        }
+      ]
+    }
+  ]
+}

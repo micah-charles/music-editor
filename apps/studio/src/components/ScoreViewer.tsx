@@ -19,11 +19,13 @@ interface ScoreViewerProps {
   musicXml: string;
   measureIssues: MeasureValidationResult[];
   activePlaybackEvents?: PlaybackNoteEvent[];
+  selectedEventId?: string;
   showValidationDetails?: boolean;
   canRevert: boolean;
   onAddMissingRest: (issue: MeasureValidationResult) => void;
   onStretchLastNote: (issue: MeasureValidationResult) => void;
   onRevertChange: () => void;
+  compact?: boolean;
 }
 
 const LARGE_SCORE_MEASURE_THRESHOLD = 80;
@@ -37,11 +39,13 @@ export function ScoreViewer({
   musicXml,
   measureIssues,
   activePlaybackEvents = [],
+  selectedEventId,
   showValidationDetails = false,
   canRevert,
   onAddMissingRest,
   onStretchLastNote,
-  onRevertChange
+  onRevertChange,
+  compact = false
 }: ScoreViewerProps) {
   const { snapshot: playbackSession } = usePlaybackSession();
   const containerRef = useRef<HTMLDivElement | null>(null);
@@ -65,9 +69,10 @@ export function ScoreViewer({
   const hasOverfilled = measureIssues.some((issue) => issue.status === "overfilled");
   const activePlaybackSummary = useMemo(() => summarizeActivePlayback(activePlaybackEvents), [activePlaybackEvents]);
   const measureMap = useMemo(() => buildMeasureMap(score), [score]);
+  const selectedMeasureNumber = useMemo(() => findSelectedMeasure(score, selectedEventId), [score, selectedEventId]);
   const activeMeasureNumber = activePlaybackEvents.length > 0
     ? Math.min(...activePlaybackEvents.map((event) => event.measureNumber ?? 1))
-    : undefined;
+    : selectedMeasureNumber;
 
   useEffect(() => {
     let cancelled = false;
@@ -104,9 +109,9 @@ export function ScoreViewer({
           // current system, so orchestral scores retain one synchronized marker.
           cursorsOptions: [{ type: 3, color: "#f4c84a", alpha: 0.34, follow: false }],
           disableCursor: false,
-          drawPartAbbreviations: true,
-          drawPartNames: true,
-          drawTitle: true,
+          drawPartAbbreviations: !compact,
+          drawPartNames: !compact,
+          drawTitle: !compact,
           drawingParameters: "compacttight",
           followCursor: false
         });
@@ -143,7 +148,7 @@ export function ScoreViewer({
       cancelled = true;
       renderHost?.remove();
     };
-  }, [musicXml]);
+  }, [compact, musicXml]);
 
   useEffect(() => {
     const osmd = osmdRef.current;
@@ -184,7 +189,8 @@ export function ScoreViewer({
     const activeMeasure = activeMeasureNumber === undefined
       ? undefined
       : measureMap.find((measure) => measure.measureNumber === activeMeasureNumber);
-    const visible = activePlaybackEvents.length > 0
+    const visible = selectedMeasureNumber !== undefined
+      || activePlaybackEvents.length > 0
       || playbackSession.status === "playing"
       || playbackSession.status === "paused";
     const highlight = cursorController?.moveTo(
@@ -194,7 +200,7 @@ export function ScoreViewer({
     if (visible && followPlayback && frameRef.current) {
       autoScrollRef.current.follow(frameRef.current, highlight);
     }
-  }, [activeMeasureNumber, cursorController, followPlayback, measureMap, playbackSession.currentSourceTime, playbackSession.status]);
+  }, [activeMeasureNumber, cursorController, followPlayback, measureMap, playbackSession.currentSourceTime, playbackSession.status, selectedMeasureNumber]);
 
   return (
     <div className={`score-viewer ${showFullScore ? "full-score" : ""}`}>
@@ -322,6 +328,18 @@ function summarizeActivePlayback(activeEvents: PlaybackNoteEvent[]): string {
   const pitches = [...new Set(activeEvents.map((event) => event.pitch))].slice(0, 4).join(", ");
   const measureNumber = Math.min(...activeEvents.map((event) => event.measureNumber ?? 1));
   return `Playing ${pitches}${activeEvents.length > 4 ? "..." : ""} · measure ${measureNumber}`;
+}
+
+function findSelectedMeasure(score: FoxChildMusicScore, selectedEventId?: string): number | undefined {
+  if (!selectedEventId) return undefined;
+  for (const part of score.parts) {
+    for (const measure of part.measures) {
+      for (const [eventIndex, event] of measure.events.entries()) {
+        if (`${part.id}:${measure.number}:${event.id ?? eventIndex}` === selectedEventId) return measure.number;
+      }
+    }
+  }
+  return undefined;
 }
 
 function recommendedScoreZoom(score: FoxChildMusicScore): number {

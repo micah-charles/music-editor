@@ -6,7 +6,16 @@ import { parseChordName } from "../chords/chordDetection";
 
 const DIVISIONS = 24;
 
-export function astToMusicXml(score: FoxChildMusicScore): string {
+export interface MusicXmlExportOptions {
+  showTitle?: boolean;
+  showTimeSignature?: boolean;
+  showTempo?: boolean;
+}
+
+export function astToMusicXml(score: FoxChildMusicScore, options: MusicXmlExportOptions = {}): string {
+  const showTitle = options.showTitle !== false;
+  const showTimeSignature = options.showTimeSignature !== false;
+  const showTempo = options.showTempo !== false;
   const partList = score.parts.map((part, index) => {
     return [
       `    <score-part id="${xml(part.id)}">`,
@@ -49,10 +58,12 @@ export function astToMusicXml(score: FoxChildMusicScore): string {
           `          <fifths>${part.transposition?.writtenKeyFifths ?? score.global.key.fifths ?? keyToFifths(score.global.key.tonic, score.global.key.mode)}</fifths>`,
           `          <mode>${score.global.key.mode}</mode>`,
           "        </key>",
-          "        <time>",
-          `          <beats>${score.global.timeSignature.beats}</beats>`,
-          `          <beat-type>${score.global.timeSignature.beatType}</beat-type>`,
-          "        </time>",
+          ...(showTimeSignature ? [
+            "        <time>",
+            `          <beats>${score.global.timeSignature.beats}</beats>`,
+            `          <beat-type>${score.global.timeSignature.beatType}</beat-type>`,
+            "        </time>"
+          ] : []),
           ...(staffCount > 1 ? [`        <staves>${staffCount}</staves>`] : []),
           ...(part.transposition ? [
             "        <transpose>",
@@ -63,7 +74,7 @@ export function astToMusicXml(score: FoxChildMusicScore): string {
           ] : []),
           clefs,
           "      </attributes>",
-          ...(partIndex === 0 ? [
+          ...(partIndex === 0 && showTempo ? [
             "      <direction placement=\"above\">",
             ...(score.global.tempo.label ? [
               "        <direction-type>",
@@ -120,10 +131,12 @@ export function astToMusicXml(score: FoxChildMusicScore): string {
   return [
     "<?xml version=\"1.0\" encoding=\"UTF-8\"?>",
     "<score-partwise version=\"4.0\">",
-    "  <work>",
-    `    <work-title>${xml(score.metadata.title)}</work-title>`,
-    "  </work>",
-    `  <movement-title>${xml(score.metadata.movementTitle ?? score.metadata.title)}</movement-title>`,
+    ...(showTitle ? [
+      "  <work>",
+      `    <work-title>${xml(score.metadata.title)}</work-title>`,
+      "  </work>",
+      `  <movement-title>${xml(score.metadata.movementTitle ?? score.metadata.title)}</movement-title>`
+    ] : []),
     ...creditXml(score),
     "  <identification>",
     score.metadata.composer ? `    <creator type="composer">${xml(score.metadata.composer)}</creator>` : "",
@@ -411,6 +424,7 @@ function timeModificationXml(duration: Duration): string {
 
 function musicXmlTypeName(value: string): string {
   if (value === "sixteenth") return "16th";
+  if (value === "thirty-second") return "32nd";
   if (value.startsWith("dotted-")) return value.replace("dotted-", "");
   return value;
 }

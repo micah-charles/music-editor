@@ -6,6 +6,7 @@ export const DURATION_BEATS: Record<NoteDurationValue, number> = {
   quarter: 1,
   eighth: 0.5,
   sixteenth: 0.25,
+  "thirty-second": 0.125,
   "dotted-half": 3,
   "dotted-quarter": 1.5,
   "dotted-eighth": 0.75
@@ -19,7 +20,8 @@ export const ORDERED_DURATIONS: NoteDurationValue[] = [
   "quarter",
   "dotted-eighth",
   "eighth",
-  "sixteenth"
+  "sixteenth",
+  "thirty-second"
 ];
 
 export function durationToBeats(duration: Duration | NoteDurationValue): number {
@@ -63,6 +65,8 @@ export function durationToMusicXmlType(duration: Duration): { type: string; dots
       return { type: "eighth", dots: 0 };
     case "sixteenth":
       return { type: "16th", dots: 0 };
+    case "thirty-second":
+      return { type: "32nd", dots: 0 };
     case "dotted-half":
       return { type: "half", dots: 1 };
     case "dotted-quarter":

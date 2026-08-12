@@ -900,6 +900,7 @@ function durationValueFromMusicXmlType(type: string, dotCount: number): NoteDura
   if (normalized === "quarter") return "quarter";
   if (normalized === "eighth") return "eighth";
   if (normalized === "16th" || normalized === "sixteenth") return "sixteenth";
+  if (normalized === "32nd" || normalized === "thirty-second") return "thirty-second";
   return undefined;
 }
 

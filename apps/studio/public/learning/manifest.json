@@ -1,0 +1,99 @@
+{
+  "format": "foxchild.music-learning.bank-manifest",
+  "version": "1.0.0",
+  "title": "FoxChild Music Learning 50-Question Starter Bank",
+  "questionCount": 50,
+  "setCount": 10,
+  "combinedSet": "foxchild-foundations-50.question-set.json",
+  "sets": [
+    {
+      "id": "set-note-reading-01",
+      "title": "Note Reading: Treble Clef",
+      "file": "01-set-note-reading-01.question-set.json",
+      "questionCount": 5,
+      "domain": "note-reading"
+    },
+    {
+      "id": "set-key-signatures-major-01",
+      "title": "Major Key Signatures",
+      "file": "02-set-key-signatures-major-01.question-set.json",
+      "questionCount": 5,
+      "domain": "key-signatures"
+    },
+    {
+      "id": "set-music-symbols-01",
+      "title": "Music Signs and Symbols",
+      "file": "03-set-music-symbols-01.question-set.json",
+      "questionCount": 5,
+      "domain": "notation-symbols"
+    },
+    {
+      "id": "set-note-values-01",
+      "title": "Note Values",
+      "file": "04-set-note-values-01.question-set.json",
+      "questionCount": 5,
+      "domain": "rhythm"
+    },
+    {
+      "id": "set-time-signatures-01",
+      "title": "Time Signatures",
+      "file": "05-set-time-signatures-01.question-set.json",
+      "questionCount": 5,
+      "domain": "rhythm"
+    },
+    {
+      "id": "set-interval-ear-training-01",
+      "title": "Interval Ear Training",
+      "file": "06-set-interval-ear-training-01.question-set.json",
+      "questionCount": 5,
+      "domain": "ear-training"
+    },
+    {
+      "id": "set-chord-ear-training-01",
+      "title": "Chord Ear Training",
+      "file": "07-set-chord-ear-training-01.question-set.json",
+      "questionCount": 5,
+      "domain": "ear-training"
+    },
+    {
+      "id": "set-tempo-terms-01",
+      "title": "Tempo Terms",
+      "file": "08-set-tempo-terms-01.question-set.json",
+      "questionCount": 5,
+      "domain": "tempo"
+    },
+    {
+      "id": "set-scales-and-keys-01",
+      "title": "Scales and Key Relationships",
+      "file": "09-set-scales-and-keys-01.question-set.json",
+      "questionCount": 5,
+      "domain": "scales"
+    },
+    {
+      "id": "set-rhythm-counting-01",
+      "title": "Rhythm Counting",
+      "file": "10-set-rhythm-counting-01.question-set.json",
+      "questionCount": 5,
+      "domain": "rhythm"
+    }
+  ],
+  "generatorDependencies": [
+    "single-note-display@1",
+    "key-signature-display@1",
+    "rhythm-fragment@1",
+    "interval-display@1",
+    "chord-display@1"
+  ],
+  "assessmentDependencies": [
+    "exact-identifier@1",
+    "pitch-match@1"
+  ],
+  "interactionDependencies": [
+    "choice",
+    "music-keyboard"
+  ],
+  "notes": [
+    "The bank deliberately uses only MCQ and piano/Web MIDI interactions because those are reported as implemented.",
+    "Generator registry names should be checked against the local repository before import."
+  ]
+}

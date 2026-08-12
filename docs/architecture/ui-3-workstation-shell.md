@@ -21,11 +21,22 @@ Workspace selection changes which existing production tools occupy the center ca
 - Piano Roll and Mixer: editable track/event surface.
 - Recording: notation with Teaching keyboard and MIDI controls.
 - OMR Review: notation with OMR and file import inspector.
-- AI Analysis and Learning: difficulty and learning-pack views.
+- Learning: the ten-set static learning catalogue and question runner.
 - Export: score export actions.
 - Settings: metadata, AST, chord, and layout controls.
 
 No workspace creates a second copy of score state. Every editor receives the same canonical AST and history boundary.
+
+AI Analysis is not a production workspace. Its feature flag defaults to false,
+it has no navigation or focus target, and legacy Analysis URLs or saved layout
+state resolve to Score.
+
+## Static-first boundary
+
+Score editing, playback, MIDI, learning, validation, export and project work do
+not require an application backend. OMR import is the current exception: its
+local helper is contacted only after the user explicitly chooses a PDF or image
+for conversion.
 
 ## Persistent layout
 
