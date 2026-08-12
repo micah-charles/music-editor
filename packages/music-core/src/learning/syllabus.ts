@@ -86,7 +86,7 @@ export function createDefaultSyllabusMatrix(): SyllabusMatrix {
     areas: [
       { id: "pitch-notation", title: "Pitch & notation", skills: [
         generated("pitch.note-reading", "Note reading", "pitch-notation", "Read pitches across clefs, octaves and ledger lines.", ["note-reading"], ["note-reading@2"], ["pitch-match@1"]),
-        planned("pitch.accidentals", "Accidentals and enharmonics", "pitch-notation", "Identify and spell chromatic pitches and enharmonic equivalents.", ["key-signatures"], ["exact-identifier@1"]),
+        generated("pitch.accidentals", "Accidentals and enharmonics", "pitch-notation", "Identify and spell chromatic pitches and enharmonic equivalents.", ["note-reading"], ["accidentals@1"], ["pitch-match@1"]),
         planned("pitch.transposition", "Written transposition", "pitch-notation", "Transpose a written line between clefs, keys and instruments.", ["note-reading"], ["score-semantic-diff@1"])
       ]},
       { id: "keys-scales", title: "Keys & scales", skills: [
@@ -97,7 +97,7 @@ export function createDefaultSyllabusMatrix(): SyllabusMatrix {
       { id: "intervals", title: "Intervals", skills: [
         generated("intervals.written", "Written intervals", "intervals", "Identify interval number, quality, direction and compound form.", ["intervals"], ["intervals@2"], ["exact-identifier@1"]),
         generated("intervals.aural", "Aural intervals", "intervals", "Recognise ascending and descending intervals by ear.", ["ear-training"], ["ear-training@2"], ["exact-identifier@1"]),
-        planned("intervals.inversions", "Interval inversions", "intervals", "Construct and identify inverted intervals.", ["intervals"], ["exact-identifier@1"])
+        generated("intervals.inversions", "Interval inversions", "intervals", "Construct and identify inverted intervals.", ["intervals"], ["interval-inversions@1"], ["exact-identifier@1"])
       ]},
       { id: "rhythm-metre", title: "Rhythm & metre", skills: [
         generated("rhythm.note-values", "Note and rest values", "rhythm-metre", "Calculate durations using notes, rests, dots and ties.", ["note-values"], ["note-values@2"], ["numeric-tolerance@1"]),

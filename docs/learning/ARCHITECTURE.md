@@ -47,7 +47,9 @@ persisted attempts
 The adaptive modules under `packages/music-core/src/learning/` are:
 
 - `adaptiveTypes.ts`: activity, family, identity, policy, mastery and session contracts.
-- `questionFamilies.ts`: the fourteen family definitions and deterministic family engine.
+- `questionFamilies.ts`: the sixteen family definitions and deterministic family
+  engine (fourteen domains, with dedicated accidental and interval-inversion
+  families).
 - `adaptiveRuntime.ts`: eligibility, adaptive selection, session planning and v1 delivery adapter.
 - `mastery.ts`: evidence rebuild, mastery bands, coverage, mistakes and spaced review.
 - `knowledgeGraph.ts`: concept prerequisites, relationships, curriculum mappings,

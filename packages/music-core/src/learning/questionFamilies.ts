@@ -134,6 +134,23 @@ function familyBlueprints(): FamilyBlueprint[] {
           hint: "Read the clef, then count lines and spaces from a landmark note."
         };
       }),
+    family("accidentals@1", "Accidentals", "note-reading", "note-reading@1", "near-neighbour@1",
+      { midi: integer(48, 84), clef: enumeration("treble", "bass") },
+      ["accidentals"], ["chromatic-pitch", "enharmonic-pitch"],
+      (seed, difficulty, parameters) => {
+        const midi = boundedInteger(parameters.midi, pickNumber(seed, difficulty > 0.6 ? 49 : 61, difficulty > 0.6 ? 83 : 72), 48, 84);
+        const name = pitchToName(midiToPitch(midi));
+        const selectedClef = enumValue(parameters.clef, ["treble", "bass"], midi < 60 ? "bass" : "treble");
+        return {
+          correct: name,
+          candidates: nearbyPitches(midi),
+          prompt: "Play the written accidental pitch on the piano keyboard.",
+          generatorParameters: { midi, clef: selectedClef },
+          interaction: "music-keyboard",
+          explanation: `The written accidental pitch is ${name}.`,
+          hint: "Read the accidental before naming the note, then find the matching piano key."
+        };
+      }),
     family("key-signatures@2", "Key signatures", "key-signatures", "key-signature-display@1", "common-confusions@1",
       { tonic: enumeration("C", "G", "D", "A", "F", "Bb", "Eb") },
       ["major-key-signature"], ["sharp-keys", "flat-keys"],
@@ -211,6 +228,22 @@ function familyBlueprints(): FamilyBlueprint[] {
           generatorParameters: { rootMidi: 60, semitones, direction },
           explanation: `The distance is a ${names[semitones - 1]}.`,
           hint: "Count letter names for the interval number, then check the semitone quality."
+        };
+      }),
+    family("interval-inversions@1", "Interval inversions", "intervals", "interval-display@1", "curriculum-peers@1",
+      { semitones: integer(1, 12), direction: enumeration("ascending", "descending") },
+      ["interval-inversion"], ["simple-inversion", "quality-inversion"],
+      (seed, difficulty, parameters) => {
+        const semitones = boundedInteger(parameters.semitones, 1 + stableHash(seed) % (difficulty > 0.7 ? 12 : 7), 1, 12);
+        const direction = enumValue(parameters.direction, ["ascending", "descending"], "ascending");
+        const inversion = intervalName(semitones === 12 ? 12 : 12 - semitones);
+        return {
+          correct: inversion,
+          candidates: ["unison", "minor 2nd", "major 2nd", "minor 3rd", "major 3rd", "perfect 4th", "tritone", "perfect 5th", "minor 6th", "major 6th", "minor 7th", "major 7th"],
+          prompt: "Which interval is the inversion of the interval shown?",
+          generatorParameters: { rootMidi: 60, semitones, direction },
+          explanation: `The interval inverts to a ${inversion}.`,
+          hint: "Invert the interval number to nine, then swap major/minor or perfect qualities."
         };
       }),
     family("chords@2", "Chords", "chords", "chord-display@1", "common-confusions@1",
@@ -572,6 +605,10 @@ function enumNumber(value: unknown, allowed: readonly number[], fallback: number
 
 function nearbyPitches(midi: number): string[] {
   return [-2, -1, 0, 1, 2].map((offset) => pitchToName(midiToPitch(midi + offset)));
+}
+
+function intervalName(semitones: number): string {
+  return ["unison", "minor 2nd", "major 2nd", "minor 3rd", "major 3rd", "perfect 4th", "tritone", "perfect 5th", "minor 6th", "major 6th", "minor 7th", "major 7th", "octave"][Math.max(0, Math.min(12, semitones))];
 }
 
 function optionId(value: string | number): string {

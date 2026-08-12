@@ -29,9 +29,9 @@ const emptyLearner: AdaptiveLearnerState = {
 };
 
 describe("adaptive learning v2", () => {
-  it("registers all fourteen required generator-backed domains", () => {
+  it("registers all generator-backed domains and extended skill families", () => {
     const families = createDefaultQuestionFamilyRegistry().list();
-    expect(families.map((family) => family.domain).sort()).toEqual([
+    expect([...new Set(families.map((family) => family.domain))].sort()).toEqual([
       "chords",
       "ear-training",
       "error-detection",
@@ -191,7 +191,7 @@ describe("adaptive learning v2", () => {
     const activity = migrateQuestionSetsToActivity(sets);
     expect(activity.schemaVersion).toBe("2.0.0");
     expect(activity.authoredItems).toHaveLength(50);
-    expect(activity.questionFamilies).toHaveLength(14);
+    expect(activity.questionFamilies).toHaveLength(16);
     expect(activity.authoredItems.every((item) => item.metadata?.adaptive === true)).toBe(true);
     expect(validateLearningActivity(activity)).toEqual({ valid: true, diagnostics: [] });
     expect(sets.flatMap(questionItems)).toHaveLength(50);
