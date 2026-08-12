@@ -53,6 +53,10 @@ The adaptive modules under `packages/music-core/src/learning/` are:
 - `knowledgeGraph.ts`: concept prerequisites, relationships, curriculum mappings,
   difficulty, status resolution and recommendation scoring.
 - `curriculum.ts`: FoxChild, ABRSM, Trinity and GCSE registries and grade mappings.
+- `syllabus.ts`: the ten-area curriculum skill matrix, cross-curriculum target
+  levels, generator/assessment links and explicit covered/partial/planned
+  coverage reporting. The matrix is the roadmap for expanding beyond the
+  current authored bank; it does not claim planned skills are implemented.
 - `distractors.ts`: versioned near-neighbour, curriculum-peer and common-confusion strategies.
 - `migrationV2.ts`: pure v1 question-set bank to v2 activity migration.
 - `validationV2.ts`: v2 structural, reference and policy diagnostics.
@@ -113,6 +117,22 @@ mappings, ABRSM grade, estimated difficulty and its local review schedule.
 The recommendation score combines due/weak priority, mastery gap, mistakes,
 available study time and the selected curriculum. A generated adaptive session
 is still delivered through `QuestionSet`, preserving the validated renderer.
+
+## Syllabus coverage model
+
+The system measures curriculum coverage by skill rather than by a fixed number
+of stored questions. `createDefaultSyllabusMatrix()` defines ten areas spanning
+pitch and notation, keys and scales, intervals, rhythm and metre, harmony,
+terms and signs, melody and composition, score reading, aural/listening, and
+musical analysis/context. Each skill records its target FoxChild levels,
+ABRSM/Trinity Grades 1–8, GCSE Foundation/Higher levels, generator families,
+and assessment strategies.
+
+`syllabusCoverage()` reports each skill as `covered`, `partial`, or `planned`.
+Generated skills can produce many reproducible instances from a seed; planned
+skills remain visible as explicit syllabus gaps until their generator or
+authored assessment is implemented. This prevents a finite 50- or 1,000-item
+bank from being mistaken for complete ABRSM or GCSE coverage.
 
 The expanded graph is the primary Learning Home navigation. During every
 lesson, result and overview state, `KnowledgeNavigator` remains available as a

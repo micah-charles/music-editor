@@ -40,8 +40,8 @@ export function createDefaultCurriculumRegistry(): CurriculumRegistry {
   const registry = new CurriculumRegistry();
   ([
     { id: "foxchild", title: "FoxChild Learning Path", levels: ["Foundation", "Developing", "Fluent", "Advanced"] },
-    { id: "abrsm", title: "ABRSM Music Theory", levels: ["Initial", "Grade 1", "Grade 2", "Grade 3", "Grade 4", "Grade 5"] },
-    { id: "trinity", title: "Trinity Music Theory", levels: ["Initial", "Grade 1", "Grade 2", "Grade 3", "Grade 4", "Grade 5"] },
+    { id: "abrsm", title: "ABRSM Music Theory", levels: ["Initial", "Grade 1", "Grade 2", "Grade 3", "Grade 4", "Grade 5", "Grade 6", "Grade 7", "Grade 8"] },
+    { id: "trinity", title: "Trinity Music Theory", levels: ["Initial", "Grade 1", "Grade 2", "Grade 3", "Grade 4", "Grade 5", "Grade 6", "Grade 7", "Grade 8"] },
     { id: "gcse", title: "GCSE Music", levels: ["Foundation", "Higher"] }
   ] satisfies CurriculumDefinition[]).forEach((definition) => registry.register(definition));
   return registry;

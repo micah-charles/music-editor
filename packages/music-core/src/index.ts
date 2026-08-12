@@ -35,6 +35,7 @@ export * from "./learning/migrationV2";
 export * from "./learning/questionFamilies";
 export * from "./learning/registries";
 export * from "./learning/runtime";
+export * from "./learning/syllabus";
 export * from "./learning/types";
 export * from "./learning/validation";
 export * from "./learning/validationV2";
