@@ -3129,6 +3129,45 @@ h3 {
   color: var(--ink, #22263a);
 }
 
+.learning-rhythm-tap {
+  display: grid;
+  gap: 0.75rem;
+  margin-top: 1rem;
+  padding: 1rem;
+  border: 1px solid var(--line, #dde1eb);
+  border-radius: 0.75rem;
+  background: var(--surface, #fff);
+}
+
+.learning-rhythm-tap p {
+  margin: 0;
+  color: var(--muted, #6d7280);
+}
+
+.learning-rhythm-tap-count {
+  font-weight: 700;
+  color: #4d46e5;
+}
+
+.learning-rhythm-tap-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.learning-rhythm-tap-button {
+  min-width: 7rem;
+  min-height: 3.25rem;
+  border: 0;
+  border-radius: 50%;
+  background: #5b5cf0;
+  color: #fff;
+  font-size: 1.1rem;
+  font-weight: 800;
+  box-shadow: 0 0.3rem 0.9rem rgb(91 92 240 / 25%);
+}
+
 .learning-ordering-instruction {
   margin: 0;
   color: var(--muted, #6d7280);

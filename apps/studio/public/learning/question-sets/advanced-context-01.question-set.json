@@ -267,6 +267,21 @@
           "feedback": { "mode": "after-submit", "correct": { "message": { "en-GB": "Correct. Each match identifies a specific harmonic clue." } }, "incorrect": { "message": { "en-GB": "Use the musical evidence: resolution, prepared dissonance or sustained bass." } }, "showCorrectAnswer": "after-final-attempt" },
           "hints": [{ "id": "context-15-hint", "content": { "en-GB": "A cadence is a resolution, a suspension resolves a dissonance, and a pedal sustains a bass note." } }],
           "explanation": { "content": { "en-GB": "Matching lets learners connect terminology with evidence, a core higher-level analysis skill." } }
+        },
+        {
+          "id": "context-16",
+          "type": "rhythm-tapping",
+          "version": 1,
+          "metadata": { "skillIds": ["musical-analysis.form-texture"], "conceptId": "musical-analysis.form-texture.rhythmic-motif", "curriculumLevels": { "abrsm": ["Grade 6", "Grade 7"], "gcse": ["Higher"] }, "difficulty": 0.84, "tags": ["rhythm", "tap", "aural"] },
+          "variables": {},
+          "stimulus": [{ "id": "context-16-stimulus", "kind": "text", "content": { "en-GB": "A four-beat motif has onsets at beats 1, 2.5, 3 and 4." }, "accessibility": { "description": { "en-GB": "A written description of a four-beat rhythmic motif." } } }],
+          "prompt": { "content": { "en-GB": "Tap the four onsets of the motif, then submit your rhythm." }, "format": "plain-text" },
+          "interaction": { "kind": "rhythm-tap", "responseId": "context-16-response", "cardinality": "record", "tempo": 72 },
+          "response": { "id": "context-16-response", "baseType": "rhythm", "cardinality": "record", "correct": { "value": [{ "onset": 0, "duration": 0.25 }, { "onset": 1.25, "duration": 0.25 }, { "onset": 1.75, "duration": 0.25 }, { "onset": 2.75, "duration": 0.25 }] } },
+          "assessment": { "strategy": "rhythm-alignment@1", "maximumScore": 1, "passingScore": 0.65, "parameters": { "onsetToleranceMs": 180, "durationToleranceRatio": 0.5 }, "attemptPolicy": { "maximumAttempts": 2, "scorePolicy": "best" } },
+          "feedback": { "mode": "after-submit", "correct": { "message": { "en-GB": "Good timing. Your tap pattern follows the motif." } }, "incorrect": { "message": { "en-GB": "Listen or count carefully, then try the motif again." } }, "showCorrectAnswer": "after-final-attempt" },
+          "hints": [{ "id": "context-16-hint", "content": { "en-GB": "Count four beats and place the second onset halfway between beats 2 and 3." } }],
+          "explanation": { "content": { "en-GB": "Rhythm tapping records onset timing locally and scores it against the canonical motif." } }
         }
       ]
     }

@@ -26,4 +26,10 @@ describe("learning answer interaction", () => {
     expect(learningPanelSource).toContain("Submit matches");
     expect(learningPanelSource).toContain("matchingOptions");
   });
+
+  it("renders a local rhythm tap recorder", () => {
+    expect(learningPanelSource).toContain('resolvedItem?.interaction.kind === "rhythm-tap"');
+    expect(learningPanelSource).toContain("Tap ♩");
+    expect(learningPanelSource).toContain("Submit rhythm");
+  });
 });

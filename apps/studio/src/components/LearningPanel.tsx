@@ -150,6 +150,7 @@ export function LearningPanel({
   const [sessionPosition, setSessionPosition] = useState(0);
   const [resolvedItem, setResolvedItem] = useState<ResolvedLearningItem>();
   const [selectedResponse, setSelectedResponse] = useState<unknown>();
+  const [rhythmTaps, setRhythmTaps] = useState<Array<{ onset: number; duration: number }>>([]);
   const [result, setResult] = useState<AssessmentResult>();
   const [attemptNumber, setAttemptNumber] = useState(1);
   const [hintVisible, setHintVisible] = useState(false);
@@ -167,6 +168,7 @@ export function LearningPanel({
   const [conceptSearch, setConceptSearch] = useState("");
   const previousMidiRef = useRef<string[]>([]);
   const submissionLockedRef = useRef(false);
+  const rhythmStartRef = useRef<number>();
 
   useEffect(() => {
     let cancelled = false;
@@ -293,6 +295,8 @@ export function LearningPanel({
     setResolvedItem(undefined);
     setResult(undefined);
     setSelectedResponse(undefined);
+    setRhythmTaps([]);
+    rhythmStartRef.current = undefined;
     submissionLockedRef.current = false;
     setAttemptNumber(1);
     setHintVisible(false);
@@ -418,6 +422,14 @@ export function LearningPanel({
   function selectMatchingTarget(leftId: string, targetId: string) {
     if (result || resolvedItem?.interaction.kind !== "matching") return;
     setSelectedResponse({ ...matchingSelections, [leftId]: targetId });
+  }
+
+  function tapRhythm() {
+    if (result || resolvedItem?.interaction.kind !== "rhythm-tap") return;
+    const now = performance.now();
+    rhythmStartRef.current ??= now;
+    const onset = (now - rhythmStartRef.current) / 1000;
+    setRhythmTaps((current) => [...current, { onset, duration: 0.25 }]);
   }
 
   function retry() {
@@ -703,6 +715,18 @@ export function LearningPanel({
             </section>
           ) : null}
 
+          {resolvedItem?.interaction.kind === "rhythm-tap" ? (
+            <section className="learning-rhythm-tap" aria-label="Rhythm tapping input">
+              <p>Tap the button in time with the displayed rhythm, then submit your performance.</p>
+              <div className="learning-rhythm-tap-count" aria-live="polite">{rhythmTaps.length} taps recorded</div>
+              <div className="learning-rhythm-tap-actions">
+                <button type="button" className="learning-rhythm-tap-button" disabled={Boolean(result)} onClick={tapRhythm}>Tap ♩</button>
+                <button type="button" disabled={Boolean(result) || rhythmTaps.length === 0} onClick={() => { setRhythmTaps([]); rhythmStartRef.current = undefined; }}>Reset</button>
+                <button type="button" className="primary" disabled={Boolean(result) || rhythmTaps.length === 0} onClick={() => submit(rhythmTaps, "rhythm-tap")}>Submit rhythm</button>
+              </div>
+            </section>
+          ) : null}
+
           {resolvedItem?.interaction.kind === "ordering" ? (
             <section className="learning-ordering" aria-label="Order the options">
               <p className="learning-ordering-instruction">Arrange the items from first to last.</p>
@@ -804,7 +828,7 @@ export function LearningPanel({
           <button type="button" disabled={sessionPosition === 0} onClick={() => moveQuestion(-1)}>← Previous</button>
           {!result ? (
             <span className="learning-choice-guidance">
-              {resolvedItem?.interaction.kind === "choice" ? "Choose an answer above" : resolvedItem?.interaction.kind === "text-entry" ? "Write an answer above" : resolvedItem?.interaction.kind === "numeric-entry" ? "Enter a number above" : resolvedItem?.interaction.kind === "matching" ? "Match the items above" : resolvedItem?.interaction.kind === "ordering" ? "Arrange the items above" : "Complete the question above"}
+              {resolvedItem?.interaction.kind === "choice" ? "Choose an answer above" : resolvedItem?.interaction.kind === "text-entry" ? "Write an answer above" : resolvedItem?.interaction.kind === "numeric-entry" ? "Enter a number above" : resolvedItem?.interaction.kind === "matching" ? "Match the items above" : resolvedItem?.interaction.kind === "ordering" ? "Arrange the items above" : resolvedItem?.interaction.kind === "rhythm-tap" ? "Tap the rhythm above" : "Complete the question above"}
             </span>
           ) : (
             <button type="button" className="primary" disabled={!result && currentAttemptState === "unanswered"} onClick={() => moveQuestion(1)}>
