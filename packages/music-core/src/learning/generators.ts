@@ -146,6 +146,7 @@ export const rhythmFragmentGenerator: MusicQuestionGenerator = {
     const authoredPattern = Array.isArray(parameters.pattern)
       ? parameters.pattern.map((value) => durationName(value, "quarter"))
       : undefined;
+    const tuplet = isRecord(parameters.tuplet) ? parameters.tuplet : undefined;
     const allowed = asDurations(parameters.allowedDurations);
     const beats = Math.max(1, number(parameters.beats, 4));
     const authoredTimeSignature = isRecord(parameters.timeSignature) ? parameters.timeSignature : {};
@@ -154,12 +155,17 @@ export const rhythmFragmentGenerator: MusicQuestionGenerator = {
       beatType: Math.max(1, Math.round(number(authoredTimeSignature.beatType, 4)))
     };
     if (authoredPattern?.length) {
+      const actualNotes = tuplet ? Math.max(2, Math.round(number(tuplet.actualNotes, 0))) : 0;
+      const normalNotes = tuplet ? Math.max(1, Math.round(number(tuplet.normalNotes, 0))) : 0;
+      const normalType = durationName(tuplet?.normalType, "quarter");
       return score({
         id: deterministicId("rhythm", seed),
         title: "Rhythm fragment",
         tempo: number(parameters.bpm, 90),
         timeSignature,
-        events: authoredPattern.map((value, index) => noteEvent(`rhythm-note-${index + 1}`, 60, value))
+        events: authoredPattern.map((value, index) => actualNotes > 1 && normalNotes > 0
+          ? noteEventWithTuplet(`rhythm-note-${index + 1}`, 60, value, actualNotes, normalNotes, normalType)
+          : noteEvent(`rhythm-note-${index + 1}`, 60, value))
       });
     }
     const events: MusicEvent[] = [];
@@ -348,6 +354,26 @@ function score(options: {
 
 function noteEvent(id: string, midi: number, value: NoteDurationValue): MusicEvent {
   return { id, type: "note", pitch: midiToPitch(midi), duration: duration(value) };
+}
+
+function noteEventWithTuplet(
+  id: string,
+  midi: number,
+  value: NoteDurationValue,
+  actualNotes: number,
+  normalNotes: number,
+  normalType: NoteDurationValue
+): MusicEvent {
+  return {
+    id,
+    type: "note",
+    pitch: midiToPitch(midi),
+    duration: {
+      value,
+      beats: DURATION_BEATS[value] * normalNotes / actualNotes,
+      tuplet: { actualNotes, normalNotes, normalType }
+    }
+  };
 }
 
 function duration(value: NoteDurationValue) {

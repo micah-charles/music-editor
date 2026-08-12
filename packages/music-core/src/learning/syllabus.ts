@@ -103,7 +103,7 @@ export function createDefaultSyllabusMatrix(): SyllabusMatrix {
         generated("rhythm.note-values", "Note and rest values", "rhythm-metre", "Calculate durations using notes, rests, dots and ties.", ["note-values"], ["note-values@2"], ["numeric-tolerance@1"]),
         generated("rhythm.metre", "Simple and compound metre", "rhythm-metre", "Identify and apply time signatures and beat grouping.", ["time-signatures"], ["time-signatures@2"], ["exact-identifier@1"]),
         generated("rhythm.patterns", "Rhythm patterns", "rhythm-metre", "Count, perform and compare rhythmic fragments.", ["rhythm"], ["rhythm@2"], ["numeric-tolerance@1"]),
-        planned("rhythm.tuplets", "Tuplets and irregular grouping", "rhythm-metre", "Read and construct tuplets and irregular subdivisions.", ["rhythm"], ["rhythm-alignment@1"])
+        generated("rhythm.tuplets", "Tuplets and irregular grouping", "rhythm-metre", "Read and construct tuplets and irregular subdivisions.", ["rhythm"], ["tuplets@1"], ["exact-identifier@1"])
       ]},
       { id: "harmony", title: "Chords & harmony", skills: [
         generated("harmony.chord-quality", "Chord qualities", "harmony", "Identify triad and seventh-chord qualities.", ["chords"], ["chords@2"], ["exact-identifier@1"]),

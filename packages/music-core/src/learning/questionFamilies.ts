@@ -354,6 +354,25 @@ function familyBlueprints(): FamilyBlueprint[] {
           hint: "Add each note value from left to right."
         };
       }),
+    family("tuplets@1", "Tuplets", "rhythm", "rhythm-fragment@1", "curriculum-peers@1",
+      { actualNotes: enumeration(3, 5, 7), normalNotes: enumeration(2, 4) },
+      ["tuplet-grouping"], ["triplets", "irregular-tuplets"],
+      (seed, _difficulty, parameters) => {
+        const actualNotes = enumNumber(parameters.actualNotes, [3, 5, 7], 3);
+        const normalNotes = enumNumber(parameters.normalNotes, [2, 4], 2);
+        return {
+          correct: actualNotes,
+          candidates: [3, 5, 7, 9],
+          prompt: "How many notes are contained in this tuplet group?",
+          generatorParameters: {
+            pattern: Array.from({ length: actualNotes }, () => "quarter"),
+            beats: normalNotes,
+            tuplet: { actualNotes, normalNotes, normalType: "quarter" }
+          },
+          explanation: `This group contains ${actualNotes} notes in the time normally occupied by ${normalNotes}.`,
+          hint: "Count the notes under the tuplet bracket, then compare the group with its normal beat span."
+        };
+      }),
     family("tempo@2", "Tempo", "tempo", "tempo-example@2", "curriculum-peers@1",
       { bpm: integer(50, 180), term: enumeration("largo", "andante", "moderato", "allegro", "presto") },
       ["tempo-term"], ["slow-tempo", "fast-tempo"],
