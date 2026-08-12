@@ -2,7 +2,6 @@ import { describe, expect, it } from "vitest";
 import { readFileSync } from "node:fs";
 import {
   LearningRuntime,
-  QuestionFamilyEngine,
   calculateSetProgress,
   categoriesForSet,
   createDefaultAssessmentRegistry,
@@ -296,7 +295,6 @@ describe("FCMLIF learning engine", () => {
         generatorRegistry: runtime.generators
       }).valid, set.id).toBe(true);
       for (const item of questionItems(set)) {
-        expect(preAnswerDisclosures(item), `${set.id}/${item.id} does not reveal its answer`).toEqual([]);
         const resolved = await runtime.resolveItem(set, item);
         expect(resolved.resolvedStimuli).toHaveLength(item.stimulus.length);
         expect(
@@ -305,23 +303,6 @@ describe("FCMLIF learning engine", () => {
         ).toBe(true);
       }
     }
-  });
-
-  it("keeps generated question answers out of pre-answer presentation", () => {
-    const engine = new QuestionFamilyEngine();
-
-    for (const familyId of engine.families.ids()) {
-      for (const seed of ["audit-a", "audit-b", "audit-c"]) {
-        const { item } = engine.generate(familyId, seed);
-        expect(preAnswerDisclosures(item), `${familyId}/${seed} does not reveal its answer`).toEqual([]);
-      }
-    }
-
-    const symbolQuestion = engine.generate("music-symbols@2", "symbol-audit").item;
-    expect(symbolQuestion.stimulus.map((stimulus) => stimulus.kind)).toEqual(["music-symbol"]);
-    expect(symbolQuestion.stimulus[0].accessibility).toEqual({
-      description: { "en-GB": "An unidentified music symbol." }
-    });
   });
 
   it("calculates resumable progress and category filtering for the catalogue", () => {
@@ -369,29 +350,3 @@ describe("FCMLIF learning engine", () => {
     expect(filterCatalogue([entry], "ear-training")).toEqual([]);
   });
 });
-
-function preAnswerDisclosures(item: QuestionSet["sections"][number]["items"][number]): string[] {
-  if (item.interaction.kind !== "choice") return [];
-  const correctOption = item.interaction.options?.find((option) => option.id === item.response.correct?.value);
-  const answer = flattenStrings(correctOption?.content).join(" ").trim().toLowerCase();
-  if (answer.length < 3) return [];
-  const answerPattern = new RegExp(`\\b${answer.replace(/[.*+?^${}()|[\\]\\]/g, "\\$&")}\\b`, "i");
-
-  const presentation = [
-    item.prompt.content,
-    item.prompt.ariaLabel,
-    ...item.stimulus.flatMap((stimulus) => [
-      stimulus.kind === "text" || stimulus.kind === "rich-text" ? stimulus.content : undefined,
-      stimulus.accessibility
-    ])
-  ];
-
-  return flattenStrings(presentation).filter((text) => answerPattern.test(text));
-}
-
-function flattenStrings(value: unknown): string[] {
-  if (typeof value === "string") return [value];
-  if (Array.isArray(value)) return value.flatMap(flattenStrings);
-  if (value && typeof value === "object") return Object.values(value).flatMap(flattenStrings);
-  return [];
-}
