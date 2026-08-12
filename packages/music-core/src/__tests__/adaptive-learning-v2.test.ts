@@ -93,6 +93,7 @@ describe("adaptive learning v2", () => {
 
   it("honours validated activity-level family parameters", () => {
     const activity = createDefaultLearningActivity();
+    activity.questionFamilies = ["chords@2"];
     const chordConfiguration = activity.generatorConfiguration.families.find((entry) => entry.familyId === "chords@2");
     if (!chordConfiguration) throw new Error("Missing chords family configuration.");
     chordConfiguration.parameters = { quality: "diminished" };
@@ -135,7 +136,7 @@ describe("adaptive learning v2", () => {
       level: "Grade 3",
       domains: ["ear-training", "chords"]
     });
-    expect(eligible.map((family) => family.domain).sort()).toEqual(["chords", "ear-training"]);
+    expect([...new Set(eligible.map((family) => family.domain))].sort()).toEqual(["chords", "ear-training"]);
     const session = runtime.start(activity, emptyLearner, {
       curriculumId: "abrsm",
       level: "Grade 3",
@@ -191,7 +192,7 @@ describe("adaptive learning v2", () => {
     const activity = migrateQuestionSetsToActivity(sets);
     expect(activity.schemaVersion).toBe("2.0.0");
     expect(activity.authoredItems).toHaveLength(50);
-    expect(activity.questionFamilies).toHaveLength(16);
+    expect(activity.questionFamilies).toHaveLength(17);
     expect(activity.authoredItems.every((item) => item.metadata?.adaptive === true)).toBe(true);
     expect(validateLearningActivity(activity)).toEqual({ valid: true, diagnostics: [] });
     expect(sets.flatMap(questionItems)).toHaveLength(50);

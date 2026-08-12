@@ -263,6 +263,28 @@ function familyBlueprints(): FamilyBlueprint[] {
           hint: "Compare the third and fifth above the root."
         };
       }),
+    family("chord-inversions@1", "Chord inversions", "chords", "chord-display@1", "curriculum-peers@1",
+      { quality: enumeration("major", "minor"), inversion: enumeration("root", "first", "second") },
+      ["chord-inversion"], ["triad-inversion"],
+      (_seed, _difficulty, parameters) => {
+        const quality = enumValue(parameters.quality, ["major", "minor"], "major");
+        const inversion = enumValue(parameters.inversion, ["root", "first", "second"], "root");
+        const base = quality === "major" ? [0, 4, 7] : [0, 3, 7];
+        const voicings: Record<string, number[]> = {
+          root: base,
+          first: [base[1], base[2], base[0] + 12],
+          second: [base[2], base[0] + 12, base[1] + 12]
+        };
+        return {
+          correct: inversion,
+          candidates: ["root", "first", "second"],
+          prompt: "Which inversion is shown?",
+          generatorParameters: { rootMidi: 60, intervals: voicings[inversion] },
+          optionLabels: { root: "Root position", first: "First inversion", second: "Second inversion" },
+          explanation: `The ${quality} triad is in ${inversion === "root" ? "root position" : `${inversion} inversion`}.`,
+          hint: "Find the lowest note: root position has the root in the bass; inversions move the third or fifth down."
+        };
+      }),
     family("scales@2", "Scales", "scales", "scale-display@2", "common-confusions@1",
       { mode: enumeration("major", "natural-minor", "harmonic-minor") },
       ["scale-type"], ["major-scale", "minor-scales"],
