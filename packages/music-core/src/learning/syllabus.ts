@@ -122,7 +122,7 @@ export function createDefaultSyllabusMatrix(): SyllabusMatrix {
       { id: "score-reading", title: "Score reading", skills: [
         generated("score.sight-reading", "Sight reading", "score-reading", "Read and perform a notated phrase with increasing complexity.", ["sight-reading"], ["sight-reading@2"], ["sight-reading@1"]),
         generated("score.instruments", "Instruments and transposing instruments", "score-reading", "Identify instruments and account for transposing notation.", ["note-reading"], ["instruments@1"], ["exact-identifier@1"]),
-        planned("score.open-short", "Open and short score", "score-reading", "Read and reduce multi-part notation.", ["note-reading"], ["score-semantic-diff@1"])
+        generated("score.open-short", "Open and short score", "score-reading", "Read and reduce multi-part notation.", ["note-reading"], ["open-score@1"], ["exact-identifier@1"])
       ]},
       { id: "aural-listening", title: "Aural & listening", skills: [
         generated("aural.intervals", "Interval ear training", "aural-listening", "Identify melodic intervals from generated audio.", ["ear-training"], ["ear-training@2"], ["exact-identifier@1"]),
@@ -130,8 +130,8 @@ export function createDefaultSyllabusMatrix(): SyllabusMatrix {
         generated("aural.features", "Musical features and instrumentation", "aural-listening", "Identify texture, sonority, metre, form and instrumentation in an excerpt.", ["ear-training"], ["aural-features@1"], ["exact-identifier@1"])
       ]},
       { id: "musical-analysis", title: "Musical analysis & context", skills: [
-        planned("analysis.form-texture", "Form and texture", "musical-analysis", "Analyse formal structure and texture in a musical example.", ["error-detection"], ["rubric@1"]),
-        planned("analysis.context", "Style and context", "musical-analysis", "Connect musical features with style, context and area-of-study evidence.", ["error-detection"], ["rubric@1"])
+        generated("analysis.form-texture", "Form and texture", "musical-analysis", "Analyse formal structure and texture in a musical example.", ["error-detection"], ["analysis-form-texture@1"], ["exact-identifier@1"]),
+        generated("analysis.context", "Style and context", "musical-analysis", "Connect musical features with style, context and area-of-study evidence.", ["error-detection"], ["analysis-context@1"], ["exact-identifier@1"])
       ]}
     ]
   };

@@ -52,6 +52,8 @@ export function createDefaultMusicGeneratorRegistry(): MusicGeneratorRegistry {
     phraseStructureGenerator,
     melodyCompletionGenerator,
     auralFeaturesGenerator,
+    analysisExampleGenerator,
+    openScoreGenerator,
     errorDetectionGenerator
   ].forEach((generator) => registry.register(generator));
   return registry;
@@ -407,6 +409,44 @@ export const auralFeaturesGenerator: MusicQuestionGenerator = {
       instrument: { name: instrumentName, midiProgram: instrumentName === "Piano" ? 1 : 73 },
       events
     });
+  }
+};
+
+export const analysisExampleGenerator: MusicQuestionGenerator = {
+  id: "analysis-example-display@1",
+  generate(seed, parameters) {
+    const analysisType = String(parameters.analysisType ?? "form");
+    const answer = String(parameters.answer ?? "binary");
+    const root = 60;
+    const motif = answer === "rondo" ? [0, 2, 4, 0, 5, 7, 0, 2] : answer === "ternary" ? [0, 2, 4, 7, 5, 3, 0, 2] : [0, 2, 4, 5, 4, 2, 0, 0];
+    return score({
+      id: deterministicId(`analysis-${analysisType}`, seed),
+      title: `${analysisType} analysis example`,
+      tempo: analysisType === "context" ? 112 : 92,
+      events: motif.map((offset, index) => noteEvent(`analysis-note-${index + 1}`, root + offset, "quarter"))
+    });
+  }
+};
+
+export const openScoreGenerator: MusicQuestionGenerator = {
+  id: "open-score-display@1",
+  generate(seed, parameters) {
+    const voices = Math.max(2, Math.min(4, Math.round(number(parameters.voices, 2))));
+    const base = score({
+      id: deterministicId("open-score", seed),
+      title: `${voices}-part open score`,
+      events: [noteEvent("open-score-soprano", 72, "whole")]
+    });
+    for (let index = 1; index < voices; index += 1) {
+      base.parts.push({
+        id: `learning-part-${index + 1}`,
+        name: `Voice ${index + 1}`,
+        instrument: { name: "Piano", midiProgram: 1 },
+        clef: index % 2 === 0 ? "bass" : "treble",
+        measures: eventsToMeasures([noteEvent(`open-score-note-${index + 1}`, 60 - index * 3, "whole")], 4)
+      });
+    }
+    return base;
   }
 };
 

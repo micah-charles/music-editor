@@ -558,6 +558,52 @@ function familyBlueprints(): FamilyBlueprint[] {
           hint: "Listen for one line, chordal accompaniment, or multiple independent lines."
         };
       }),
+    family("analysis-form-texture@1", "Form and texture analysis", "error-detection", "analysis-example-display@1", "curriculum-peers@1",
+      { answer: enumeration("binary", "ternary", "rondo"), texture: enumeration("monophonic", "homophonic", "polyphonic") },
+      ["form-and-texture"], ["formal-sections", "texture-identification"],
+      (seed, _difficulty, parameters) => {
+        const answers = ["binary", "ternary", "rondo"];
+        const answer = enumValue(parameters.answer, answers, pick(seed, answers));
+        const texture = enumValue(parameters.texture, ["monophonic", "homophonic", "polyphonic"], "homophonic");
+        return {
+          correct: answer,
+          candidates: answers,
+          prompt: "Which formal structure best describes this excerpt?",
+          generatorParameters: { analysisType: "form", answer, texture },
+          explanation: `The recurring sections suggest a ${answer} form; the texture is ${texture}.`,
+          hint: "Listen for repeated sections and whether the musical lines move together or independently."
+        };
+      }),
+    family("analysis-context@1", "Style and context", "error-detection", "analysis-example-display@1", "curriculum-peers@1",
+      { answer: enumeration("baroque", "classical", "romantic", "contemporary") },
+      ["style-and-context"], ["period-identification", "contextual-evidence"],
+      (seed, _difficulty, parameters) => {
+        const answers = ["baroque", "classical", "romantic", "contemporary"];
+        const answer = enumValue(parameters.answer, answers, pick(seed, answers));
+        return {
+          correct: answer,
+          candidates: answers,
+          prompt: "Which style or period best fits this musical example?",
+          generatorParameters: { analysisType: "context", answer },
+          explanation: `The tempo, melodic shape and presentation are being used as evidence for a ${answer} style attribution.`,
+          hint: "Use several clues together: texture, phrase shape, harmony, sonority and expressive character."
+        };
+      }),
+    family("open-score@1", "Open and short score", "note-reading", "open-score-display@1", "curriculum-peers@1",
+      { voices: integer(2, 4) },
+      ["open-short-score"], ["voice-identification", "score-reduction"],
+      (seed, _difficulty, parameters) => {
+        const voices = boundedInteger(parameters.voices, 2 + stableHash(seed) % 3, 2, 4);
+        return {
+          correct: voices,
+          candidates: [2, 3, 4],
+          prompt: "How many independent parts are shown in this open score?",
+          generatorParameters: { voices },
+          optionLabels: { "2": "Two parts", "3": "Three parts", "4": "Four parts" },
+          explanation: `The score contains ${voices} independent parts.`
+            ,hint: "Count the separate staves and follow each voice across the measure."
+        };
+      }),
     family("error-detection@2", "Error detection", "error-detection", "error-detection@2", "near-neighbour@1",
       { errorIndex: integer(0, 3), errorSemitones: enumeration(1, -1) },
       ["notation-error-position"], ["pitch-error", "scale-error"],
