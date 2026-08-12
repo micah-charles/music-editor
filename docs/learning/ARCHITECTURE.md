@@ -113,6 +113,11 @@ catalogue. The ten-set/50-question bank remains an internal source of authored
 items for the adaptive activity. The browser builds a 14-concept graph from the
 same stable concept IDs used by question families and mastery evidence.
 
+The manifest also supports `adaptivePacks`: supplemental authored material is
+loaded into the adaptive activity without changing the ten-card Learning Home.
+The current advanced context pack contains four authored ABRSM Grade 6–8 and
+GCSE Foundation/Higher analysis questions with evidence-based explanations.
+
 Each graph node stores prerequisites, contextual relationships, curriculum
 mappings, ABRSM grade, estimated difficulty and its local review schedule.
 `buildKnowledgeGraphState` resolves the visible state:

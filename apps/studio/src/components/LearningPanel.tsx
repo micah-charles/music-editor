@@ -77,6 +77,13 @@ interface BankManifest {
     questionCount: number;
     domain: string;
   }>;
+  adaptivePacks?: Array<{
+    id: string;
+    title: string;
+    file: string;
+    questionCount: number;
+    domain: string;
+  }>;
 }
 
 interface LearningSessionDraft {
@@ -131,6 +138,7 @@ export function LearningPanel({
   onOpenScoreLab
 }: LearningPanelProps) {
   const [sets, setSets] = useState<QuestionSet[]>([]);
+  const [adaptiveSets, setAdaptiveSets] = useState<QuestionSet[]>([]);
   const [catalogue, setCatalogue] = useState<LearningCatalogueEntry[]>([]);
   const [loadError, setLoadError] = useState("");
   const [view, setView] = useState<LearningView>("home");
@@ -163,10 +171,11 @@ export function LearningPanel({
   useEffect(() => {
     let cancelled = false;
     void loadQuestionBank()
-      .then(({ loadedSets, entries }) => {
+      .then(({ loadedSets, adaptiveSets: loadedAdaptiveSets, entries }) => {
         if (cancelled) return;
         const draft = loadLearningSessionDraft();
         setSets(draft ? [...loadedSets, draft.set] : loadedSets);
+        setAdaptiveSets(loadedAdaptiveSets);
         setCatalogue(entries);
         if (draft) {
           setSelectedSetId(draft.set.id);
@@ -195,8 +204,8 @@ export function LearningPanel({
   const selectedProgress = selectedSet ? progressBySet.get(selectedSet.id) : undefined;
   const filteredCatalogue = useMemo(() => filterCatalogue(catalogue, category), [catalogue, category]);
   const adaptiveActivity = useMemo(() => migrateQuestionSetsToActivity(
-    sets.filter((set) => !set.id.startsWith("session-"))
-  ), [sets]);
+    [...sets.filter((set) => !set.id.startsWith("session-")), ...adaptiveSets]
+  ), [adaptiveSets, sets]);
   const learnerState = useMemo(() => createLearnerState(
     attempts,
     inferDomainFromConcept,
@@ -1316,11 +1325,16 @@ function SetResults({
   );
 }
 
-async function loadQuestionBank(): Promise<{ loadedSets: QuestionSet[]; entries: LearningCatalogueEntry[] }> {
+async function loadQuestionBank(): Promise<{ loadedSets: QuestionSet[]; adaptiveSets: QuestionSet[]; entries: LearningCatalogueEntry[] }> {
   const manifestResponse = await fetch("/learning/manifest.json");
   if (!manifestResponse.ok) throw new Error("The learning catalogue manifest is unavailable.");
   const manifest = await manifestResponse.json() as BankManifest;
   const loadedSets = await Promise.all(manifest.sets.map(async (entry) => {
+    const response = await fetch(`/learning/question-sets/${entry.file}`);
+    if (!response.ok) throw new Error(`Could not load ${entry.title}.`);
+    return normaliseQuestionBankSet(await response.json() as QuestionSet);
+  }));
+  const adaptiveSets = await Promise.all((manifest.adaptivePacks ?? []).map(async (entry) => {
     const response = await fetch(`/learning/question-sets/${entry.file}`);
     if (!response.ok) throw new Error(`Could not load ${entry.title}.`);
     return normaliseQuestionBankSet(await response.json() as QuestionSet);
@@ -1334,7 +1348,7 @@ async function loadQuestionBank(): Promise<{ loadedSets: QuestionSet[]; entries:
     questionCount: questionItems(set).length,
     file: manifest.sets[index]?.file ?? ""
   }));
-  return { loadedSets, entries };
+  return { loadedSets, adaptiveSets, entries };
 }
 
 function overallProgress(sets: QuestionSet[], progressBySet: Map<string, SetProgress>) {

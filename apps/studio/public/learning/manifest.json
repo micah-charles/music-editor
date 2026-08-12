@@ -5,6 +5,15 @@
   "questionCount": 50,
   "setCount": 10,
   "combinedSet": "foxchild-foundations-50.question-set.json",
+  "adaptivePacks": [
+    {
+      "id": "advanced-context-01",
+      "title": "Advanced Context and Analysis",
+      "file": "advanced-context-01.question-set.json",
+      "questionCount": 4,
+      "domain": "musical-analysis"
+    }
+  ],
   "sets": [
     {
       "id": "set-note-reading-01",

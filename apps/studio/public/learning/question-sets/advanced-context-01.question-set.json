@@ -1,0 +1,100 @@
+{
+  "format": "foxchild.music-learning.question-set",
+  "schemaVersion": "1.0.0",
+  "id": "advanced-context-01",
+  "revision": 1,
+  "status": "published",
+  "metadata": {
+    "title": { "en-GB": "Advanced Context and Analysis" },
+    "description": { "en-GB": "Authored contextual questions for higher ABRSM theory and GCSE listening analysis." },
+    "language": "en-GB",
+    "authors": ["FoxChild Music Learning Editorial"],
+    "subject": "Music",
+    "domain": "musical-analysis",
+    "skillIds": ["musical-analysis.context", "musical-analysis.form-texture"],
+    "difficulty": "advanced",
+    "tags": ["abrsm-grade-6", "abrsm-grade-7", "abrsm-grade-8", "gcse", "contextual", "authored"]
+  },
+  "defaults": {
+    "locale": "en-GB",
+    "attemptPolicy": { "maximumAttempts": 2, "scorePolicy": "best" }
+  },
+  "assets": [],
+  "variables": {},
+  "delivery": { "mode": "adaptive", "navigation": "linear", "showProgress": true },
+  "sections": [
+    {
+      "id": "advanced-context-section",
+      "title": { "en-GB": "Context and analysis" },
+      "delivery": {},
+      "items": [
+        {
+          "id": "context-01",
+          "type": "selected-response",
+          "version": 1,
+          "metadata": {
+            "skillIds": ["musical-analysis.context"],
+            "conceptId": "musical-analysis.context.style-evidence",
+            "curriculumLevels": { "abrsm": ["Grade 6", "Grade 7", "Grade 8"], "gcse": ["Higher"] },
+            "difficulty": 0.86,
+            "tags": ["style", "evidence"]
+          },
+          "variables": {},
+          "stimulus": [{ "id": "context-01-stimulus", "kind": "text", "content": { "en-GB": "An excerpt uses a regular four-bar phrase, balanced antecedent–consequent periods, light Alberti-bass accompaniment and clear tonic–dominant symmetry." }, "accessibility": { "description": { "en-GB": "A written description of a musical excerpt." } } }],
+          "prompt": { "content": { "en-GB": "Which stylistic context is best supported by the evidence?" }, "format": "plain-text" },
+          "interaction": { "kind": "choice", "responseId": "context-01-response", "cardinality": "single", "display": "buttons", "shuffleOptions": false, "options": [{ "id": "answer-classical", "content": { "en-GB": "Classical period" } }, { "id": "answer-baroque", "content": { "en-GB": "Baroque period" } }, { "id": "answer-romantic", "content": { "en-GB": "Romantic period" } }, { "id": "answer-contemporary", "content": { "en-GB": "Contemporary practice" } }] },
+          "response": { "id": "context-01-response", "baseType": "identifier", "cardinality": "single", "correct": { "value": "answer-classical" } },
+          "assessment": { "strategy": "exact-identifier@1", "maximumScore": 1, "passingScore": 1, "attemptPolicy": { "maximumAttempts": 2, "scorePolicy": "best" } },
+          "feedback": { "mode": "after-submit", "correct": { "message": { "en-GB": "Correct. Balanced phrases and Alberti-bass are strong Classical-style evidence." } }, "incorrect": { "message": { "en-GB": "Use the texture, phrase symmetry and accompaniment together." } }, "showCorrectAnswer": "after-final-attempt" },
+          "hints": [{ "id": "context-01-hint", "content": { "en-GB": "Alberti bass and balanced phrase structure are characteristic clues." } }],
+          "explanation": { "content": { "en-GB": "This is an evidence-based attribution: no single clue is decisive, but the combination strongly supports the Classical period." } }
+        },
+        {
+          "id": "context-02",
+          "type": "selected-response",
+          "version": 1,
+          "metadata": { "skillIds": ["musical-analysis.form-texture"], "conceptId": "musical-analysis.form-texture.section-contrast", "curriculumLevels": { "abrsm": ["Grade 7", "Grade 8"], "gcse": ["Higher"] }, "difficulty": 0.9, "tags": ["form", "texture"] },
+          "variables": {},
+          "stimulus": [{ "id": "context-02-stimulus", "kind": "text", "content": { "en-GB": "The opening theme returns three times between contrasting episodes. During the episodes, two independent lines imitate one another." }, "accessibility": { "description": { "en-GB": "A written description of form and texture." } } }],
+          "prompt": { "content": { "en-GB": "Which description is most accurate?" }, "format": "plain-text" },
+          "interaction": { "kind": "choice", "responseId": "context-02-response", "cardinality": "single", "display": "buttons", "shuffleOptions": false, "options": [{ "id": "answer-rondo-polyphonic", "content": { "en-GB": "Rondo form with polyphonic episodes" } }, { "id": "answer-binary-homophonic", "content": { "en-GB": "Binary form with homophonic texture" } }, { "id": "answer-ternary-monophonic", "content": { "en-GB": "Ternary form with monophonic texture" } }, { "id": "answer-strophic-unison", "content": { "en-GB": "Strophic form in unison" } }] },
+          "response": { "id": "context-02-response", "baseType": "identifier", "cardinality": "single", "correct": { "value": "answer-rondo-polyphonic" } },
+          "assessment": { "strategy": "exact-identifier@1", "maximumScore": 1, "passingScore": 1, "attemptPolicy": { "maximumAttempts": 2, "scorePolicy": "best" } },
+          "feedback": { "mode": "after-submit", "correct": { "message": { "en-GB": "Correct. A returning refrain suggests rondo, while imitative independent lines create polyphony." } }, "incorrect": { "message": { "en-GB": "Separate the large-scale section pattern from the texture inside each episode." } }, "showCorrectAnswer": "after-final-attempt" },
+          "hints": [{ "id": "context-02-hint", "content": { "en-GB": "Count the returns of the opening theme, then listen for independent lines." } }],
+          "explanation": { "content": { "en-GB": "Analysis questions often combine form and texture: the refrain pattern identifies rondo, while imitation identifies polyphonic writing." } }
+        },
+        {
+          "id": "context-03",
+          "type": "selected-response",
+          "version": 1,
+          "metadata": { "skillIds": ["musical-analysis.context"], "conceptId": "musical-analysis.context.harmonic-language", "curriculumLevels": { "abrsm": ["Grade 8"], "gcse": ["Higher"] }, "difficulty": 0.95, "tags": ["harmony", "context"] },
+          "variables": {},
+          "stimulus": [{ "id": "context-03-stimulus", "kind": "text", "content": { "en-GB": "A slow movement lingers on chromatic mediants, unresolved added-note sonorities and long-breathed rubato phrases, with a wide dynamic range." }, "accessibility": { "description": { "en-GB": "A written description of harmonic and expressive features." } } }],
+          "prompt": { "content": { "en-GB": "Which interpretation is the most defensible?" }, "format": "plain-text" },
+          "interaction": { "kind": "choice", "responseId": "context-03-response", "cardinality": "single", "display": "buttons", "shuffleOptions": false, "options": [{ "id": "answer-romantic", "content": { "en-GB": "Romantic expressive language is plausible" } }, { "id": "answer-renaissance", "content": { "en-GB": "Renaissance modality is certain" } }, { "id": "answer-baroque", "content": { "en-GB": "Baroque sequence technique is proven" } }, { "id": "answer-classical", "content": { "en-GB": "Classical symmetry is conclusive" } }] },
+          "response": { "id": "context-03-response", "baseType": "identifier", "cardinality": "single", "correct": { "value": "answer-romantic" } },
+          "assessment": { "strategy": "exact-identifier@1", "maximumScore": 1, "passingScore": 1, "attemptPolicy": { "maximumAttempts": 2, "scorePolicy": "best" } },
+          "feedback": { "mode": "after-submit", "correct": { "message": { "en-GB": "Correct. The answer is appropriately cautious: the features support a Romantic interpretation without proving a composer or date." } }, "incorrect": { "message": { "en-GB": "Distinguish plausible stylistic evidence from claims that the evidence cannot prove." } }, "showCorrectAnswer": "after-final-attempt" },
+          "hints": [{ "id": "context-03-hint", "content": { "en-GB": "Look for the answer that makes a supported interpretation, not an absolute claim." } }],
+          "explanation": { "content": { "en-GB": "Higher-level analysis rewards qualified evidence. Chromatic mediants, added-note harmony, rubato and extreme dynamics support Romantic language but do not uniquely identify a work." } }
+        },
+        {
+          "id": "context-04",
+          "type": "selected-response",
+          "version": 1,
+          "metadata": { "skillIds": ["musical-analysis.form-texture"], "conceptId": "musical-analysis.form-texture.cadential-structure", "curriculumLevels": { "abrsm": ["Grade 6", "Grade 7", "Grade 8"], "gcse": ["Foundation", "Higher"] }, "difficulty": 0.82, "tags": ["cadence", "analysis"] },
+          "variables": {},
+          "stimulus": [{ "id": "context-04-stimulus", "kind": "text", "content": { "en-GB": "A phrase ends with the harmony V–vi in a major key, avoiding the expected tonic while the melody continues into a new idea." }, "accessibility": { "description": { "en-GB": "A written description of a cadence." } } }],
+          "prompt": { "content": { "en-GB": "What cadence is described?" }, "format": "plain-text" },
+          "interaction": { "kind": "choice", "responseId": "context-04-response", "cardinality": "single", "display": "buttons", "shuffleOptions": false, "options": [{ "id": "answer-interrupted", "content": { "en-GB": "Interrupted cadence" } }, { "id": "answer-perfect", "content": { "en-GB": "Perfect cadence" } }, { "id": "answer-plagal", "content": { "en-GB": "Plagal cadence" } }, { "id": "answer-imperfect", "content": { "en-GB": "Imperfect cadence" } }] },
+          "response": { "id": "context-04-response", "baseType": "identifier", "cardinality": "single", "correct": { "value": "answer-interrupted" } },
+          "assessment": { "strategy": "exact-identifier@1", "maximumScore": 1, "passingScore": 1, "attemptPolicy": { "maximumAttempts": 2, "scorePolicy": "best" } },
+          "feedback": { "mode": "after-submit", "correct": { "message": { "en-GB": "Correct. V moving to vi interrupts the expected V–I resolution." } }, "incorrect": { "message": { "en-GB": "Check the destination chord: it is vi, not I." } }, "showCorrectAnswer": "after-final-attempt" },
+          "hints": [{ "id": "context-04-hint", "content": { "en-GB": "An interrupted cadence substitutes vi for the expected tonic." } }],
+          "explanation": { "content": { "en-GB": "The dominant is followed by the submediant, creating an interrupted cadence and redirecting the phrase." } }
+        }
+      ]
+    }
+  ]
+}

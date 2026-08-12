@@ -305,6 +305,25 @@ describe("FCMLIF learning engine", () => {
     }
   });
 
+  it("loads and validates supplemental authored contextual material for adaptive sessions", () => {
+    const publicRoot = new URL("../../../../apps/studio/public/learning/", import.meta.url);
+    const manifest = JSON.parse(readFileSync(new URL("manifest.json", publicRoot), "utf8")) as {
+      adaptivePacks?: Array<{ file: string }>;
+    };
+    const packs = (manifest.adaptivePacks ?? []).map(({ file }) => normaliseQuestionBankSet(JSON.parse(
+      readFileSync(new URL(`question-sets/${file}`, publicRoot), "utf8")
+    ) as QuestionSet));
+    expect(packs).toHaveLength(1);
+    expect(packs.flatMap(questionItems)).toHaveLength(4);
+    expect(packs[0].metadata.tags).toEqual(expect.arrayContaining(["abrsm-grade-8", "gcse"]));
+    expect(questionItems(packs[0]).some((item) => item.metadata?.curriculumLevels &&
+      (item.metadata.curriculumLevels as { abrsm?: string[] }).abrsm?.includes("Grade 8"))).toBe(true);
+    packs.forEach((pack) => expect(validateQuestionSet(pack, {
+      assessmentRegistry: new LearningRuntime().assessments,
+      generatorRegistry: new LearningRuntime().generators
+    }).valid, pack.id).toBe(true));
+  });
+
   it("calculates resumable progress and category filtering for the catalogue", () => {
     const set = normaliseQuestionBankSet(structuredClone(musicLearningDemoSet));
     const items = questionItems(set);
