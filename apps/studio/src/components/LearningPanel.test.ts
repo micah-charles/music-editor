@@ -32,4 +32,10 @@ describe("learning answer interaction", () => {
     expect(learningPanelSource).toContain("Tap ♩");
     expect(learningPanelSource).toContain("Submit rhythm");
   });
+
+  it("renders local notation-entry controls", () => {
+    expect(learningPanelSource).toContain('resolvedItem?.interaction.kind === "notation-entry"');
+    expect(learningPanelSource).toContain("Submit notation");
+    expect(learningPanelSource).toContain("createScoreFromEvents");
+  });
 });

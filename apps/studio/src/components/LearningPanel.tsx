@@ -16,6 +16,7 @@ import {
   createDefaultQuestionFamilyRegistry,
   createDefaultAssessmentRegistry,
   createDefaultSyllabusMatrix,
+  createScoreFromEvents,
   syllabusCoverage,
   createLearnerState,
   deterministicShuffle,
@@ -35,6 +36,7 @@ import {
   type CurriculumId,
   type FoxChildMusicScore,
   type LearningAttempt,
+  type MusicEvent,
   type LearningCatalogueEntry,
   type LearningCategory,
   type LearningDomain,
@@ -151,6 +153,7 @@ export function LearningPanel({
   const [resolvedItem, setResolvedItem] = useState<ResolvedLearningItem>();
   const [selectedResponse, setSelectedResponse] = useState<unknown>();
   const [rhythmTaps, setRhythmTaps] = useState<Array<{ onset: number; duration: number }>>([]);
+  const [notationPitches, setNotationPitches] = useState<string[]>([]);
   const [result, setResult] = useState<AssessmentResult>();
   const [attemptNumber, setAttemptNumber] = useState(1);
   const [hintVisible, setHintVisible] = useState(false);
@@ -296,6 +299,7 @@ export function LearningPanel({
     setResult(undefined);
     setSelectedResponse(undefined);
     setRhythmTaps([]);
+    setNotationPitches([]);
     rhythmStartRef.current = undefined;
     submissionLockedRef.current = false;
     setAttemptNumber(1);
@@ -431,6 +435,17 @@ export function LearningPanel({
     const onset = (now - rhythmStartRef.current) / 1000;
     setRhythmTaps((current) => [...current, { onset, duration: 0.25 }]);
   }
+
+  const notationEntryScore = useMemo(() => {
+    if (resolvedItem?.interaction.kind !== "notation-entry" || notationPitches.length === 0) return undefined;
+    const events: MusicEvent[] = notationPitches.map((pitch, index) => ({
+      id: `learning-entry-${index + 1}`,
+      type: "note",
+      pitch: parseLearningPitch(pitch),
+      duration: { value: "quarter", beats: 1 }
+    }));
+    return createScoreFromEvents({ title: "Learning answer", events });
+  }, [notationPitches, resolvedItem]);
 
   function retry() {
     setAttemptNumber((current) => current + 1);
@@ -727,6 +742,27 @@ export function LearningPanel({
             </section>
           ) : null}
 
+          {resolvedItem?.interaction.kind === "notation-entry" ? (
+            <section className="learning-notation-entry" aria-label="Notation entry input">
+              <p>Build the answer one note at a time using the piano or your MIDI keyboard.</p>
+              <div className="learning-notation-entry-preview" aria-live="polite">
+                {notationPitches.length ? notationPitches.map((pitch, index) => <span key={`${pitch}-${index}`}>{pitch}</span>) : <em>No notes entered yet</em>}
+              </div>
+              <PianoKeyboard
+                range={{ from: "C4", to: "C6" }}
+                activePitches={midiActivePitches}
+                selectedPitches={notationPitches}
+                keyboardNavigable
+                onKeyPress={(pitch) => { if (!result) setNotationPitches((current) => [...current, pitch]); }}
+              />
+              <div className="learning-notation-entry-actions">
+                <button type="button" disabled={Boolean(result) || notationPitches.length === 0} onClick={() => setNotationPitches((current) => current.slice(0, -1))}>Undo note</button>
+                <button type="button" disabled={Boolean(result) || notationPitches.length === 0} onClick={() => { setNotationPitches([]); }}>Clear</button>
+                <button type="button" className="primary" disabled={Boolean(result) || !notationEntryScore} onClick={() => submit(notationEntryScore, "notation-entry")}>Submit notation</button>
+              </div>
+            </section>
+          ) : null}
+
           {resolvedItem?.interaction.kind === "ordering" ? (
             <section className="learning-ordering" aria-label="Order the options">
               <p className="learning-ordering-instruction">Arrange the items from first to last.</p>
@@ -828,7 +864,7 @@ export function LearningPanel({
           <button type="button" disabled={sessionPosition === 0} onClick={() => moveQuestion(-1)}>← Previous</button>
           {!result ? (
             <span className="learning-choice-guidance">
-              {resolvedItem?.interaction.kind === "choice" ? "Choose an answer above" : resolvedItem?.interaction.kind === "text-entry" ? "Write an answer above" : resolvedItem?.interaction.kind === "numeric-entry" ? "Enter a number above" : resolvedItem?.interaction.kind === "matching" ? "Match the items above" : resolvedItem?.interaction.kind === "ordering" ? "Arrange the items above" : resolvedItem?.interaction.kind === "rhythm-tap" ? "Tap the rhythm above" : "Complete the question above"}
+              {resolvedItem?.interaction.kind === "choice" ? "Choose an answer above" : resolvedItem?.interaction.kind === "text-entry" ? "Write an answer above" : resolvedItem?.interaction.kind === "numeric-entry" ? "Enter a number above" : resolvedItem?.interaction.kind === "matching" ? "Match the items above" : resolvedItem?.interaction.kind === "ordering" ? "Arrange the items above" : resolvedItem?.interaction.kind === "rhythm-tap" ? "Tap the rhythm above" : resolvedItem?.interaction.kind === "notation-entry" ? "Enter the notation above" : "Complete the question above"}
             </span>
           ) : (
             <button type="button" className="primary" disabled={!result && currentAttemptState === "unanswered"} onClick={() => moveQuestion(1)}>
@@ -1736,4 +1772,11 @@ function matchingOptions(value: unknown): Array<{ id: string; content: unknown }
   return value.filter((entry): entry is { id: string; content: unknown } =>
     isRecord(entry) && typeof entry.id === "string" && "content" in entry
   );
+}
+
+function parseLearningPitch(value: string): { step: "C" | "D" | "E" | "F" | "G" | "A" | "B"; octave: number; alter?: number } {
+  const match = /^([A-G])([#b]?)(-?\d+)$/.exec(value);
+  if (!match) return { step: "C", octave: 4 };
+  const alter = match[2] === "#" ? 1 : match[2] === "b" ? -1 : 0;
+  return { step: match[1] as "C" | "D" | "E" | "F" | "G" | "A" | "B", octave: Number(match[3]), ...(alter ? { alter } : {}) };
 }
