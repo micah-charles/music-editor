@@ -87,7 +87,7 @@ export function createDefaultSyllabusMatrix(): SyllabusMatrix {
       { id: "pitch-notation", title: "Pitch & notation", skills: [
         generated("pitch.note-reading", "Note reading", "pitch-notation", "Read pitches across clefs, octaves and ledger lines.", ["note-reading"], ["note-reading@2"], ["pitch-match@1"]),
         generated("pitch.accidentals", "Accidentals and enharmonics", "pitch-notation", "Identify and spell chromatic pitches and enharmonic equivalents.", ["note-reading"], ["accidentals@1"], ["pitch-match@1"]),
-        planned("pitch.transposition", "Written transposition", "pitch-notation", "Transpose a written line between clefs, keys and instruments.", ["note-reading"], ["score-semantic-diff@1"])
+        generated("pitch.transposition", "Written transposition", "pitch-notation", "Transpose a written line between clefs, keys and instruments.", ["note-reading"], ["transposition@1"], ["exact-identifier@1"])
       ]},
       { id: "keys-scales", title: "Keys & scales", skills: [
         generated("keys.key-signatures", "Key signatures", "keys-scales", "Recognise and construct major and minor key signatures.", ["key-signatures"], ["key-signatures@2"], ["exact-identifier@1"]),

@@ -200,7 +200,7 @@ describe("adaptive learning v2", () => {
     const activity = migrateQuestionSetsToActivity(sets);
     expect(activity.schemaVersion).toBe("2.0.0");
     expect(activity.authoredItems).toHaveLength(50);
-    expect(activity.questionFamilies).toHaveLength(21);
+    expect(activity.questionFamilies).toHaveLength(22);
     expect(activity.authoredItems.every((item) => item.metadata?.adaptive === true)).toBe(true);
     expect(validateLearningActivity(activity)).toEqual({ valid: true, diagnostics: [] });
     expect(sets.flatMap(questionItems)).toHaveLength(50);

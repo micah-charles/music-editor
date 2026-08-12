@@ -151,6 +151,26 @@ function familyBlueprints(): FamilyBlueprint[] {
           hint: "Read the accidental before naming the note, then find the matching piano key."
         };
       }),
+    family("transposition@1", "Transposition", "note-reading", "transposition-display@1", "curriculum-peers@1",
+      { semitones: enumeration(-12, -7, -5, 5, 7, 12) },
+      ["written-transposition"], ["interval-transposition"],
+      (seed, _difficulty, parameters) => {
+        const intervals = [-12, -7, -5, 5, 7, 12];
+        const semitones = enumNumber(parameters.semitones, intervals, 5);
+        const labels: Record<string, string> = {
+          "-12": "Down an octave", "-7": "Down a perfect fifth", "-5": "Down a perfect fourth",
+          "5": "Up a perfect fourth", "7": "Up a perfect fifth", "12": "Up an octave"
+        };
+        return {
+          correct: semitones,
+          candidates: intervals,
+          prompt: "Which interval transposes the second phrase from the first?",
+          generatorParameters: { rootMidi: 60, semitones },
+          optionLabels: labels,
+          explanation: `The second phrase is transposed ${labels[String(semitones)].toLowerCase()}.`,
+          hint: "Compare the first note of each phrase, then measure the interval between them."
+        };
+      }),
     family("key-signatures@2", "Key signatures", "key-signatures", "key-signature-display@1", "common-confusions@1",
       { tonic: enumeration("C", "G", "D", "A", "F", "Bb", "Eb") },
       ["major-key-signature"], ["sharp-keys", "flat-keys"],
@@ -703,6 +723,7 @@ function intervalName(semitones: number): string {
 }
 
 function optionId(value: string | number): string {
+  if (typeof value === "number" && value < 0) return `answer-negative-${slug(String(Math.abs(value)))}`;
   return `answer-${slug(String(value))}`;
 }
 

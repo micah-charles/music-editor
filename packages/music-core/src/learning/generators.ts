@@ -40,6 +40,7 @@ export function createDefaultMusicGeneratorRegistry(): MusicGeneratorRegistry {
     chordGenerator,
     { ...chordGenerator, id: "chord-display@1" },
     cadenceGenerator,
+    transpositionGenerator,
     rhythmFragmentGenerator,
     { ...rhythmFragmentGenerator, id: "note-value-display@2" },
     { ...rhythmFragmentGenerator, id: "time-signature-display@2" },
@@ -156,6 +157,24 @@ export const cadenceGenerator: MusicQuestionGenerator = {
       title: `${cadence} cadence`,
       tempo: 72,
       events: progression.map((chord, index) => chordEvent(`cadence-chord-${index + 1}`, chord.root, chord.intervals))
+    });
+  }
+};
+
+export const transpositionGenerator: MusicQuestionGenerator = {
+  id: "transposition-display@1",
+  generate(seed, parameters) {
+    const root = Math.round(number(parameters.rootMidi, 60));
+    const semitones = Math.round(number(parameters.semitones, 5));
+    const motif = [0, 2, 4, 2];
+    return score({
+      id: deterministicId("transposition", seed),
+      title: "Written transposition",
+      tempo: 84,
+      events: motif.flatMap((offset, index) => [
+        noteEvent(`source-note-${index + 1}`, root + offset, "quarter"),
+        noteEvent(`transposed-note-${index + 1}`, root + offset + semitones, "quarter")
+      ])
     });
   }
 };
