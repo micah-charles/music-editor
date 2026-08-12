@@ -117,7 +117,7 @@ export function createDefaultSyllabusMatrix(): SyllabusMatrix {
       ]},
       { id: "melody-composition", title: "Melody & composition", skills: [
         generated("melody.phrase-structure", "Phrase structure and development", "melody-composition", "Recognise phrases, sequences, repetition and contrast.", ["melody-dictation"], ["phrase-structure@1"], ["exact-identifier@1"]),
-        planned("melody.completion", "Melodic completion", "melody-composition", "Complete and develop a melody within tonal and rhythmic constraints.", ["melody-dictation"], ["score-semantic-diff@1", "rubric@1"])
+        generated("melody.completion", "Melodic completion", "melody-composition", "Complete and develop a melody within tonal and rhythmic constraints.", ["melody-dictation"], ["melody-completion@1"], ["exact-identifier@1"])
       ]},
       { id: "score-reading", title: "Score reading", skills: [
         generated("score.sight-reading", "Sight reading", "score-reading", "Read and perform a notated phrase with increasing complexity.", ["sight-reading"], ["sight-reading@2"], ["sight-reading@1"]),

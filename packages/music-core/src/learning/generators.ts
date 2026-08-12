@@ -50,6 +50,7 @@ export function createDefaultMusicGeneratorRegistry(): MusicGeneratorRegistry {
     tempoGenerator,
     melodyDictationGenerator,
     phraseStructureGenerator,
+    melodyCompletionGenerator,
     errorDetectionGenerator
   ].forEach((generator) => registry.register(generator));
   return registry;
@@ -367,6 +368,21 @@ export const phraseStructureGenerator: MusicQuestionGenerator = {
       title: "Phrase structure",
       tempo: 80,
       events: [...source, ...second].map((offset, index) => noteEvent(`phrase-note-${index + 1}`, root + offset, "quarter"))
+    });
+  }
+};
+
+export const melodyCompletionGenerator: MusicQuestionGenerator = {
+  id: "melody-completion-display@1",
+  generate(seed, parameters) {
+    const root = Math.round(number(parameters.rootMidi, 60));
+    const completion = Math.round(number(parameters.completionMidi, root));
+    const motif = [0, 2, 4, 5, 7, 5, 4];
+    return score({
+      id: deterministicId("melody-completion", seed),
+      title: "Melodic completion",
+      tempo: 76,
+      events: [...motif.map((offset, index) => noteEvent(`completion-note-${index + 1}`, root + offset, "quarter")), noteEvent("completion-final", completion, "whole")]
     });
   }
 };

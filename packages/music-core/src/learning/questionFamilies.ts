@@ -521,6 +521,24 @@ function familyBlueprints(): FamilyBlueprint[] {
           hint: "Compare the contour and interval pattern of the second phrase with the first."
         };
       }),
+    family("melody-completion@1", "Melodic completion", "melody-dictation", "melody-completion-display@1", "near-neighbour@1",
+      { completionMidi: integer(60, 72), mode: enumeration("major", "minor") },
+      ["melodic-completion"], ["cadential-ending", "tonal-continuation"],
+      (seed, _difficulty, parameters) => {
+        const endings = [60, 62, 64, 67];
+        const completionMidi = enumNumber(parameters.completionMidi, endings, pick(seed, endings));
+        const mode = enumValue(parameters.mode, ["major", "minor"], "major");
+        const labels = endings.map((midi) => pitchToName(midiToPitch(midi)));
+        const correct = pitchToName(midiToPitch(completionMidi));
+        return {
+          correct,
+          candidates: labels,
+          prompt: "Which final note best completes this melody?",
+          generatorParameters: { rootMidi: 60, completionMidi, mode },
+          explanation: `${correct} provides the most stable tonal ending for this ${mode} phrase.`,
+          hint: "Sing the phrase internally and choose the pitch that gives the strongest sense of resolution."
+        };
+      }),
     family("error-detection@2", "Error detection", "error-detection", "error-detection@2", "near-neighbour@1",
       { errorIndex: integer(0, 3), errorSemitones: enumeration(1, -1) },
       ["notation-error-position"], ["pitch-error", "scale-error"],
