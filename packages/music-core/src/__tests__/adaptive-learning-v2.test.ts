@@ -89,6 +89,14 @@ describe("adaptive learning v2", () => {
       };
       expect(validateQuestionSet(wrapper).valid, familyId).toBe(true);
     }
+    const tuplets = new QuestionFamilyEngine().generate("tuplets@1", "tuplet-seed");
+    const tupletSource = tuplets.item.stimulus.find((stimulus) => stimulus.kind === "notation")?.source as { mode?: string; score?: { parts?: Array<{ measures?: Array<{ events?: Array<{ duration?: { tuplet?: unknown } }> }> }> } } | undefined;
+    expect(tupletSource?.mode).toBe("inline-ast");
+    expect(tupletSource?.score?.parts?.[0]?.measures?.[0]?.events?.[0]?.duration?.tuplet).toEqual({
+      actualNotes: 3,
+      normalNotes: 2,
+      normalType: "quarter"
+    });
   });
 
   it("honours validated activity-level family parameters", () => {
