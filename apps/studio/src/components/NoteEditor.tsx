@@ -25,9 +25,11 @@ import { usePlaybackActiveEvents } from "../music/playback/session/usePlaybackSe
 interface NoteEditorProps {
   score: FoxChildMusicScore;
   activePartId: string;
+  selectedEventId?: string;
   measureIssues: MeasureValidationResult[];
   instrumentOptions: SoundFontPresetOption[];
   onActivePartChange: (partId: string) => void;
+  onSelectedEventChange?: (eventId?: string) => void;
   onChange: (score: FoxChildMusicScore) => void;
 }
 
@@ -38,7 +40,7 @@ const defaultDuration = { value: "quarter" as const, beats: DURATION_BEATS.quart
 const defaultPitch = { step: "C" as const, octave: 4, alter: 0 };
 const defaultChordPitches = ["C4", "E4", "G4"].map(parsePitchName);
 
-export function NoteEditor({ score, activePartId, measureIssues, instrumentOptions, onActivePartChange, onChange }: NoteEditorProps) {
+export function NoteEditor({ score, activePartId, selectedEventId, measureIssues, instrumentOptions, onActivePartChange, onSelectedEventChange, onChange }: NoteEditorProps) {
   const activePlaybackEvents = usePlaybackActiveEvents();
   const [inputWarnings, setInputWarnings] = useState<Record<string, string>>({});
   const [draftInputs, setDraftInputs] = useState<Record<string, string>>({});
@@ -234,9 +236,11 @@ export function NoteEditor({ score, activePartId, measureIssues, instrumentOptio
 
       {score.parts.map((part) => {
         const rows = part.measures.flatMap((measure) => {
-          return measure.events
-            .filter((event) => event.type !== "annotation" && event.type !== "direction")
-            .map((event) => ({ event, measureNumber: measure.number }));
+          return measure.events.flatMap((event, measureEventIndex) =>
+            event.type === "annotation" || event.type === "direction"
+              ? []
+              : [{ event, measureNumber: measure.number, measureEventIndex }]
+          );
         });
         const collapsed = Boolean(part.collapsed);
         const isSounding = activePlaybackEvents.some((event) => event.partId === part.id);
@@ -333,7 +337,14 @@ export function NoteEditor({ score, activePartId, measureIssues, instrumentOptio
                     const inputKey = eventKey(part.id, event, event.type === "chord" ? "chord" : "pitch");
                     const warning = inputWarnings[inputKey];
                     return (
-                      <div className={`note-row ${issue ? `measure-${issue.status}` : ""}`} key={event.id ?? `${part.id}-${index}`}>
+                      <div
+                        className={`note-row ${issue ? `measure-${issue.status}` : ""} ${selectedEventId === selectionKey(part.id, row.measureNumber, row.measureEventIndex, event) ? "selected" : ""}`}
+                        key={event.id ?? `${part.id}-${index}`}
+                        onClick={() => {
+                          onActivePartChange(part.id);
+                          onSelectedEventChange?.(selectionKey(part.id, row.measureNumber, row.measureEventIndex, event));
+                        }}
+                      >
                         <span className="row-index">{index + 1}</span>
                         <select
                           value={event.type}
@@ -415,6 +426,10 @@ function mutateEditableEvent(part: Part, targetIndex: number, update: (event: Mu
     }
     measure.events = nextEvents;
   }
+}
+
+function selectionKey(partId: string, measureNumber: number, eventIndex: number, event: MusicEvent) {
+  return `${partId}:${measureNumber}:${event.id ?? eventIndex}`;
 }
 
 function createEvent(type: EditableEventType, id: string, duration: Duration): MusicEvent {

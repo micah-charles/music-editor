@@ -1,0 +1,621 @@
+{
+  "format": "foxchild.music-learning.question-set",
+  "schemaVersion": "1.0.0",
+  "id": "set-scales-and-keys-01",
+  "revision": 1,
+  "status": "published",
+  "metadata": {
+    "title": {
+      "en-GB": "Scales and Key Relationships"
+    },
+    "description": {
+      "en-GB": "Practise relative keys and important scale degrees."
+    },
+    "language": "en-GB",
+    "authors": [
+      "FoxChild Music Learning Generator"
+    ],
+    "subject": "Music",
+    "domain": "scales",
+    "skillIds": [
+      "theory.scale.relationships"
+    ],
+    "difficulty": "mixed",
+    "tags": []
+  },
+  "defaults": {
+    "locale": "en-GB",
+    "attemptPolicy": {
+      "maximumAttempts": 3,
+      "scorePolicy": "best"
+    }
+  },
+  "assets": [],
+  "variables": {},
+  "delivery": {
+    "mode": "practice",
+    "navigation": "linear",
+    "showProgress": true
+  },
+  "sections": [
+    {
+      "id": "section-1",
+      "title": {
+        "en-GB": "Scales and Key Relationships"
+      },
+      "delivery": {},
+      "items": [
+        {
+          "id": "relative-minor-c",
+          "type": "selected-response",
+          "version": 1,
+          "metadata": {
+            "skillIds": [
+              "theory.scale.relationships"
+            ],
+            "difficulty": 1,
+            "tags": [
+              "scale",
+              "key-relationship"
+            ]
+          },
+          "variables": {},
+          "stimulus": [
+            {
+              "id": "concept",
+              "kind": "text",
+              "content": {
+                "en-GB": "Scale and key relationship"
+              },
+              "presentation": {
+                "role": "topic-label"
+              }
+            }
+          ],
+          "prompt": {
+            "content": {
+              "en-GB": "What is the relative minor of C major?"
+            },
+            "format": "plain-text"
+          },
+          "interaction": {
+            "kind": "choice",
+            "responseId": "response-main",
+            "cardinality": "single",
+            "display": "buttons",
+            "shuffleOptions": true,
+            "optionOrderSeed": "relative-minor-c-options",
+            "options": [
+              {
+                "id": "a-minor",
+                "content": {
+                  "en-GB": "A minor"
+                }
+              },
+              {
+                "id": "e-minor",
+                "content": {
+                  "en-GB": "E minor"
+                }
+              },
+              {
+                "id": "d-minor",
+                "content": {
+                  "en-GB": "D minor"
+                }
+              },
+              {
+                "id": "c-minor",
+                "content": {
+                  "en-GB": "C minor"
+                }
+              }
+            ]
+          },
+          "response": {
+            "id": "response-main",
+            "baseType": "identifier",
+            "cardinality": "single",
+            "correct": {
+              "value": "a-minor"
+            }
+          },
+          "assessment": {
+            "strategy": "exact-identifier@1",
+            "maximumScore": 1,
+            "passingScore": 1,
+            "attemptPolicy": {
+              "maximumAttempts": 3,
+              "scorePolicy": "best"
+            }
+          },
+          "feedback": {
+            "mode": "after-submit",
+            "correct": {
+              "message": {
+                "en-GB": "Correct. C major and A minor share no sharps or flats."
+              }
+            },
+            "incorrect": {
+              "message": {
+                "en-GB": "Not quite. Review the notation or concept and try again."
+              }
+            },
+            "showCorrectAnswer": "after-final-attempt"
+          },
+          "hints": [
+            {
+              "id": "relative-minor-c-hint-1",
+              "content": {
+                "en-GB": "Use the scale degrees or compare key signatures."
+              }
+            }
+          ],
+          "explanation": {
+            "content": {
+              "en-GB": "C major and A minor share no sharps or flats."
+            }
+          },
+          "delivery": {},
+          "analytics": {}
+        },
+        {
+          "id": "relative-minor-g",
+          "type": "selected-response",
+          "version": 1,
+          "metadata": {
+            "skillIds": [
+              "theory.scale.relationships"
+            ],
+            "difficulty": 1,
+            "tags": [
+              "scale",
+              "key-relationship"
+            ]
+          },
+          "variables": {},
+          "stimulus": [
+            {
+              "id": "concept",
+              "kind": "text",
+              "content": {
+                "en-GB": "Scale and key relationship"
+              },
+              "presentation": {
+                "role": "topic-label"
+              }
+            }
+          ],
+          "prompt": {
+            "content": {
+              "en-GB": "What is the relative minor of G major?"
+            },
+            "format": "plain-text"
+          },
+          "interaction": {
+            "kind": "choice",
+            "responseId": "response-main",
+            "cardinality": "single",
+            "display": "buttons",
+            "shuffleOptions": true,
+            "optionOrderSeed": "relative-minor-g-options",
+            "options": [
+              {
+                "id": "e-minor",
+                "content": {
+                  "en-GB": "E minor"
+                }
+              },
+              {
+                "id": "a-minor",
+                "content": {
+                  "en-GB": "A minor"
+                }
+              },
+              {
+                "id": "b-minor",
+                "content": {
+                  "en-GB": "B minor"
+                }
+              },
+              {
+                "id": "d-minor",
+                "content": {
+                  "en-GB": "D minor"
+                }
+              }
+            ]
+          },
+          "response": {
+            "id": "response-main",
+            "baseType": "identifier",
+            "cardinality": "single",
+            "correct": {
+              "value": "e-minor"
+            }
+          },
+          "assessment": {
+            "strategy": "exact-identifier@1",
+            "maximumScore": 1,
+            "passingScore": 1,
+            "attemptPolicy": {
+              "maximumAttempts": 3,
+              "scorePolicy": "best"
+            }
+          },
+          "feedback": {
+            "mode": "after-submit",
+            "correct": {
+              "message": {
+                "en-GB": "Correct. G major and E minor share one sharp."
+              }
+            },
+            "incorrect": {
+              "message": {
+                "en-GB": "Not quite. Review the notation or concept and try again."
+              }
+            },
+            "showCorrectAnswer": "after-final-attempt"
+          },
+          "hints": [
+            {
+              "id": "relative-minor-g-hint-1",
+              "content": {
+                "en-GB": "Use the scale degrees or compare key signatures."
+              }
+            }
+          ],
+          "explanation": {
+            "content": {
+              "en-GB": "G major and E minor share one sharp."
+            }
+          },
+          "delivery": {},
+          "analytics": {}
+        },
+        {
+          "id": "relative-major-a-minor",
+          "type": "selected-response",
+          "version": 1,
+          "metadata": {
+            "skillIds": [
+              "theory.scale.relationships"
+            ],
+            "difficulty": 1,
+            "tags": [
+              "scale",
+              "key-relationship"
+            ]
+          },
+          "variables": {},
+          "stimulus": [
+            {
+              "id": "concept",
+              "kind": "text",
+              "content": {
+                "en-GB": "Scale and key relationship"
+              },
+              "presentation": {
+                "role": "topic-label"
+              }
+            }
+          ],
+          "prompt": {
+            "content": {
+              "en-GB": "What is the relative major of A minor?"
+            },
+            "format": "plain-text"
+          },
+          "interaction": {
+            "kind": "choice",
+            "responseId": "response-main",
+            "cardinality": "single",
+            "display": "buttons",
+            "shuffleOptions": true,
+            "optionOrderSeed": "relative-major-a-minor-options",
+            "options": [
+              {
+                "id": "c-major",
+                "content": {
+                  "en-GB": "C major"
+                }
+              },
+              {
+                "id": "f-major",
+                "content": {
+                  "en-GB": "F major"
+                }
+              },
+              {
+                "id": "g-major",
+                "content": {
+                  "en-GB": "G major"
+                }
+              },
+              {
+                "id": "a-major",
+                "content": {
+                  "en-GB": "A major"
+                }
+              }
+            ]
+          },
+          "response": {
+            "id": "response-main",
+            "baseType": "identifier",
+            "cardinality": "single",
+            "correct": {
+              "value": "c-major"
+            }
+          },
+          "assessment": {
+            "strategy": "exact-identifier@1",
+            "maximumScore": 1,
+            "passingScore": 1,
+            "attemptPolicy": {
+              "maximumAttempts": 3,
+              "scorePolicy": "best"
+            }
+          },
+          "feedback": {
+            "mode": "after-submit",
+            "correct": {
+              "message": {
+                "en-GB": "Correct. A minor and C major share the same key signature."
+              }
+            },
+            "incorrect": {
+              "message": {
+                "en-GB": "Not quite. Review the notation or concept and try again."
+              }
+            },
+            "showCorrectAnswer": "after-final-attempt"
+          },
+          "hints": [
+            {
+              "id": "relative-major-a-minor-hint-1",
+              "content": {
+                "en-GB": "Use the scale degrees or compare key signatures."
+              }
+            }
+          ],
+          "explanation": {
+            "content": {
+              "en-GB": "A minor and C major share the same key signature."
+            }
+          },
+          "delivery": {},
+          "analytics": {}
+        },
+        {
+          "id": "leading-note-d-major",
+          "type": "selected-response",
+          "version": 1,
+          "metadata": {
+            "skillIds": [
+              "theory.scale.relationships"
+            ],
+            "difficulty": 2,
+            "tags": [
+              "scale",
+              "key-relationship"
+            ]
+          },
+          "variables": {},
+          "stimulus": [
+            {
+              "id": "concept",
+              "kind": "text",
+              "content": {
+                "en-GB": "Scale and key relationship"
+              },
+              "presentation": {
+                "role": "topic-label"
+              }
+            }
+          ],
+          "prompt": {
+            "content": {
+              "en-GB": "Which note is the leading note in D major?"
+            },
+            "format": "plain-text"
+          },
+          "interaction": {
+            "kind": "choice",
+            "responseId": "response-main",
+            "cardinality": "single",
+            "display": "buttons",
+            "shuffleOptions": true,
+            "optionOrderSeed": "leading-note-d-major-options",
+            "options": [
+              {
+                "id": "c-natural",
+                "content": {
+                  "en-GB": "C natural"
+                }
+              },
+              {
+                "id": "c-sharp",
+                "content": {
+                  "en-GB": "C-sharp"
+                }
+              },
+              {
+                "id": "d",
+                "content": {
+                  "en-GB": "D"
+                }
+              },
+              {
+                "id": "b",
+                "content": {
+                  "en-GB": "B"
+                }
+              }
+            ]
+          },
+          "response": {
+            "id": "response-main",
+            "baseType": "identifier",
+            "cardinality": "single",
+            "correct": {
+              "value": "c-sharp"
+            }
+          },
+          "assessment": {
+            "strategy": "exact-identifier@1",
+            "maximumScore": 1,
+            "passingScore": 1,
+            "attemptPolicy": {
+              "maximumAttempts": 3,
+              "scorePolicy": "best"
+            }
+          },
+          "feedback": {
+            "mode": "after-submit",
+            "correct": {
+              "message": {
+                "en-GB": "Correct. The leading note is the seventh degree, C-sharp."
+              }
+            },
+            "incorrect": {
+              "message": {
+                "en-GB": "Not quite. Review the notation or concept and try again."
+              }
+            },
+            "showCorrectAnswer": "after-final-attempt"
+          },
+          "hints": [
+            {
+              "id": "leading-note-d-major-hint-1",
+              "content": {
+                "en-GB": "Use the scale degrees or compare key signatures."
+              }
+            }
+          ],
+          "explanation": {
+            "content": {
+              "en-GB": "The leading note is the seventh degree, C-sharp."
+            }
+          },
+          "delivery": {},
+          "analytics": {}
+        },
+        {
+          "id": "dominant-a-major",
+          "type": "selected-response",
+          "version": 1,
+          "metadata": {
+            "skillIds": [
+              "theory.scale.relationships"
+            ],
+            "difficulty": 2,
+            "tags": [
+              "scale",
+              "key-relationship"
+            ]
+          },
+          "variables": {},
+          "stimulus": [
+            {
+              "id": "concept",
+              "kind": "text",
+              "content": {
+                "en-GB": "Scale and key relationship"
+              },
+              "presentation": {
+                "role": "topic-label"
+              }
+            }
+          ],
+          "prompt": {
+            "content": {
+              "en-GB": "Which note is the dominant of A major?"
+            },
+            "format": "plain-text"
+          },
+          "interaction": {
+            "kind": "choice",
+            "responseId": "response-main",
+            "cardinality": "single",
+            "display": "buttons",
+            "shuffleOptions": true,
+            "optionOrderSeed": "dominant-a-major-options",
+            "options": [
+              {
+                "id": "a",
+                "content": {
+                  "en-GB": "A"
+                }
+              },
+              {
+                "id": "c-sharp",
+                "content": {
+                  "en-GB": "C-sharp"
+                }
+              },
+              {
+                "id": "e",
+                "content": {
+                  "en-GB": "E"
+                }
+              },
+              {
+                "id": "g-sharp",
+                "content": {
+                  "en-GB": "G-sharp"
+                }
+              }
+            ]
+          },
+          "response": {
+            "id": "response-main",
+            "baseType": "identifier",
+            "cardinality": "single",
+            "correct": {
+              "value": "e"
+            }
+          },
+          "assessment": {
+            "strategy": "exact-identifier@1",
+            "maximumScore": 1,
+            "passingScore": 1,
+            "attemptPolicy": {
+              "maximumAttempts": 3,
+              "scorePolicy": "best"
+            }
+          },
+          "feedback": {
+            "mode": "after-submit",
+            "correct": {
+              "message": {
+                "en-GB": "Correct. The dominant is the fifth degree, E."
+              }
+            },
+            "incorrect": {
+              "message": {
+                "en-GB": "Not quite. Review the notation or concept and try again."
+              }
+            },
+            "showCorrectAnswer": "after-final-attempt"
+          },
+          "hints": [
+            {
+              "id": "dominant-a-major-hint-1",
+              "content": {
+                "en-GB": "Use the scale degrees or compare key signatures."
+              }
+            }
+          ],
+          "explanation": {
+            "content": {
+              "en-GB": "The dominant is the fifth degree, E."
+            }
+          },
+          "delivery": {},
+          "analytics": {}
+        }
+      ]
+    }
+  ]
+}

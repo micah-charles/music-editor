@@ -1,6 +1,5 @@
 import { useEffect, useMemo, useRef, useState, type CSSProperties } from "react";
 import {
-  analyseDifficulty,
   astToLearningPack,
   astToMusicXml,
   beatsToDuration,
@@ -23,6 +22,7 @@ import {
 } from "@foxchild/music-core";
 import { ExportPanel } from "./components/ExportPanel";
 import { ChordProgressionPanel } from "./components/ChordProgressionPanel";
+import { HomeLauncher } from "./components/HomeLauncher";
 import { ImportPanel } from "./components/ImportPanel";
 import { JsonEditor } from "./components/JsonEditor";
 import { LearningPanel } from "./components/LearningPanel";
@@ -31,8 +31,14 @@ import { OmrImportPanel } from "./components/OmrImportPanel";
 import { OmrFidelityReview } from "./components/OmrFidelityReview";
 import { PianoKeyboard } from "./components/PianoKeyboard";
 import { PlaybackControls } from "./components/PlaybackControls";
+import { ProjectBrowser } from "./components/ProjectBrowser";
+import { ProjectNavigationTools } from "./components/ProjectNavigationTools";
 import { ScoreMetadataEditor } from "./components/ScoreMetadataEditor";
 import { ScoreViewer } from "./components/ScoreViewer";
+import { TrackEditor } from "./components/TrackEditor";
+import { defaultFeatureFlags } from "./config/features";
+import { parseAppRoute, routeFor } from "./config/projectRoutes";
+import { resolveWorkspaceId, type WorkspaceId } from "./config/workspaceRouting";
 import {
   attachMidiInput,
   CHORD_CAPTURE_WINDOW_MS,
@@ -49,6 +55,8 @@ import { usePlaybackActiveEvents, usePlaybackSessionController } from "./music/p
 import { generalMidiPresetOptions, type SoundFontPresetOption } from "./music/playback/soundfontPresets";
 import { SharedRecordingClock } from "./music/recording/recordingClock";
 import { quantizeBeatsToDuration, quantizeStartBeat, type QuantizeGrid } from "./music/rhythm/quantizeDuration";
+import { createSavedProject, projectRepository } from "./music/projects/projectRepository";
+import type { ProjectRecovery, ProjectRevision, ProjectSaveStatus, ProjectWorkspace, SavedProject } from "./music/projects/types";
 
 type InputMode = "fixed" | "performed";
 type RecordingStrategy = "overdub" | "replace";
@@ -68,7 +76,6 @@ type PendingOverfill = {
   startBeat?: number;
 };
 
-type WorkspaceId = "score" | "piano-input" | "piano-roll" | "mixer" | "recording" | "omr-review" | "analysis" | "learning" | "export" | "settings";
 type InspectorDock = "right" | "left" | "float";
 type KeyboardSize = "compact" | "performance" | "teaching" | "fullscreen";
 type UiLayoutState = {
@@ -91,7 +98,7 @@ function isMeasureTimingValidationMessage(message: string): boolean {
 }
 
 const defaultUiLayout: UiLayoutState = {
-  workspace: "score",
+  workspace: "home",
   navigationCollapsed: false,
   inspectorVisible: true,
   inspectorCollapsed: false,
@@ -103,31 +110,46 @@ const defaultUiLayout: UiLayoutState = {
   validationExpanded: false
 };
 
-const workspaces: Array<{ id: WorkspaceId; icon: string; label: string; section?: "library" }> = [
+const workspaceRegistry: Array<{ id: WorkspaceId; icon: string; label: string; section?: "library"; feature?: keyof typeof defaultFeatureFlags }> = [
+  { id: "home", icon: "HM", label: "Home" },
+  { id: "projects", icon: "PJ", label: "My Projects" },
   { id: "score", icon: "SC", label: "Score" },
   { id: "piano-input", icon: "PI", label: "Piano Input" },
   { id: "piano-roll", icon: "PR", label: "Piano Roll" },
-  { id: "mixer", icon: "MX", label: "Mixer" },
-  { id: "recording", icon: "RC", label: "Recording" },
-  { id: "omr-review", icon: "OM", label: "OMR Review" },
-  { id: "analysis", icon: "AN", label: "AI Analysis" },
+  { id: "track-editor", icon: "TE", label: "Track Editor" },
+  { id: "recording", icon: "PF", label: "Performance" },
+  { id: "omr-review", icon: "OM", label: "OMR Review", feature: "omrImport" },
+  { id: "analysis", icon: "AN", label: "AI Analysis", feature: "aiAnalysis" },
   { id: "learning", icon: "LR", label: "Learning" },
-  { id: "export", icon: "EX", label: "Export" },
+  { id: "export", icon: "PT", label: "Print" },
   { id: "settings", icon: "ST", label: "Settings", section: "library" }
 ];
+const workspaces = workspaceRegistry.filter((workspace) =>
+  workspace.feature === undefined || defaultFeatureFlags[workspace.feature]
+);
 const durationValues = Object.keys(DURATION_BEATS) as NoteDurationValue[];
 
-export function App() {
+export function App({ initialWorkspace }: { initialWorkspace?: WorkspaceId } = {}) {
   const playbackController = usePlaybackSessionController();
   const playbackActiveEvents = usePlaybackActiveEvents();
   const [score, setScore] = useState<FoxChildMusicScore>(() => withMeasureValidation(simpleMelodyAst));
+  const [projects, setProjects] = useState<SavedProject[]>([]);
+  const [recoveries, setRecoveries] = useState<ProjectRecovery[]>([]);
+  const [currentProjectId, setCurrentProjectId] = useState<string>();
+  const [currentProjectRevision, setCurrentProjectRevision] = useState(0);
+  const [saveStatus, setSaveStatus] = useState<ProjectSaveStatus>("saved");
+  const [projectDirty, setProjectDirty] = useState(false);
+  const [developerMode, setDeveloperMode] = useState(() => window.localStorage.getItem("foxchild-developer-mode") === "true");
+  const [revisionHistory, setRevisionHistory] = useState<{ project: SavedProject; revisions: ProjectRevision[] }>();
   const [trackVolumes, setTrackVolumes] = useState<Record<string, number>>(() => playbackVolumesFromScore(simpleMelodyAst));
   const [undoStack, setUndoStack] = useState<FoxChildMusicScore[]>([]);
   const [redoStack, setRedoStack] = useState<FoxChildMusicScore[]>([]);
   const [previewScore, setPreviewScore] = useState<FoxChildMusicScore | null>(null);
-  const [uiLayout, setUiLayout] = useState<UiLayoutState>(loadUiLayout);
+  const [uiLayout, setUiLayout] = useState<UiLayoutState>(() => loadUiLayout(initialWorkspace));
+  const [learningInspectorOpen, setLearningInspectorOpen] = useState(false);
   const [message, setMessage] = useState("Loaded demo AST score.");
   const [activePartId, setActivePartId] = useState(simpleMelodyAst.parts[0].id);
+  const [selectedEventId, setSelectedEventId] = useState<string>();
   const [keyboardPressedPitches, setKeyboardPressedPitches] = useState<string[]>([]);
   const [selectedChordPitches, setSelectedChordPitches] = useState<string[]>([]);
   const [keyboardDuration, setKeyboardDuration] = useState<NoteDurationValue>("quarter");
@@ -159,6 +181,7 @@ export function App() {
   const performedChordCaptureRef = useRef<{ notes: CompletedHeldPitch[]; timer?: number }>({ notes: [] });
   const replaceOnNextRecordedEventRef = useRef(false);
   const lastAudibleTrackVolumeRef = useRef<Record<string, number>>(playbackVolumesFromScore(simpleMelodyAst));
+  const dirtyVersionRef = useRef(0);
 
   const validation = useMemo(() => validateScore(score), [score]);
   const structuralValidationErrors = useMemo(
@@ -169,27 +192,116 @@ export function App() {
     () => validation.warnings.filter((message) => !isMeasureTimingValidationMessage(message)),
     [validation.warnings]
   );
-  const analysis = useMemo(() => analyseDifficulty(score), [score]);
   const musicXml = useMemo(() => astToMusicXml(score), [score]);
+  const displayedScore = previewScore ?? score;
   const notationMusicXml = useMemo(() => {
-    const visibleParts = score.parts.filter((part) => part.visible !== false);
-    return astToMusicXml(visibleParts.length > 0 ? { ...score, parts: visibleParts } : score);
-  }, [score]);
+    const visibleParts = displayedScore.parts.filter((part) => part.visible !== false);
+    return astToMusicXml(visibleParts.length > 0 ? { ...displayedScore, parts: visibleParts } : displayedScore);
+  }, [displayedScore]);
   const learningPack = useMemo(() => astToLearningPack(score), [score]);
   const measureCount = new Set(score.parts.flatMap((part) => part.measures.map((measure) => measure.number))).size;
 
   const measureIssues = useMemo(() => score.validation?.measures.filter((measure) => measure.status !== "complete") ?? [], [score]);
   const playbackActivePitches = useMemo(() => uniquePitches(playbackActiveEvents.map((event) => event.pitch)), [playbackActiveEvents]);
   const activeKeyboardPitches = useMemo(() => uniquePitches([...playbackActivePitches, ...keyboardPressedPitches, ...midiActivePitches]), [keyboardPressedPitches, midiActivePitches, playbackActivePitches]);
-  const keyboardIsVisible = uiLayout.keyboardVisible
+  const keyboardIsVisible = uiLayout.workspace !== "learning" && (uiLayout.keyboardVisible
     || uiLayout.workspace === "piano-input"
     || uiLayout.workspace === "recording"
     || midiDevices.length > 0
-    || midiRecordMode !== "off";
+    || midiRecordMode !== "off");
 
   useEffect(() => {
     window.localStorage.setItem(UI_LAYOUT_STORAGE_KEY, JSON.stringify(uiLayout));
   }, [uiLayout]);
+
+  useEffect(() => {
+    let cancelled = false;
+    void (async () => {
+      try {
+        const [savedProjects, savedRecoveries] = await Promise.all([
+          projectRepository.listProjects(),
+          projectRepository.getRecoveries()
+        ]);
+        if (!cancelled) {
+          setProjects(savedProjects);
+          setRecoveries(savedRecoveries);
+          const route = parseAppRoute(window.location.pathname);
+          if (route.projectId) {
+            await openProject(route.projectId, projectWorkspaceFrom(route.workspace), "replace");
+          } else if (initialWorkspace) {
+            setUiLayout((current) => ({ ...current, workspace: initialWorkspace }));
+            window.history.replaceState(null, "", "/");
+          } else {
+            setUiLayout((current) => ({ ...current, workspace: route.workspace }));
+            window.history.replaceState(null, "", routeFor(route.workspace));
+          }
+        }
+      } catch (error) {
+        if (!cancelled) {
+          setSaveStatus("failed");
+          setMessage(errorMessage(error));
+        }
+      }
+    })();
+    return () => { cancelled = true; };
+  }, []);
+
+  useEffect(() => {
+    function handlePopState() {
+      const route = parseAppRoute(window.location.pathname);
+      if (route.projectId) {
+        void openProject(route.projectId, projectWorkspaceFrom(route.workspace), "none");
+      } else {
+        setUiLayout((current) => ({ ...current, workspace: route.workspace }));
+      }
+    }
+    window.addEventListener("popstate", handlePopState);
+    return () => window.removeEventListener("popstate", handlePopState);
+  }, [currentProjectId, projectDirty, score]);
+
+  useEffect(() => {
+    window.localStorage.setItem("foxchild-developer-mode", String(developerMode));
+  }, [developerMode]);
+
+  useEffect(() => {
+    if (!projectDirty) return undefined;
+    setSaveStatus("unsaved");
+    const version = dirtyVersionRef.current;
+    if (currentProjectId) {
+      void projectRepository.putRecovery({
+        projectId: currentProjectId,
+        title: score.metadata.title || "Untitled Score",
+        capturedAt: new Date().toISOString(),
+        baseRevision: currentProjectRevision,
+        ast: structuredClone(score),
+        uiState: currentProjectUiState(activePartId, selectedEventId)
+      }).then(async () => setRecoveries(await projectRepository.getRecoveries())).catch(() => undefined);
+    }
+    const timer = window.setTimeout(() => {
+      void saveCurrentProject("autosave", version);
+    }, 900);
+    return () => window.clearTimeout(timer);
+  }, [activePartId, currentProjectId, currentProjectRevision, projectDirty, score, selectedEventId, uiLayout.workspace]);
+
+  useEffect(() => {
+    function handleKeyDown(event: globalThis.KeyboardEvent) {
+      if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === "s") {
+        event.preventDefault();
+        void saveCurrentProject("manual", dirtyVersionRef.current);
+      }
+    }
+    function handleVisibility() {
+      if (document.visibilityState === "hidden" && projectDirty) {
+        void saveCurrentProject("autosave", dirtyVersionRef.current);
+      }
+    }
+    window.addEventListener("keydown", handleKeyDown);
+    document.addEventListener("visibilitychange", handleVisibility);
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown);
+      document.removeEventListener("visibilitychange", handleVisibility);
+    };
+  }, [currentProjectId, projectDirty, score, uiLayout.workspace]);
 
   useEffect(() => {
     if (!score.parts.some((part) => part.id === activePartId)) {
@@ -278,8 +390,167 @@ export function App() {
     setUndoStack((current) => [...current.slice(-49), score]);
     setRedoStack([]);
     setScore(decoratedScore);
+    dirtyVersionRef.current += 1;
+    setProjectDirty(true);
+    setSaveStatus("unsaved");
     setPreviewScore(null);
     setMessage(nextMessage);
+  }
+
+  async function saveCurrentProject(reason: "autosave" | "manual" | "restore" = "manual", version = dirtyVersionRef.current) {
+    setSaveStatus("saving");
+    try {
+      let projectId = currentProjectId;
+      let saved: SavedProject;
+      if (!projectId) {
+        const created = createSavedProject(score, projectWorkspaceFrom(uiLayout.workspace));
+        saved = await projectRepository.addProject(created);
+        projectId = saved.id;
+        setCurrentProjectId(saved.id);
+      } else {
+        saved = await projectRepository.saveProject({
+          id: projectId,
+          ast: score,
+          lastWorkspace: projectWorkspaceFrom(uiLayout.workspace),
+          uiState: currentProjectUiState(activePartId, selectedEventId),
+          reason
+        });
+      }
+      setCurrentProjectRevision(saved.revision);
+      setProjects(await projectRepository.listProjects());
+      await projectRepository.clearRecovery(saved.id);
+      setRecoveries(await projectRepository.getRecoveries());
+      if (dirtyVersionRef.current === version) {
+        setProjectDirty(false);
+        setSaveStatus("saved");
+      } else {
+        setSaveStatus("unsaved");
+      }
+      if (reason === "manual") setMessage("Saved to My Projects.");
+    } catch (error) {
+      setSaveStatus("failed");
+      setMessage(`Save failed: ${errorMessage(error)}`);
+    }
+  }
+
+  async function createBlankProject() {
+    if (projectDirty) await saveCurrentProject("autosave", dirtyVersionRef.current);
+    const blank = createBlankScore();
+    const project = await projectRepository.addProject(createSavedProject(blank, "score"));
+    setProjects(await projectRepository.listProjects());
+    setCurrentProjectId(project.id);
+    setCurrentProjectRevision(project.revision);
+    setScore(withMeasureValidation(project.ast));
+    setUndoStack([]);
+    setRedoStack([]);
+    setActivePartId(project.ast.parts[0]?.id ?? "");
+    setSelectedEventId(undefined);
+    setProjectDirty(false);
+    setSaveStatus("saved");
+    selectWorkspace("score", project.id);
+  }
+
+  async function importAsNewProject(importedScore: FoxChildMusicScore, importMessage: string) {
+    if (projectDirty) await saveCurrentProject("autosave", dirtyVersionRef.current);
+    const decorated = withMeasureValidation(importedScore);
+    const workspace: ProjectWorkspace = importMessage.toLowerCase().includes("omr") ? "omr-review" : "score";
+    const project = await projectRepository.addProject(createSavedProject(decorated, workspace));
+    setProjects(await projectRepository.listProjects());
+    setCurrentProjectId(project.id);
+    setCurrentProjectRevision(project.revision);
+    setScore(decorated);
+    setUndoStack([]);
+    setRedoStack([]);
+    setActivePartId(decorated.parts[0]?.id ?? "");
+    setSelectedEventId(undefined);
+    setProjectDirty(false);
+    setSaveStatus("saved");
+    setMessage(`${importMessage} Saved as a new project.`);
+    selectWorkspace(workspace, project.id);
+  }
+
+  async function openProject(projectId: string, workspace?: ProjectWorkspace, historyMode: "push" | "replace" | "none" = "push") {
+    if (projectDirty) await saveCurrentProject("autosave", dirtyVersionRef.current);
+    const project = await projectRepository.getProject(projectId);
+    if (!project) {
+      setMessage("That project could not be loaded.");
+      selectWorkspace("projects");
+      return;
+    }
+    const opened = await projectRepository.updateProject(project.id, { lastOpenedAt: new Date().toISOString() });
+    setCurrentProjectId(opened.id);
+    setCurrentProjectRevision(opened.revision);
+    setScore(withMeasureValidation(opened.ast));
+    setUndoStack([]);
+    setRedoStack([]);
+    setActivePartId(opened.uiState?.selectedPartId ?? opened.ast.parts[0]?.id ?? "");
+    setSelectedEventId(opened.uiState?.selectedEventId);
+    setProjectDirty(false);
+    setSaveStatus("saved");
+    setProjects(await projectRepository.listProjects());
+    selectWorkspace(workspace ?? opened.lastWorkspace, opened.id, historyMode);
+  }
+
+  async function recoverProject(recovery: ProjectRecovery) {
+    const project = await projectRepository.getProject(recovery.projectId);
+    if (!project || project.revision > recovery.baseRevision) {
+      setMessage("Recovery was not applied because a newer saved revision exists.");
+      return;
+    }
+    setCurrentProjectId(recovery.projectId);
+    setCurrentProjectRevision(recovery.baseRevision);
+    setScore(withMeasureValidation(recovery.ast));
+    setActivePartId(recovery.uiState?.selectedPartId ?? recovery.ast.parts[0]?.id ?? "");
+    setSelectedEventId(recovery.uiState?.selectedEventId);
+    dirtyVersionRef.current += 1;
+    setProjectDirty(true);
+    setSaveStatus("recovered");
+    selectWorkspace(project.lastWorkspace, project.id);
+  }
+
+  async function discardRecovery(projectId: string) {
+    await projectRepository.clearRecovery(projectId);
+    setRecoveries(await projectRepository.getRecoveries());
+  }
+
+  async function closeCurrentProject() {
+    if (projectDirty) await saveCurrentProject("manual", dirtyVersionRef.current);
+    setCurrentProjectId(undefined);
+    setCurrentProjectRevision(0);
+    setUndoStack([]);
+    setRedoStack([]);
+    setSelectedEventId(undefined);
+    setScore(withMeasureValidation(simpleMelodyAst));
+    setSaveStatus("saved");
+    setMessage("Project closed. The demo remains available as a template.");
+    selectWorkspace("home");
+  }
+
+  async function updateProjectRecord(projectId: string, patch: Partial<Pick<SavedProject, "title" | "favourite" | "archived">>) {
+    const updated = await projectRepository.updateProject(projectId, patch);
+    if (projectId === currentProjectId && patch.title) {
+      setScore((current) => ({ ...current, metadata: { ...current.metadata, title: patch.title! } }));
+    }
+    setProjects(await projectRepository.listProjects());
+    setMessage(`Updated ${updated.title}.`);
+  }
+
+  async function openRevisionHistory(projectId: string) {
+    const project = await projectRepository.getProject(projectId);
+    if (!project) return;
+    setRevisionHistory({ project, revisions: await projectRepository.listRevisions(projectId) });
+  }
+
+  function restoreRevision(revision: ProjectRevision) {
+    if (!window.confirm(`Restore revision ${revision.revision} from ${new Date(revision.createdAt).toLocaleString()}?`)) return;
+    setCurrentProjectId(revision.projectId);
+    setCurrentProjectRevision(revision.revision);
+    setScore(withMeasureValidation(revision.ast));
+    dirtyVersionRef.current += 1;
+    setProjectDirty(true);
+    setSaveStatus("recovered");
+    setRevisionHistory(undefined);
+    selectWorkspace("score");
   }
 
   function togglePartSound(partId: string) {
@@ -355,6 +626,9 @@ export function App() {
     setUndoStack((current) => current.slice(0, -1));
     setRedoStack((current) => [...current.slice(-49), score]);
     setScore(withMeasureValidation(previousScore));
+    dirtyVersionRef.current += 1;
+    setProjectDirty(true);
+    setSaveStatus("unsaved");
     setMessage("Reverted the last score change.");
   }
 
@@ -366,6 +640,9 @@ export function App() {
     setRedoStack((current) => current.slice(0, -1));
     setUndoStack((current) => [...current.slice(-49), score]);
     setScore(withMeasureValidation(nextScore));
+    dirtyVersionRef.current += 1;
+    setProjectDirty(true);
+    setSaveStatus("unsaved");
     setMessage("Restored the next score change.");
   }
 
@@ -594,12 +871,23 @@ export function App() {
     setUiLayout((current) => ({ ...current, ...patch }));
   }
 
-  function selectWorkspace(workspace: WorkspaceId) {
+  function selectWorkspace(workspace: WorkspaceId, routeProjectId = currentProjectId, historyMode: "push" | "replace" | "none" = "push") {
+    const safeWorkspace = resolveWorkspaceId(workspace);
+    if (safeWorkspace === "learning") {
+      setLearningInspectorOpen(false);
+    }
     updateUiLayout({
-      workspace,
-      ...(workspace === "piano-input" ? { keyboardVisible: true, keyboardSize: "performance" } : {}),
-      ...(workspace === "recording" ? { keyboardVisible: true, keyboardSize: "teaching" } : {})
+      workspace: safeWorkspace,
+      ...(safeWorkspace === "piano-input" ? { keyboardVisible: true, keyboardSize: "performance" } : {}),
+      ...(safeWorkspace === "recording" ? { keyboardVisible: true, keyboardSize: "teaching" } : {}),
+      ...(safeWorkspace === "export" ? { inspectorVisible: false, keyboardVisible: false } : {})
     });
+    if (historyMode !== "none") {
+      const nextPath = routeFor(safeWorkspace, routeProjectId);
+      if (`${window.location.pathname}${window.location.search}${window.location.hash}` !== nextPath) {
+        window.history[historyMode === "replace" ? "replaceState" : "pushState"](null, "", nextPath);
+      }
+    }
   }
 
   function beginInspectorResize(event: React.PointerEvent<HTMLDivElement>) {
@@ -638,37 +926,70 @@ export function App() {
     + structuralValidationWarnings.length
     + measureIssues.length
     + (score.sourceMetadata?.warnings?.length ?? 0);
+  const isLearningWorkspace = uiLayout.workspace === "learning";
+  const isTrackEditorWorkspace = uiLayout.workspace === "track-editor";
+  const isHomeWorkspace = uiLayout.workspace === "home";
+  const isProjectBrowserWorkspace = uiLayout.workspace === "projects";
+  const isExportWorkspace = uiLayout.workspace === "export";
+  const inspectorIsVisible = isHomeWorkspace || isProjectBrowserWorkspace || isTrackEditorWorkspace || isExportWorkspace
+    ? false
+    : isLearningWorkspace ? learningInspectorOpen : uiLayout.inspectorVisible;
 
   return (
-    <div className={`app-shell ui3 keyboard-${keyboardIsVisible ? "open" : "closed"}`}>
+    <div className={`app-shell ui3 keyboard-${keyboardIsVisible ? "open" : "closed"} ${isHomeWorkspace ? "home-workspace" : ""} ${isProjectBrowserWorkspace ? "project-browser-workspace" : ""} ${!isHomeWorkspace && !isProjectBrowserWorkspace && !isLearningWorkspace ? "project-workspace" : ""} ${isLearningWorkspace ? "learning-workspace" : ""} ${isTrackEditorWorkspace ? "track-editor-workspace" : ""}`}>
       <header className="app-header workstation-header">
         <button
           type="button"
           className="brand-mark"
-          aria-label="Toggle workspace navigation"
-          title="Toggle workspace navigation"
-          onClick={() => updateUiLayout({ navigationCollapsed: !uiLayout.navigationCollapsed })}
+          aria-label="Open Home"
+          title="Home"
+          onClick={() => selectWorkspace("home")}
         >FC</button>
-        <div className="brand-title">FoxChild Music Score Lab</div>
+        <div className="brand-title">{isLearningWorkspace ? "FoxChild Music Learning Lab" : "FoxChild Music Score Lab"}</div>
         <div className="document-title-block">
-          <strong>{score.metadata.title}</strong>
-          <span>{workspaceLabel}</span>
+          <strong>{isLearningWorkspace ? "Learning Home" : score.metadata.title}</strong>
+          <span>{isLearningWorkspace ? "Adaptive knowledge graph" : workspaceLabel}</span>
         </div>
+        {!isHomeWorkspace && !isProjectBrowserWorkspace && !isLearningWorkspace ? (
+          <nav className="project-view-switcher" aria-label="Project views">
+            {([
+              ["score", "Score"],
+              ["track-editor", "Tracks"],
+              ["piano-roll", "Piano Roll"],
+              ["recording", "Perform"],
+              ["omr-review", "OMR"],
+              ["export", "Print"]
+            ] as Array<[WorkspaceId, string]>).map(([workspace, label]) => (
+              <button type="button" key={workspace} className={uiLayout.workspace === workspace ? "active" : ""} onClick={() => selectWorkspace(workspace)}>{label}</button>
+            ))}
+          </nav>
+        ) : null}
         <div className="header-actions">
-          <button
-            type="button"
-            className={`warning-button ${validationIssueCount > 0 ? "has-issues" : ""}`}
-            onClick={() => updateUiLayout({ inspectorVisible: true, inspectorCollapsed: false, validationExpanded: true })}
-          >{validationIssueCount} issue{validationIssueCount === 1 ? "" : "s"}</button>
-          <button type="button" className="icon-button" onClick={revertLastChange} disabled={undoStack.length === 0} title="Undo" aria-label="Undo">↶</button>
-          <button type="button" className="icon-button" onClick={redoLastChange} disabled={redoStack.length === 0} title="Redo" aria-label="Redo">↷</button>
-          <button
+          {!isLearningWorkspace && !isHomeWorkspace && !isProjectBrowserWorkspace ? (
+            <>
+              <button
+                type="button"
+                className={`warning-button ${validationIssueCount > 0 ? "has-issues" : ""}`}
+                onClick={() => updateUiLayout({ inspectorVisible: true, inspectorCollapsed: false, validationExpanded: true })}
+              >{validationIssueCount} issue{validationIssueCount === 1 ? "" : "s"}</button>
+              <button type="button" className="icon-button" onClick={revertLastChange} disabled={undoStack.length === 0} title="Undo" aria-label="Undo">↶</button>
+              <button type="button" className="icon-button" onClick={redoLastChange} disabled={redoStack.length === 0} title="Redo" aria-label="Redo">↷</button>
+              <span className={`project-save-status ${saveStatus}`} role="status" aria-live="polite">{saveStatusLabel(saveStatus)}</span>
+              <button type="button" onClick={() => void saveCurrentProject("manual", dirtyVersionRef.current)} disabled={saveStatus === "saving"}>Save</button>
+              <button type="button" onClick={() => selectWorkspace("export")}>Export</button>
+            </>
+          ) : null}
+          {!isTrackEditorWorkspace && !isHomeWorkspace && !isProjectBrowserWorkspace && !isExportWorkspace ? <button
             type="button"
             className="icon-button"
-            onClick={() => updateUiLayout({ inspectorVisible: !uiLayout.inspectorVisible })}
-            title="Toggle inspector"
-            aria-label="Toggle inspector"
+            onClick={() => isLearningWorkspace
+              ? setLearningInspectorOpen((current) => !current)
+              : updateUiLayout({ inspectorVisible: !uiLayout.inspectorVisible })}
+            title={isLearningWorkspace ? "Open Score Lab inspector" : "Toggle inspector"}
+            aria-label={isLearningWorkspace ? "Open Score Lab inspector" : "Toggle inspector"}
+            aria-pressed={inspectorIsVisible}
           >IN</button>
+          : null}
         </div>
       </header>
 
@@ -698,23 +1019,23 @@ export function App() {
         </nav>
 
         <section className="workspace-panel canvas-workspace">
-          <div className="score-topbar workstation-toolbar">
+          {!isHomeWorkspace && !isProjectBrowserWorkspace && !isLearningWorkspace && !isTrackEditorWorkspace && !isExportWorkspace ? <div className="score-topbar workstation-toolbar">
             <div>
               <h1>{workspaceLabel}</h1>
               <p>{score.global.key.tonic} {score.global.key.mode} · {score.global.timeSignature.beats}/{score.global.timeSignature.beatType} · {score.global.tempo.bpm} bpm · {measureCount} measures</p>
             </div>
             <div className="document-actions">
               <button type="button" onClick={() => selectWorkspace("score")} className={uiLayout.workspace === "score" ? "active" : ""}>Score</button>
-              <button type="button" onClick={() => selectWorkspace("mixer")} className={uiLayout.workspace === "mixer" ? "active" : ""}>Tracks</button>
+              <button type="button" onClick={() => selectWorkspace("track-editor")} className={uiLayout.workspace === "track-editor" ? "active" : ""}>Track Editor</button>
               <button
                 type="button"
                 onClick={() => updateUiLayout({ keyboardVisible: !uiLayout.keyboardVisible })}
                 aria-pressed={keyboardIsVisible}
               >{keyboardIsVisible ? "Hide Keyboard" : "Show Keyboard"}</button>
             </div>
-          </div>
+          </div> : null}
 
-          <button
+          {!isHomeWorkspace && !isProjectBrowserWorkspace && !isLearningWorkspace && !isTrackEditorWorkspace && !isExportWorkspace ? <button
             type="button"
             className={`validation-banner ${validationIssueCount > 0 ? "warning" : "ok"}`}
             onClick={() => updateUiLayout({ validationExpanded: !uiLayout.validationExpanded })}
@@ -722,8 +1043,8 @@ export function App() {
           >
             <span>{validationIssueCount > 0 ? `${validationIssueCount} validation and fidelity issue${validationIssueCount === 1 ? "" : "s"}` : "Score validation passed"}</span>
             <span>{uiLayout.validationExpanded ? "Hide details" : "Show details"}</span>
-          </button>
-          {uiLayout.validationExpanded ? (
+          </button> : null}
+          {!isHomeWorkspace && !isProjectBrowserWorkspace && !isLearningWorkspace && !isTrackEditorWorkspace && !isExportWorkspace && uiLayout.validationExpanded ? (
             <div className="validation-details" aria-live="polite">
               {message ? <p className="message-line">{message}</p> : null}
               {structuralValidationErrors.map((error, index) => <p className="validation-error" key={`${index}-${error}`}>{error}</p>)}
@@ -731,35 +1052,136 @@ export function App() {
               {measureIssues.map((issue) => <p key={`${issue.partId}-${issue.measure}`}>Measure {issue.measure}: {issue.status}</p>)}
               {score.sourceMetadata?.warnings?.map((warning, index) => <p key={`source-${index}-${warning}`}>{warning}</p>)}
             </div>
-          ) : message ? <div className="workspace-message" aria-live="polite">{message}</div> : null}
+          ) : !isHomeWorkspace && !isProjectBrowserWorkspace && !isLearningWorkspace && !isTrackEditorWorkspace && !isExportWorkspace && message ? <div className="workspace-message" aria-live="polite">{message}</div> : null}
 
           <div className="canvas-stage">
-            {uiLayout.workspace === "piano-roll" || uiLayout.workspace === "mixer" ? (
+            {uiLayout.workspace === "home" ? (
+              <HomeLauncher
+                score={score}
+                projects={projects}
+                recoveries={recoveries}
+                currentProjectId={currentProjectId}
+                onNavigate={selectWorkspace}
+                onCreateProject={() => void createBlankProject()}
+                onOpenProjects={() => selectWorkspace("projects")}
+                onOpenProject={(projectId) => void openProject(projectId)}
+                onRecover={(recovery) => void recoverProject(recovery)}
+                onDiscardRecovery={(projectId) => void discardRecovery(projectId)}
+              />
+            ) : uiLayout.workspace === "projects" ? (
+              <ProjectBrowser
+                projects={projects}
+                currentProjectId={currentProjectId}
+                onCreate={() => void createBlankProject()}
+                onOpen={(projectId, workspace) => void openProject(projectId, workspace)}
+                onRename={(projectId, title) => void updateProjectRecord(projectId, { title })}
+                onDuplicate={(projectId) => void projectRepository.duplicateProject(projectId).then(async () => setProjects(await projectRepository.listProjects())).catch((error) => setMessage(errorMessage(error)))}
+                onHistory={(projectId) => void openRevisionHistory(projectId)}
+                onFavourite={(projectId, favourite) => void updateProjectRecord(projectId, { favourite })}
+                onArchive={(projectId, archived) => void updateProjectRecord(projectId, { archived })}
+                onDelete={(projectId) => void projectRepository.deleteProject(projectId).then(async () => {
+                  if (projectId === currentProjectId) {
+                    setCurrentProjectId(undefined);
+                    setScore(withMeasureValidation(simpleMelodyAst));
+                    setSaveStatus("saved");
+                  }
+                  setProjects(await projectRepository.listProjects());
+                }).catch((error) => setMessage(errorMessage(error)))}
+                onHome={() => selectWorkspace("home")}
+              />
+            ) : uiLayout.workspace === "track-editor" ? (
+              <TrackEditor
+                score={score}
+                activePartId={activePartId}
+                selectedEventId={selectedEventId}
+                measureIssues={measureIssues}
+                instrumentOptions={soundFontPresetOptions}
+                canUndo={undoStack.length > 0}
+                canRedo={redoStack.length > 0}
+                recording={midiRecordMode !== "off"}
+                onActivePartChange={setActivePartId}
+                onSelectedEventChange={setSelectedEventId}
+                onChange={(next) => acceptScore(next, "Updated Track Editor.")}
+                onUndo={revertLastChange}
+                onRedo={redoLastChange}
+                onToggleRecording={() => {
+                  if (midiRecordMode !== "off") {
+                    setMidiRecordMode("off");
+                    return;
+                  }
+                  setInputMode("performed");
+                  setMidiRecordMode("insert-notes");
+                  updateUiLayout({ keyboardVisible: true });
+                  if (!midiAccess) void enableMidi();
+                }}
+              />
+            ) : uiLayout.workspace === "piano-roll" ? (
               <NoteEditor
                 score={score}
                 activePartId={activePartId}
+                selectedEventId={selectedEventId}
                 measureIssues={measureIssues}
                 instrumentOptions={soundFontPresetOptions}
                 onActivePartChange={setActivePartId}
+                onSelectedEventChange={setSelectedEventId}
                 onChange={(next) => acceptScore(next, "Updated tracks.")}
               />
-            ) : uiLayout.workspace === "analysis" || uiLayout.workspace === "learning" ? (
-              <LearningPanel analysis={analysis} learningPack={learningPack} />
+            ) : uiLayout.workspace === "learning" ? (
+              <LearningPanel
+                midiActivePitches={midiActivePitches}
+                midiStatus={midiStatus}
+                onEnableMidi={() => void enableMidi()}
+                onOpenScoreLab={(example, conceptTitle) => {
+                  setPreviewScore(withMeasureValidation(example));
+                  setActivePartId(example.parts[0]?.id ?? "");
+                  setSelectedEventId(example.parts.flatMap((part) => part.measures.flatMap((measure) => measure.events))[0]?.id);
+                  setMessage(`${conceptTitle} example opened from Learning. Your project is unchanged.`);
+                  selectWorkspace("score");
+                }}
+              />
             ) : uiLayout.workspace === "export" ? (
-              <ExportPanel score={score} musicXml={musicXml} learningPack={learningPack} />
+              <div className="export-workspace">
+                <ExportPanel
+                  score={score}
+                  musicXml={musicXml}
+                  learningPack={learningPack}
+                  developerMode={developerMode}
+                  validationErrors={structuralValidationErrors}
+                  validationWarnings={[...structuralValidationWarnings, ...measureIssues.map((issue) => `Measure ${issue.measure}: ${issue.status}`)]}
+                />
+                <div className="print-score-surface" aria-hidden="true" {...({ inert: "" } as Record<string, string>)}>
+                  <ScoreViewer
+                    score={score}
+                    musicXml={notationMusicXml}
+                    measureIssues={[]}
+                    activePlaybackEvents={[]}
+                    canRevert={false}
+                    onAddMissingRest={() => undefined}
+                    onStretchLastNote={() => undefined}
+                    onRevertChange={() => undefined}
+                    compact
+                  />
+                </div>
+              </div>
             ) : uiLayout.workspace === "omr-review" ? (
               <OmrFidelityReview score={score} onChange={(next) => acceptScore(next, "Updated OMR review values.")} />
             ) : uiLayout.workspace === "settings" ? (
               <div className="settings-canvas">
                 <ScoreMetadataEditor score={score} onChange={(next) => acceptScore(next, "Updated score metadata.")} />
-                <JsonEditor score={score} onApply={(next) => acceptScore(next, "Applied AST JSON.")} onMessage={setMessage} />
+                <section className="panel developer-mode-settings">
+                  <div className="panel-heading"><h2>Developer Mode</h2><span>{developerMode ? "On" : "Off"}</span></div>
+                  <p>Expose internal score JSON, compatibility exports, validation reports and diagnostics. Normal music work does not require these tools.</p>
+                  <label className="inline-toggle"><input type="checkbox" checked={developerMode} onChange={(event) => setDeveloperMode(event.target.checked)} /><span>Enable Developer Mode</span></label>
+                </section>
+                {developerMode ? <JsonEditor score={score} onApply={(next) => acceptScore(next, "Applied AST JSON.")} onMessage={setMessage} /> : null}
               </div>
             ) : (
               <ScoreViewer
-                score={score}
+                score={displayedScore}
                 musicXml={notationMusicXml}
                 measureIssues={measureIssues}
                 activePlaybackEvents={playbackActiveEvents}
+                selectedEventId={selectedEventId}
                 showValidationDetails={uiLayout.validationExpanded}
                 canRevert={undoStack.length > 0}
                 onAddMissingRest={addMissingRest}
@@ -770,7 +1192,7 @@ export function App() {
           </div>
         </section>
 
-        {uiLayout.inspectorVisible ? (
+        {inspectorIsVisible ? (
           <aside
             className={`inspector-panel ${uiLayout.inspectorCollapsed ? "collapsed" : ""} ${uiLayout.inspectorDock === "float" ? "floating" : ""}`}
             style={{ width: uiLayout.inspectorCollapsed ? 48 : uiLayout.inspectorWidth }}
@@ -779,7 +1201,10 @@ export function App() {
             <div className="inspector-header">
               {!uiLayout.inspectorCollapsed ? <strong>Inspector</strong> : null}
               <button type="button" className="icon-button" onClick={() => updateUiLayout({ inspectorCollapsed: !uiLayout.inspectorCollapsed })} title="Collapse inspector" aria-label="Collapse inspector">{uiLayout.inspectorCollapsed ? "<" : ">"}</button>
-              {!uiLayout.inspectorCollapsed ? <button type="button" className="icon-button" onClick={() => updateUiLayout({ inspectorVisible: false })} title="Hide inspector" aria-label="Hide inspector">×</button> : null}
+              {!uiLayout.inspectorCollapsed ? <button type="button" className="icon-button" onClick={() => {
+                if (isLearningWorkspace) setLearningInspectorOpen(false);
+                else updateUiLayout({ inspectorVisible: false });
+              }} title="Hide inspector" aria-label="Hide inspector">×</button> : null}
             </div>
             {!uiLayout.inspectorCollapsed ? (
               <div className="inspector-content">
@@ -793,8 +1218,8 @@ export function App() {
 
                 {uiLayout.workspace === "omr-review" ? (
                   <>
-                    <OmrImportPanel onImport={acceptScore} onMessage={setMessage} />
-                    <ImportPanel onImport={acceptScore} onMessage={setMessage} />
+                    <OmrImportPanel onImport={(next, nextMessage) => void importAsNewProject(next, nextMessage)} onMessage={setMessage} />
+                    <ImportPanel onImport={(next, nextMessage) => void importAsNewProject(next, nextMessage)} onMessage={setMessage} />
                   </>
                 ) : null}
 
@@ -806,6 +1231,7 @@ export function App() {
                       <label><span>Inspector width</span><input aria-label="Inspector width" type="range" min={260} max={520} value={uiLayout.inspectorWidth} onChange={(event) => updateUiLayout({ inspectorWidth: Number(event.target.value) })} /></label>
                       <label><span>Keyboard size</span><select aria-label="Keyboard size" value={uiLayout.keyboardSize} onChange={(event) => updateUiLayout({ keyboardSize: event.target.value as KeyboardSize, keyboardVisible: true })}><option value="compact">Compact</option><option value="performance">Performance</option><option value="teaching">Teaching</option><option value="fullscreen">Fullscreen</option></select></label>
                       <button type="button" onClick={() => setUiLayout(defaultUiLayout)}>Reset workspace layout</button>
+                      <label className="inline-toggle"><input type="checkbox" checked={developerMode} onChange={(event) => setDeveloperMode(event.target.checked)} /><span>Developer Mode</span></label>
                     </section>
                     <ChordProgressionPanel score={score} onPreview={previewPlayback} onInsert={acceptScore} onMessage={setMessage} />
                   </>
@@ -856,7 +1282,7 @@ export function App() {
                         </div>
                         );
                       })}
-                      <button type="button" onClick={() => selectWorkspace("mixer")}>Open mixer</button>
+                      <button type="button" onClick={() => selectWorkspace("track-editor")}>Open Track Editor</button>
                     </section>
                   </>
                 ) : null}
@@ -875,7 +1301,32 @@ export function App() {
         ) : null}
       </main>
 
-      {keyboardIsVisible ? (
+      {revisionHistory ? (
+        <div className="revision-history-backdrop" role="presentation" onMouseDown={(event) => { if (event.currentTarget === event.target) setRevisionHistory(undefined); }}>
+          <section className="revision-history-dialog" role="dialog" aria-modal="true" aria-label={`Revision history for ${revisionHistory.project.title}`}>
+            <header><div><strong>Revision history</strong><span>{revisionHistory.project.title}</span></div><button type="button" aria-label="Close revision history" onClick={() => setRevisionHistory(undefined)}>×</button></header>
+            {revisionHistory.revisions.length ? revisionHistory.revisions.map((revision) => (
+              <article key={revision.key}>
+                <div><strong>Revision {revision.revision}</strong><span>{new Date(revision.createdAt).toLocaleString()} · {revision.reason}</span></div>
+                <button type="button" onClick={() => restoreRevision(revision)}>Restore…</button>
+              </article>
+            )) : <p>No earlier checkpoints yet. Manual saves and autosaves create a bounded local history.</p>}
+          </section>
+        </div>
+      ) : null}
+
+      {!isHomeWorkspace && !isProjectBrowserWorkspace && !isLearningWorkspace ? (
+        <ProjectNavigationTools
+          workspace={uiLayout.workspace}
+          saveStatus={saveStatusLabel(saveStatus)}
+          onNavigate={selectWorkspace}
+          onSave={() => void saveCurrentProject("manual", dirtyVersionRef.current)}
+          onValidate={() => updateUiLayout({ inspectorVisible: true, inspectorCollapsed: false, validationExpanded: true })}
+          onCloseProject={() => void closeCurrentProject()}
+        />
+      ) : null}
+
+      {keyboardIsVisible && !isHomeWorkspace ? (
         <section
           className={`keyboard-dock keyboard-size-${uiLayout.keyboardSize}`}
           style={uiLayout.keyboardSize === "performance" ? { height: uiLayout.keyboardHeight } : undefined}
@@ -1016,7 +1467,7 @@ export function App() {
         </section>
       ) : null}
 
-      <PlaybackControls
+      {!isLearningWorkspace && !isHomeWorkspace && !isProjectBrowserWorkspace && !isExportWorkspace ? <PlaybackControls
         score={previewScore ?? score}
         trackVolumes={trackVolumes}
         label={previewScore ? `Preview: ${previewScore.metadata.title}` : undefined}
@@ -1028,7 +1479,7 @@ export function App() {
           }
           acceptScore({ ...score, global: { ...score.global, tempo: { ...score.global.tempo, bpm } } }, `Changed tempo to ${bpm} bpm.`);
         }}
-      />
+      /> : null}
     </div>
   );
 }
@@ -1059,13 +1510,60 @@ function errorMessage(error: unknown): string {
   return error instanceof Error ? error.message : String(error);
 }
 
-function loadUiLayout(): UiLayoutState {
+function createBlankScore(): FoxChildMusicScore {
+  const id = `score-${Date.now()}`;
+  return {
+    ...structuredClone(simpleMelodyAst),
+    id,
+    metadata: {
+      title: "Untitled Score",
+      composer: "",
+      createdAt: new Date().toISOString().slice(0, 10),
+      updatedAt: new Date().toISOString().slice(0, 10),
+      source: "manual"
+    },
+    parts: [{
+      ...structuredClone(simpleMelodyAst.parts[0]),
+      id: "part-1",
+      name: "Piano",
+      measures: [{
+        number: 1,
+        events: [{ id: "rest-1", type: "rest", duration: { value: "whole", beats: DURATION_BEATS.whole } }]
+      }]
+    }],
+    validation: undefined
+  };
+}
+
+function projectWorkspaceFrom(workspace: WorkspaceId): ProjectWorkspace {
+  if (workspace === "track-editor" || workspace === "piano-roll" || workspace === "recording" || workspace === "omr-review" || workspace === "export") {
+    return workspace;
+  }
+  return "score";
+}
+
+function currentProjectUiState(selectedPartId?: string, selectedEventId?: string) {
+  return { selectedPartId, selectedEventId };
+}
+
+function saveStatusLabel(status: ProjectSaveStatus) {
+  return ({
+    saved: "✓ Saved",
+    saving: "↻ Saving…",
+    unsaved: "● Unsaved changes",
+    failed: "⚠ Save failed",
+    recovered: "↺ Recovered"
+  } as Record<ProjectSaveStatus, string>)[status];
+}
+
+function loadUiLayout(forcedWorkspace?: WorkspaceId): UiLayoutState {
   try {
     const compactViewport = window.innerWidth <= 820;
     const stored = window.localStorage.getItem(UI_LAYOUT_STORAGE_KEY);
     if (!stored) {
       return {
         ...defaultUiLayout,
+        workspace: forcedWorkspace ?? defaultUiLayout.workspace,
         navigationCollapsed: compactViewport,
         inspectorVisible: !compactViewport
       };
@@ -1074,6 +1572,9 @@ function loadUiLayout(): UiLayoutState {
     return {
       ...defaultUiLayout,
       ...parsed,
+      // A remembered layout must not force-open the last project on launch.
+      // Project routes may pass an explicit workspace later.
+      workspace: forcedWorkspace ?? "home",
       navigationCollapsed: compactViewport ? true : Boolean(parsed.navigationCollapsed),
       inspectorVisible: compactViewport ? false : parsed.inspectorVisible ?? defaultUiLayout.inspectorVisible,
       keyboardSize: compactViewport ? "compact" : parsed.keyboardSize ?? defaultUiLayout.keyboardSize,
@@ -1081,7 +1582,10 @@ function loadUiLayout(): UiLayoutState {
       keyboardHeight: Math.min(520, Math.max(170, Number(parsed.keyboardHeight) || defaultUiLayout.keyboardHeight))
     };
   } catch {
-    return defaultUiLayout;
+    return {
+      ...defaultUiLayout,
+      workspace: forcedWorkspace ?? defaultUiLayout.workspace
+    };
   }
 }
 

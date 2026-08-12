@@ -18,6 +18,7 @@ export type NoteDurationValue =
   | "quarter"
   | "eighth"
   | "sixteenth"
+  | "thirty-second"
   | "dotted-half"
   | "dotted-quarter"
   | "dotted-eighth";
@@ -119,6 +120,11 @@ export interface ChordEvent extends TimedEventFields {
   duration: Duration;
   velocity?: number;
   lyric?: string;
+  tie?: {
+    start?: boolean;
+    stop?: boolean;
+    groupId?: string;
+  };
   notation?: NoteNotation;
   semantic?: SemanticChordInfo;
 }
@@ -211,6 +217,7 @@ export interface Part {
   visible?: boolean;
   color?: string;
   collapsed?: boolean;
+  extensions?: Record<string, unknown>;
   measures: Measure[];
 }
 

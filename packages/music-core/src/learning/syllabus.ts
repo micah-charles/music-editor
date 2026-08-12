@@ -1,0 +1,238 @@
+import type { AssessmentStrategyRegistry } from "./registries";
+import type { QuestionFamilyRegistry } from "./questionFamilies";
+import type { CurriculumId, LearningDomain, ParameterDefinition } from "./adaptiveTypes";
+
+export type SyllabusAreaId =
+  | "pitch-notation"
+  | "keys-scales"
+  | "intervals"
+  | "rhythm-metre"
+  | "harmony"
+  | "terms-signs"
+  | "melody-composition"
+  | "score-reading"
+  | "aural-listening"
+  | "musical-analysis";
+
+export type SyllabusCoverageMode = "generated" | "authored" | "hybrid" | "planned";
+
+export interface SyllabusSkill {
+  id: string;
+  title: string;
+  area: SyllabusAreaId;
+  description: string;
+  domains: LearningDomain[];
+  generatorFamilyIds: string[];
+  assessmentStrategyIds: string[];
+  coverageMode: SyllabusCoverageMode;
+  curriculumLevels: Partial<Record<CurriculumId, string[]>>;
+}
+
+export interface SyllabusArea {
+  id: SyllabusAreaId;
+  title: string;
+  skills: SyllabusSkill[];
+}
+
+export interface SyllabusMatrix {
+  version: "1.0.0";
+  areas: SyllabusArea[];
+}
+
+export interface SyllabusCoverageEntry {
+  skillId: string;
+  area: SyllabusAreaId;
+  coverageMode: SyllabusCoverageMode;
+  generatorFamilyIds: string[];
+  missingGeneratorFamilyIds: string[];
+  missingAssessmentStrategyIds: string[];
+  missingCurriculumLevels: Partial<Record<CurriculumId, string[]>>;
+  estimatedGeneratedInstances: number | "unbounded";
+  curriculumLevels: Partial<Record<CurriculumId, string[]>>;
+  status: "covered" | "partial" | "planned";
+}
+
+/**
+ * A compact description of a generator's legal parameter universe.  This is
+ * deliberately metadata-only: callers can report the size without eagerly
+ * materialising every score/audio instance.
+ */
+export interface QuestionFamilyUniverse {
+  familyId: string;
+  estimatedInstances: number | "unbounded";
+  parameterAxes: Record<string, number | "unbounded">;
+}
+
+export function createDefaultSyllabusMatrix(): SyllabusMatrix {
+  const allFoxChildLevels = ["Foundation", "Developing", "Fluent", "Advanced"];
+  const abrsmGrades = ["Grade 1", "Grade 2", "Grade 3", "Grade 4", "Grade 5", "Grade 6", "Grade 7", "Grade 8"];
+  const gcseLevels = ["Foundation", "Higher"];
+  const levels = { foxchild: allFoxChildLevels, abrsm: abrsmGrades, trinity: abrsmGrades, gcse: gcseLevels };
+  const generated = (
+    id: string,
+    title: string,
+    area: SyllabusAreaId,
+    description: string,
+    domains: LearningDomain[],
+    generatorFamilyIds: string[],
+    assessmentStrategyIds: string[]
+  ): SyllabusSkill => ({
+    id, title, area, description, domains, generatorFamilyIds, assessmentStrategyIds,
+    coverageMode: "generated", curriculumLevels: levels
+  });
+  const planned = (
+    id: string,
+    title: string,
+    area: SyllabusAreaId,
+    description: string,
+    domains: LearningDomain[],
+    assessmentStrategyIds: string[]
+  ): SyllabusSkill => ({
+    id, title, area, description, domains, generatorFamilyIds: [], assessmentStrategyIds,
+    coverageMode: "planned", curriculumLevels: levels
+  });
+
+  return {
+    version: "1.0.0",
+    areas: [
+      { id: "pitch-notation", title: "Pitch & notation", skills: [
+        generated("pitch.note-reading", "Note reading", "pitch-notation", "Read pitches across clefs, octaves and ledger lines.", ["note-reading"], ["note-reading@2"], ["pitch-match@1"]),
+        generated("pitch.accidentals", "Accidentals and enharmonics", "pitch-notation", "Identify and spell chromatic pitches and enharmonic equivalents.", ["note-reading"], ["accidentals@1"], ["pitch-match@1"]),
+        generated("pitch.transposition", "Written transposition", "pitch-notation", "Transpose a written line between clefs, keys and instruments.", ["note-reading"], ["transposition@1"], ["exact-identifier@1"])
+      ]},
+      { id: "keys-scales", title: "Keys & scales", skills: [
+        generated("keys.key-signatures", "Key signatures", "keys-scales", "Recognise and construct major and minor key signatures.", ["key-signatures"], ["key-signatures@2"], ["exact-identifier@1"]),
+        generated("scales.scale-types", "Scale types", "keys-scales", "Distinguish and construct major, natural-minor and harmonic-minor scales.", ["scales"], ["scales@2"], ["exact-identifier@1"]),
+        generated("scales.scale-degrees", "Scale degrees and relationships", "keys-scales", "Use tonic, dominant, relative and parallel relationships.", ["scales", "key-signatures"], ["scale-degrees@1"], ["exact-identifier@1"])
+      ]},
+      { id: "intervals", title: "Intervals", skills: [
+        generated("intervals.written", "Written intervals", "intervals", "Identify interval number, quality, direction and compound form.", ["intervals"], ["intervals@2"], ["exact-identifier@1"]),
+        generated("intervals.aural", "Aural intervals", "intervals", "Recognise ascending and descending intervals by ear.", ["ear-training"], ["ear-training@2"], ["exact-identifier@1"]),
+        generated("intervals.inversions", "Interval inversions", "intervals", "Construct and identify inverted intervals.", ["intervals"], ["interval-inversions@1"], ["exact-identifier@1"])
+      ]},
+      { id: "rhythm-metre", title: "Rhythm & metre", skills: [
+        generated("rhythm.note-values", "Note and rest values", "rhythm-metre", "Calculate durations using notes, rests, dots and ties.", ["note-values"], ["note-values@2"], ["numeric-tolerance@1"]),
+        generated("rhythm.metre", "Simple and compound metre", "rhythm-metre", "Identify and apply time signatures and beat grouping.", ["time-signatures"], ["time-signatures@2"], ["exact-identifier@1"]),
+        generated("rhythm.patterns", "Rhythm patterns", "rhythm-metre", "Count, perform and compare rhythmic fragments.", ["rhythm"], ["rhythm@2"], ["numeric-tolerance@1"]),
+        generated("rhythm.tuplets", "Tuplets and irregular grouping", "rhythm-metre", "Read and construct tuplets and irregular subdivisions.", ["rhythm"], ["tuplets@1"], ["exact-identifier@1"])
+      ]},
+      { id: "harmony", title: "Chords & harmony", skills: [
+        generated("harmony.chord-quality", "Chord qualities", "harmony", "Identify triad and seventh-chord qualities.", ["chords"], ["chords@2"], ["exact-identifier@1"]),
+        generated("harmony.inversions", "Chord inversions", "harmony", "Identify and construct chord inversions and figured bass.", ["chords"], ["chord-inversions@1"], ["exact-identifier@1"]),
+        generated("harmony.cadences", "Cadences and harmonic function", "harmony", "Recognise cadences and harmonic function in context.", ["chords", "ear-training"], ["cadences@1"], ["exact-identifier@1"])
+      ]},
+      { id: "terms-signs", title: "Terms, signs & ornaments", skills: [
+        generated("symbols.music-signs", "Music signs and symbols", "terms-signs", "Interpret articulation, expression and accidental symbols.", ["music-symbols"], ["music-symbols@2"], ["exact-identifier@1"]),
+        generated("terms.tempo", "Tempo terms", "terms-signs", "Match tempo terminology to pulse and performance context.", ["tempo"], ["tempo@2"], ["exact-identifier@1"]),
+        generated("terms.ornaments", "Ornaments and instrumental directions", "terms-signs", "Interpret ornaments and common instrumental directions.", ["music-symbols"], ["ornaments@1"], ["exact-identifier@1"])
+      ]},
+      { id: "melody-composition", title: "Melody & composition", skills: [
+        generated("melody.phrase-structure", "Phrase structure and development", "melody-composition", "Recognise phrases, sequences, repetition and contrast.", ["melody-dictation"], ["phrase-structure@1"], ["exact-identifier@1"]),
+        generated("melody.completion", "Melodic completion", "melody-composition", "Complete and develop a melody within tonal and rhythmic constraints.", ["melody-dictation"], ["melody-completion@1"], ["exact-identifier@1"])
+      ]},
+      { id: "score-reading", title: "Score reading", skills: [
+        generated("score.sight-reading", "Sight reading", "score-reading", "Read and perform a notated phrase with increasing complexity.", ["sight-reading"], ["sight-reading@2"], ["sight-reading@1"]),
+        generated("score.instruments", "Instruments and transposing instruments", "score-reading", "Identify instruments and account for transposing notation.", ["note-reading"], ["instruments@1"], ["exact-identifier@1"]),
+        generated("score.open-short", "Open and short score", "score-reading", "Read and reduce multi-part notation.", ["note-reading"], ["open-score@1"], ["exact-identifier@1"])
+      ]},
+      { id: "aural-listening", title: "Aural & listening", skills: [
+        generated("aural.intervals", "Interval ear training", "aural-listening", "Identify melodic intervals from generated audio.", ["ear-training"], ["ear-training@2"], ["exact-identifier@1"]),
+        generated("aural.chords", "Chord ear training", "aural-listening", "Identify chord qualities from generated audio.", ["ear-training"], ["chords@2"], ["exact-identifier@1"]),
+        generated("aural.features", "Musical features and instrumentation", "aural-listening", "Identify texture, sonority, metre, form and instrumentation in an excerpt.", ["ear-training"], ["aural-features@1"], ["exact-identifier@1"])
+      ]},
+      { id: "musical-analysis", title: "Musical analysis & context", skills: [
+        generated("analysis.form-texture", "Form and texture", "musical-analysis", "Analyse formal structure and texture in a musical example.", ["error-detection"], ["analysis-form-texture@1"], ["exact-identifier@1"]),
+        generated("analysis.context", "Style and context", "musical-analysis", "Connect musical features with style, context and area-of-study evidence.", ["error-detection"], ["analysis-context@1"], ["exact-identifier@1"])
+      ]}
+    ]
+  };
+}
+
+export function syllabusSkills(matrix = createDefaultSyllabusMatrix()): SyllabusSkill[] {
+  return matrix.areas.flatMap((area) => area.skills);
+}
+
+export function syllabusCoverage(
+  matrix: SyllabusMatrix,
+  families: QuestionFamilyRegistry,
+  assessments: AssessmentStrategyRegistry
+): SyllabusCoverageEntry[] {
+  return syllabusSkills(matrix).map((skill) => {
+    const missingGeneratorFamilyIds = skill.generatorFamilyIds.filter((id) => !families.ids().includes(id));
+    const missingAssessmentStrategyIds = skill.assessmentStrategyIds.filter((id) => !assessments.has(id));
+    const mappedLevels: Partial<Record<CurriculumId, Set<string>>> = {};
+    skill.generatorFamilyIds
+      .filter((id) => families.ids().includes(id))
+      .map((id) => families.resolve(id))
+      .flatMap((family) => family.curriculum)
+      .forEach((mapping) => {
+        const levels = mappedLevels[mapping.curriculumId] ?? new Set<string>();
+        levels.add(mapping.level);
+        mappedLevels[mapping.curriculumId] = levels;
+      });
+    const missingCurriculumLevels: Partial<Record<CurriculumId, string[]>> = {};
+    (Object.keys(skill.curriculumLevels) as CurriculumId[]).forEach((curriculumId) => {
+      const required = skill.curriculumLevels[curriculumId] ?? [];
+      const mapped = mappedLevels[curriculumId] ?? new Set<string>();
+      const missing = required.filter((level) => !mapped.has(level));
+      if (missing.length) missingCurriculumLevels[curriculumId] = missing;
+    });
+    const status = skill.coverageMode === "planned"
+      ? "planned"
+      : missingGeneratorFamilyIds.length || missingAssessmentStrategyIds.length || Object.keys(missingCurriculumLevels).length
+        ? "partial"
+      : "covered";
+    const familySizes = skill.generatorFamilyIds
+      .filter((id) => families.ids().includes(id))
+      .map((id) => describeQuestionFamilyUniverse(families.resolve(id)).estimatedInstances);
+    const estimatedGeneratedInstances = familySizes.some((size) => size === "unbounded")
+      ? "unbounded"
+      : familySizes.reduce<number>((sum, size) => sum + Number(size), 0);
+    return {
+      skillId: skill.id,
+      area: skill.area,
+      coverageMode: skill.coverageMode,
+      generatorFamilyIds: skill.generatorFamilyIds,
+      missingGeneratorFamilyIds,
+      missingAssessmentStrategyIds,
+      missingCurriculumLevels,
+      estimatedGeneratedInstances,
+      curriculumLevels: skill.curriculumLevels,
+      status
+    };
+  });
+}
+
+/**
+ * Describe the bounded/unbounded generated space for one registered family.
+ * Integer ranges and enum values are exact; open numeric parameters remain
+ * unbounded because their legal values cannot be enumerated safely.
+ */
+export function describeQuestionFamilyUniverse(
+  family: ReturnType<QuestionFamilyRegistry["resolve"]>
+): QuestionFamilyUniverse {
+  const parameterAxes = Object.fromEntries(
+    Object.entries(family.parameterSpace).map(([name, parameter]) => [name, parameterCardinality(parameter)])
+  );
+  const parameterCount = Object.values(parameterAxes).reduce<number | "unbounded">((total, cardinality) => {
+    if (total === "unbounded") return total;
+    if (cardinality === "unbounded") return cardinality;
+    return total * cardinality;
+  }, 1);
+  const variantCount = Math.max(1, family.variantIds.length);
+  const conceptCount = Math.max(1, family.conceptIds.length);
+  return {
+    familyId: family.id,
+    estimatedInstances: parameterCount === "unbounded" ? "unbounded" : parameterCount * variantCount * conceptCount,
+    parameterAxes
+  };
+}
+
+function parameterCardinality(parameter: ParameterDefinition): number | "unbounded" {
+  if (parameter.type === "enum") return Math.max(1, parameter.values?.length ?? 0);
+  if (parameter.type === "integer" && parameter.minimum !== undefined && parameter.maximum !== undefined) {
+    return Math.max(1, parameter.maximum - parameter.minimum + 1);
+  }
+  if (parameter.type === "boolean") return 2;
+  return "unbounded";
+}

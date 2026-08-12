@@ -1,0 +1,89 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://foxchild.example/schemas/music-learning/attempt-v1.schema.json",
+  "title": "FoxChild Music Learning Attempt v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "format",
+    "schemaVersion",
+    "attemptId",
+    "questionSetId",
+    "questionSetRevision",
+    "itemId",
+    "startedAt",
+    "resolvedVariables",
+    "responses",
+    "telemetry"
+  ],
+  "properties": {
+    "format": { "const": "foxchild.music-learning.attempt" },
+    "schemaVersion": { "const": "1.0.0" },
+    "attemptId": { "$ref": "#/$defs/id" },
+    "questionSetId": { "$ref": "#/$defs/id" },
+    "questionSetRevision": { "type": "integer", "minimum": 1 },
+    "itemId": { "$ref": "#/$defs/id" },
+    "learnerId": { "$ref": "#/$defs/id" },
+    "startedAt": { "type": "string", "format": "date-time" },
+    "submittedAt": { "type": "string", "format": "date-time" },
+    "resolvedVariables": { "type": "object" },
+    "resolvedSeed": { "type": "string" },
+    "responses": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["responseId", "value", "capturedAt"],
+        "properties": {
+          "responseId": { "$ref": "#/$defs/id" },
+          "value": {},
+          "capturedAt": { "type": "string", "format": "date-time" }
+        }
+      }
+    },
+    "result": {
+      "type": "object",
+      "required": ["score", "maximumScore", "percentage", "passed", "dimensions", "feedbackIds", "masteryEvidence"],
+      "properties": {
+        "score": { "type": "number" },
+        "maximumScore": { "type": "number", "minimum": 0 },
+        "percentage": { "type": "number" },
+        "passed": { "type": "boolean" },
+        "dimensions": { "type": "object" },
+        "feedbackIds": { "type": "array", "items": { "type": "string" } },
+        "masteryEvidence": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["skillId", "evidence", "weight"],
+            "properties": {
+              "skillId": { "$ref": "#/$defs/id" },
+              "evidence": { "type": "number", "minimum": 0, "maximum": 1 },
+              "weight": { "type": "number", "minimum": 0 }
+            }
+          }
+        }
+      },
+      "additionalProperties": true
+    },
+    "telemetry": {
+      "type": "object",
+      "required": ["replayCount", "hintIdsUsed"],
+      "properties": {
+        "responseTimeMs": { "type": "number", "minimum": 0 },
+        "replayCount": { "type": "integer", "minimum": 0 },
+        "hintIdsUsed": { "type": "array", "items": { "$ref": "#/$defs/id" } },
+        "inputSource": { "type": "string" }
+      },
+      "additionalProperties": false
+    }
+  },
+  "$defs": {
+    "id": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 220,
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._:@/-]*$"
+    }
+  }
+}

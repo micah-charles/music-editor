@@ -1,0 +1,641 @@
+{
+  "format": "foxchild.music-learning.question-set",
+  "schemaVersion": "1.0.0",
+  "id": "set-music-symbols-01",
+  "revision": 1,
+  "status": "published",
+  "metadata": {
+    "title": {
+      "en-GB": "Music Signs and Symbols"
+    },
+    "description": {
+      "en-GB": "Recognise five common notation symbols and their meanings."
+    },
+    "language": "en-GB",
+    "authors": [
+      "FoxChild Music Learning Generator"
+    ],
+    "subject": "Music",
+    "domain": "notation-symbols",
+    "skillIds": [
+      "theory.notation-symbol.meaning"
+    ],
+    "difficulty": "mixed",
+    "tags": []
+  },
+  "defaults": {
+    "locale": "en-GB",
+    "attemptPolicy": {
+      "maximumAttempts": 3,
+      "scorePolicy": "best"
+    }
+  },
+  "assets": [],
+  "variables": {},
+  "delivery": {
+    "mode": "practice",
+    "navigation": "linear",
+    "showProgress": true
+  },
+  "sections": [
+    {
+      "id": "section-1",
+      "title": {
+        "en-GB": "Music Signs and Symbols"
+      },
+      "delivery": {},
+      "items": [
+        {
+          "id": "symbol-01",
+          "type": "selected-response",
+          "version": 1,
+          "metadata": {
+            "skillIds": [
+              "theory.notation-symbol.meaning"
+            ],
+            "difficulty": 1,
+            "tags": [
+              "music-symbol"
+            ]
+          },
+          "variables": {},
+          "stimulus": [
+            {
+              "id": "symbol",
+              "kind": "music-symbol",
+              "content": {
+                "symbolId": "staccato"
+              },
+              "presentation": {
+                "size": "large"
+              },
+              "accessibility": {
+                "description": {
+                  "en-GB": "A dot above or below a note"
+                }
+              }
+            }
+          ],
+          "prompt": {
+            "content": {
+              "en-GB": "What does this music sign mean?"
+            },
+            "format": "plain-text"
+          },
+          "interaction": {
+            "kind": "choice",
+            "responseId": "response-main",
+            "cardinality": "single",
+            "display": "buttons",
+            "shuffleOptions": true,
+            "optionOrderSeed": "symbol-01-options",
+            "options": [
+              {
+                "id": "opt-short",
+                "content": {
+                  "en-GB": "Play the note short and detached"
+                }
+              },
+              {
+                "id": "opt-loud",
+                "content": {
+                  "en-GB": "Play very loudly"
+                }
+              },
+              {
+                "id": "opt-slow",
+                "content": {
+                  "en-GB": "Slow down"
+                }
+              },
+              {
+                "id": "opt-hold",
+                "content": {
+                  "en-GB": "Hold beyond its value"
+                }
+              }
+            ]
+          },
+          "response": {
+            "id": "response-main",
+            "baseType": "identifier",
+            "cardinality": "single",
+            "correct": {
+              "value": "opt-short"
+            }
+          },
+          "assessment": {
+            "strategy": "exact-identifier@1",
+            "maximumScore": 1,
+            "passingScore": 1,
+            "attemptPolicy": {
+              "maximumAttempts": 3,
+              "scorePolicy": "best"
+            }
+          },
+          "feedback": {
+            "mode": "after-submit",
+            "correct": {
+              "message": {
+                "en-GB": "Correct. A staccato dot means short and detached."
+              }
+            },
+            "incorrect": {
+              "message": {
+                "en-GB": "Not quite. Review the notation or concept and try again."
+              }
+            },
+            "showCorrectAnswer": "after-final-attempt"
+          },
+          "hints": [
+            {
+              "id": "symbol-01-hint-1",
+              "content": {
+                "en-GB": "Think about how the sign changes the sound or duration."
+              }
+            }
+          ],
+          "explanation": {
+            "content": {
+              "en-GB": "A staccato dot means short and detached."
+            }
+          },
+          "delivery": {},
+          "analytics": {}
+        },
+        {
+          "id": "symbol-02",
+          "type": "selected-response",
+          "version": 1,
+          "metadata": {
+            "skillIds": [
+              "theory.notation-symbol.meaning"
+            ],
+            "difficulty": 1,
+            "tags": [
+              "music-symbol"
+            ]
+          },
+          "variables": {},
+          "stimulus": [
+            {
+              "id": "symbol",
+              "kind": "music-symbol",
+              "content": {
+                "symbolId": "fermata"
+              },
+              "presentation": {
+                "size": "large"
+              },
+              "accessibility": {
+                "description": {
+                  "en-GB": "A curved arch with a dot"
+                }
+              }
+            }
+          ],
+          "prompt": {
+            "content": {
+              "en-GB": "What does this music sign mean?"
+            },
+            "format": "plain-text"
+          },
+          "interaction": {
+            "kind": "choice",
+            "responseId": "response-main",
+            "cardinality": "single",
+            "display": "buttons",
+            "shuffleOptions": true,
+            "optionOrderSeed": "symbol-02-options",
+            "options": [
+              {
+                "id": "opt-repeat",
+                "content": {
+                  "en-GB": "Repeat the bar"
+                }
+              },
+              {
+                "id": "opt-hold",
+                "content": {
+                  "en-GB": "Hold the note or rest longer"
+                }
+              },
+              {
+                "id": "opt-soft",
+                "content": {
+                  "en-GB": "Play softly"
+                }
+              },
+              {
+                "id": "opt-accent",
+                "content": {
+                  "en-GB": "Play with a sharp accent"
+                }
+              }
+            ]
+          },
+          "response": {
+            "id": "response-main",
+            "baseType": "identifier",
+            "cardinality": "single",
+            "correct": {
+              "value": "opt-hold"
+            }
+          },
+          "assessment": {
+            "strategy": "exact-identifier@1",
+            "maximumScore": 1,
+            "passingScore": 1,
+            "attemptPolicy": {
+              "maximumAttempts": 3,
+              "scorePolicy": "best"
+            }
+          },
+          "feedback": {
+            "mode": "after-submit",
+            "correct": {
+              "message": {
+                "en-GB": "Correct. A fermata asks the performer to hold the sound or silence."
+              }
+            },
+            "incorrect": {
+              "message": {
+                "en-GB": "Not quite. Review the notation or concept and try again."
+              }
+            },
+            "showCorrectAnswer": "after-final-attempt"
+          },
+          "hints": [
+            {
+              "id": "symbol-02-hint-1",
+              "content": {
+                "en-GB": "Think about how the sign changes the sound or duration."
+              }
+            }
+          ],
+          "explanation": {
+            "content": {
+              "en-GB": "A fermata asks the performer to hold the sound or silence."
+            }
+          },
+          "delivery": {},
+          "analytics": {}
+        },
+        {
+          "id": "symbol-03",
+          "type": "selected-response",
+          "version": 1,
+          "metadata": {
+            "skillIds": [
+              "theory.notation-symbol.meaning"
+            ],
+            "difficulty": 1,
+            "tags": [
+              "music-symbol"
+            ]
+          },
+          "variables": {},
+          "stimulus": [
+            {
+              "id": "symbol",
+              "kind": "music-symbol",
+              "content": {
+                "symbolId": "crescendo"
+              },
+              "presentation": {
+                "size": "large"
+              },
+              "accessibility": {
+                "description": {
+                  "en-GB": "The hairpin opening to the right"
+                }
+              }
+            }
+          ],
+          "prompt": {
+            "content": {
+              "en-GB": "What does this music sign mean?"
+            },
+            "format": "plain-text"
+          },
+          "interaction": {
+            "kind": "choice",
+            "responseId": "response-main",
+            "cardinality": "single",
+            "display": "buttons",
+            "shuffleOptions": true,
+            "optionOrderSeed": "symbol-03-options",
+            "options": [
+              {
+                "id": "opt-faster",
+                "content": {
+                  "en-GB": "Gradually become faster"
+                }
+              },
+              {
+                "id": "opt-louder",
+                "content": {
+                  "en-GB": "Gradually become louder"
+                }
+              },
+              {
+                "id": "opt-softer",
+                "content": {
+                  "en-GB": "Gradually become softer"
+                }
+              },
+              {
+                "id": "opt-stop",
+                "content": {
+                  "en-GB": "Stop playing"
+                }
+              }
+            ]
+          },
+          "response": {
+            "id": "response-main",
+            "baseType": "identifier",
+            "cardinality": "single",
+            "correct": {
+              "value": "opt-louder"
+            }
+          },
+          "assessment": {
+            "strategy": "exact-identifier@1",
+            "maximumScore": 1,
+            "passingScore": 1,
+            "attemptPolicy": {
+              "maximumAttempts": 3,
+              "scorePolicy": "best"
+            }
+          },
+          "feedback": {
+            "mode": "after-submit",
+            "correct": {
+              "message": {
+                "en-GB": "Correct. A crescendo means gradually louder."
+              }
+            },
+            "incorrect": {
+              "message": {
+                "en-GB": "Not quite. Review the notation or concept and try again."
+              }
+            },
+            "showCorrectAnswer": "after-final-attempt"
+          },
+          "hints": [
+            {
+              "id": "symbol-03-hint-1",
+              "content": {
+                "en-GB": "Think about how the sign changes the sound or duration."
+              }
+            }
+          ],
+          "explanation": {
+            "content": {
+              "en-GB": "A crescendo means gradually louder."
+            }
+          },
+          "delivery": {},
+          "analytics": {}
+        },
+        {
+          "id": "symbol-04",
+          "type": "selected-response",
+          "version": 1,
+          "metadata": {
+            "skillIds": [
+              "theory.notation-symbol.meaning"
+            ],
+            "difficulty": 2,
+            "tags": [
+              "music-symbol"
+            ]
+          },
+          "variables": {},
+          "stimulus": [
+            {
+              "id": "symbol",
+              "kind": "music-symbol",
+              "content": {
+                "symbolId": "natural"
+              },
+              "presentation": {
+                "size": "large"
+              },
+              "accessibility": {
+                "description": {
+                  "en-GB": "The natural sign"
+                }
+              }
+            }
+          ],
+          "prompt": {
+            "content": {
+              "en-GB": "What does this music sign mean?"
+            },
+            "format": "plain-text"
+          },
+          "interaction": {
+            "kind": "choice",
+            "responseId": "response-main",
+            "cardinality": "single",
+            "display": "buttons",
+            "shuffleOptions": true,
+            "optionOrderSeed": "symbol-04-options",
+            "options": [
+              {
+                "id": "opt-lower",
+                "content": {
+                  "en-GB": "Lower by a semitone"
+                }
+              },
+              {
+                "id": "opt-raise",
+                "content": {
+                  "en-GB": "Raise by a semitone"
+                }
+              },
+              {
+                "id": "opt-cancel",
+                "content": {
+                  "en-GB": "Cancel a previous sharp or flat"
+                }
+              },
+              {
+                "id": "opt-double",
+                "content": {
+                  "en-GB": "Raise by two semitones"
+                }
+              }
+            ]
+          },
+          "response": {
+            "id": "response-main",
+            "baseType": "identifier",
+            "cardinality": "single",
+            "correct": {
+              "value": "opt-cancel"
+            }
+          },
+          "assessment": {
+            "strategy": "exact-identifier@1",
+            "maximumScore": 1,
+            "passingScore": 1,
+            "attemptPolicy": {
+              "maximumAttempts": 3,
+              "scorePolicy": "best"
+            }
+          },
+          "feedback": {
+            "mode": "after-submit",
+            "correct": {
+              "message": {
+                "en-GB": "Correct. A natural cancels a sharp or flat."
+              }
+            },
+            "incorrect": {
+              "message": {
+                "en-GB": "Not quite. Review the notation or concept and try again."
+              }
+            },
+            "showCorrectAnswer": "after-final-attempt"
+          },
+          "hints": [
+            {
+              "id": "symbol-04-hint-1",
+              "content": {
+                "en-GB": "Think about how the sign changes the sound or duration."
+              }
+            }
+          ],
+          "explanation": {
+            "content": {
+              "en-GB": "A natural cancels a sharp or flat."
+            }
+          },
+          "delivery": {},
+          "analytics": {}
+        },
+        {
+          "id": "symbol-05",
+          "type": "selected-response",
+          "version": 1,
+          "metadata": {
+            "skillIds": [
+              "theory.notation-symbol.meaning"
+            ],
+            "difficulty": 2,
+            "tags": [
+              "music-symbol"
+            ]
+          },
+          "variables": {},
+          "stimulus": [
+            {
+              "id": "symbol",
+              "kind": "music-symbol",
+              "content": {
+                "symbolId": "tie"
+              },
+              "presentation": {
+                "size": "large"
+              },
+              "accessibility": {
+                "description": {
+                  "en-GB": "A curved line joining two notes of the same pitch"
+                }
+              }
+            }
+          ],
+          "prompt": {
+            "content": {
+              "en-GB": "What does this music sign mean?"
+            },
+            "format": "plain-text"
+          },
+          "interaction": {
+            "kind": "choice",
+            "responseId": "response-main",
+            "cardinality": "single",
+            "display": "buttons",
+            "shuffleOptions": true,
+            "optionOrderSeed": "symbol-05-options",
+            "options": [
+              {
+                "id": "opt-smooth",
+                "content": {
+                  "en-GB": "Play different notes smoothly"
+                }
+              },
+              {
+                "id": "opt-combine",
+                "content": {
+                  "en-GB": "Combine their durations into one sound"
+                }
+              },
+              {
+                "id": "opt-repeat",
+                "content": {
+                  "en-GB": "Repeat both notes"
+                }
+              },
+              {
+                "id": "opt-accent",
+                "content": {
+                  "en-GB": "Accent the second note"
+                }
+              }
+            ]
+          },
+          "response": {
+            "id": "response-main",
+            "baseType": "identifier",
+            "cardinality": "single",
+            "correct": {
+              "value": "opt-combine"
+            }
+          },
+          "assessment": {
+            "strategy": "exact-identifier@1",
+            "maximumScore": 1,
+            "passingScore": 1,
+            "attemptPolicy": {
+              "maximumAttempts": 3,
+              "scorePolicy": "best"
+            }
+          },
+          "feedback": {
+            "mode": "after-submit",
+            "correct": {
+              "message": {
+                "en-GB": "Correct. A tie combines the durations of equal pitches."
+              }
+            },
+            "incorrect": {
+              "message": {
+                "en-GB": "Not quite. Review the notation or concept and try again."
+              }
+            },
+            "showCorrectAnswer": "after-final-attempt"
+          },
+          "hints": [
+            {
+              "id": "symbol-05-hint-1",
+              "content": {
+                "en-GB": "Think about how the sign changes the sound or duration."
+              }
+            }
+          ],
+          "explanation": {
+            "content": {
+              "en-GB": "A tie combines the durations of equal pitches."
+            }
+          },
+          "delivery": {},
+          "analytics": {}
+        }
+      ]
+    }
+  ]
+}

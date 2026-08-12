@@ -1,0 +1,752 @@
+{
+  "format": "foxchild.music-learning.question-set",
+  "schemaVersion": "1.0.0",
+  "id": "set-rhythm-counting-01",
+  "revision": 1,
+  "status": "published",
+  "metadata": {
+    "title": {
+      "en-GB": "Rhythm Counting"
+    },
+    "description": {
+      "en-GB": "Count the total duration of five written rhythm patterns."
+    },
+    "language": "en-GB",
+    "authors": [
+      "FoxChild Music Learning Generator"
+    ],
+    "subject": "Music",
+    "domain": "rhythm",
+    "skillIds": [
+      "rhythm.duration.sum"
+    ],
+    "difficulty": "mixed",
+    "tags": []
+  },
+  "defaults": {
+    "locale": "en-GB",
+    "attemptPolicy": {
+      "maximumAttempts": 3,
+      "scorePolicy": "best"
+    }
+  },
+  "assets": [],
+  "variables": {},
+  "delivery": {
+    "mode": "practice",
+    "navigation": "linear",
+    "showProgress": true
+  },
+  "sections": [
+    {
+      "id": "section-1",
+      "title": {
+        "en-GB": "Rhythm Counting"
+      },
+      "delivery": {},
+      "items": [
+        {
+          "id": "rhythm-count-01",
+          "type": "selected-response",
+          "version": 1,
+          "metadata": {
+            "skillIds": [
+              "rhythm.duration.sum"
+            ],
+            "difficulty": 1,
+            "tags": [
+              "rhythm",
+              "duration"
+            ]
+          },
+          "variables": {},
+          "stimulus": [
+            {
+              "id": "rhythm-score",
+              "kind": "notation",
+              "source": {
+                "mode": "generator",
+                "generatorId": "rhythm-fragment@1",
+                "seed": "rhythm-count-1",
+                "parameters": {
+                  "timeSignature": {
+                    "beats": 4,
+                    "beatType": 4
+                  },
+                  "pattern": [
+                    "1/4",
+                    "1/4",
+                    "1/2"
+                  ],
+                  "showNotes": true
+                }
+              },
+              "presentation": {
+                "renderer": "foxchild-score",
+                "layout": "single-system",
+                "scale": 1.4,
+                "showCursor": false,
+                "editable": false
+              },
+              "playback": {
+                "enabled": false
+              },
+              "accessibility": {
+                "description": {
+                  "en-GB": "A rhythm fragment to count."
+                }
+              }
+            }
+          ],
+          "prompt": {
+            "content": {
+              "en-GB": "How many crotchet beats does this rhythm contain?"
+            },
+            "format": "plain-text"
+          },
+          "interaction": {
+            "kind": "choice",
+            "responseId": "response-main",
+            "cardinality": "single",
+            "display": "buttons",
+            "shuffleOptions": true,
+            "optionOrderSeed": "rhythm-count-01-options",
+            "options": [
+              {
+                "id": "opt-4",
+                "content": {
+                  "en-GB": "4 crotchet beats"
+                }
+              },
+              {
+                "id": "opt-3",
+                "content": {
+                  "en-GB": "3 crotchet beats"
+                }
+              },
+              {
+                "id": "opt-2",
+                "content": {
+                  "en-GB": "2 crotchet beats"
+                }
+              },
+              {
+                "id": "opt-5",
+                "content": {
+                  "en-GB": "5 crotchet beats"
+                }
+              }
+            ]
+          },
+          "response": {
+            "id": "response-main",
+            "baseType": "identifier",
+            "cardinality": "single",
+            "correct": {
+              "value": "opt-4"
+            }
+          },
+          "assessment": {
+            "strategy": "exact-identifier@1",
+            "maximumScore": 1,
+            "passingScore": 1,
+            "attemptPolicy": {
+              "maximumAttempts": 3,
+              "scorePolicy": "best"
+            }
+          },
+          "feedback": {
+            "mode": "after-submit",
+            "correct": {
+              "message": {
+                "en-GB": "Correct. 1 + 1 + 2 = 4 beats."
+              }
+            },
+            "incorrect": {
+              "message": {
+                "en-GB": "Not quite. Review the notation or concept and try again."
+              }
+            },
+            "showCorrectAnswer": "after-final-attempt"
+          },
+          "hints": [
+            {
+              "id": "rhythm-count-01-hint-1",
+              "content": {
+                "en-GB": "Convert every duration into crotchet beats, then add them."
+              }
+            }
+          ],
+          "explanation": {
+            "content": {
+              "en-GB": "1 + 1 + 2 = 4 beats."
+            }
+          },
+          "delivery": {},
+          "analytics": {}
+        },
+        {
+          "id": "rhythm-count-02",
+          "type": "selected-response",
+          "version": 1,
+          "metadata": {
+            "skillIds": [
+              "rhythm.duration.sum"
+            ],
+            "difficulty": 1,
+            "tags": [
+              "rhythm",
+              "duration"
+            ]
+          },
+          "variables": {},
+          "stimulus": [
+            {
+              "id": "rhythm-score",
+              "kind": "notation",
+              "source": {
+                "mode": "generator",
+                "generatorId": "rhythm-fragment@1",
+                "seed": "rhythm-count-2",
+                "parameters": {
+                  "timeSignature": {
+                    "beats": 4,
+                    "beatType": 4
+                  },
+                  "pattern": [
+                    "1/8",
+                    "1/8",
+                    "1/4",
+                    "1/2"
+                  ],
+                  "showNotes": true
+                }
+              },
+              "presentation": {
+                "renderer": "foxchild-score",
+                "layout": "single-system",
+                "scale": 1.4,
+                "showCursor": false,
+                "editable": false
+              },
+              "playback": {
+                "enabled": false
+              },
+              "accessibility": {
+                "description": {
+                  "en-GB": "A rhythm fragment to count."
+                }
+              }
+            }
+          ],
+          "prompt": {
+            "content": {
+              "en-GB": "How many crotchet beats does this rhythm contain?"
+            },
+            "format": "plain-text"
+          },
+          "interaction": {
+            "kind": "choice",
+            "responseId": "response-main",
+            "cardinality": "single",
+            "display": "buttons",
+            "shuffleOptions": true,
+            "optionOrderSeed": "rhythm-count-02-options",
+            "options": [
+              {
+                "id": "opt-4",
+                "content": {
+                  "en-GB": "4 crotchet beats"
+                }
+              },
+              {
+                "id": "opt-3",
+                "content": {
+                  "en-GB": "3 crotchet beats"
+                }
+              },
+              {
+                "id": "opt-2",
+                "content": {
+                  "en-GB": "2 crotchet beats"
+                }
+              },
+              {
+                "id": "opt-5",
+                "content": {
+                  "en-GB": "5 crotchet beats"
+                }
+              }
+            ]
+          },
+          "response": {
+            "id": "response-main",
+            "baseType": "identifier",
+            "cardinality": "single",
+            "correct": {
+              "value": "opt-4"
+            }
+          },
+          "assessment": {
+            "strategy": "exact-identifier@1",
+            "maximumScore": 1,
+            "passingScore": 1,
+            "attemptPolicy": {
+              "maximumAttempts": 3,
+              "scorePolicy": "best"
+            }
+          },
+          "feedback": {
+            "mode": "after-submit",
+            "correct": {
+              "message": {
+                "en-GB": "Correct. Two quavers equal one crotchet, then 1 + 1 + 2 = 4."
+              }
+            },
+            "incorrect": {
+              "message": {
+                "en-GB": "Not quite. Review the notation or concept and try again."
+              }
+            },
+            "showCorrectAnswer": "after-final-attempt"
+          },
+          "hints": [
+            {
+              "id": "rhythm-count-02-hint-1",
+              "content": {
+                "en-GB": "Convert every duration into crotchet beats, then add them."
+              }
+            }
+          ],
+          "explanation": {
+            "content": {
+              "en-GB": "Two quavers equal one crotchet, then 1 + 1 + 2 = 4."
+            }
+          },
+          "delivery": {},
+          "analytics": {}
+        },
+        {
+          "id": "rhythm-count-03",
+          "type": "selected-response",
+          "version": 1,
+          "metadata": {
+            "skillIds": [
+              "rhythm.duration.sum"
+            ],
+            "difficulty": 1,
+            "tags": [
+              "rhythm",
+              "duration"
+            ]
+          },
+          "variables": {},
+          "stimulus": [
+            {
+              "id": "rhythm-score",
+              "kind": "notation",
+              "source": {
+                "mode": "generator",
+                "generatorId": "rhythm-fragment@1",
+                "seed": "rhythm-count-3",
+                "parameters": {
+                  "timeSignature": {
+                    "beats": 4,
+                    "beatType": 4
+                  },
+                  "pattern": [
+                    "1/2",
+                    "1/2"
+                  ],
+                  "showNotes": true
+                }
+              },
+              "presentation": {
+                "renderer": "foxchild-score",
+                "layout": "single-system",
+                "scale": 1.4,
+                "showCursor": false,
+                "editable": false
+              },
+              "playback": {
+                "enabled": false
+              },
+              "accessibility": {
+                "description": {
+                  "en-GB": "A rhythm fragment to count."
+                }
+              }
+            }
+          ],
+          "prompt": {
+            "content": {
+              "en-GB": "How many crotchet beats does this rhythm contain?"
+            },
+            "format": "plain-text"
+          },
+          "interaction": {
+            "kind": "choice",
+            "responseId": "response-main",
+            "cardinality": "single",
+            "display": "buttons",
+            "shuffleOptions": true,
+            "optionOrderSeed": "rhythm-count-03-options",
+            "options": [
+              {
+                "id": "opt-2",
+                "content": {
+                  "en-GB": "2 crotchet beats"
+                }
+              },
+              {
+                "id": "opt-3",
+                "content": {
+                  "en-GB": "3 crotchet beats"
+                }
+              },
+              {
+                "id": "opt-4",
+                "content": {
+                  "en-GB": "4 crotchet beats"
+                }
+              },
+              {
+                "id": "opt-6",
+                "content": {
+                  "en-GB": "6 crotchet beats"
+                }
+              }
+            ]
+          },
+          "response": {
+            "id": "response-main",
+            "baseType": "identifier",
+            "cardinality": "single",
+            "correct": {
+              "value": "opt-4"
+            }
+          },
+          "assessment": {
+            "strategy": "exact-identifier@1",
+            "maximumScore": 1,
+            "passingScore": 1,
+            "attemptPolicy": {
+              "maximumAttempts": 3,
+              "scorePolicy": "best"
+            }
+          },
+          "feedback": {
+            "mode": "after-submit",
+            "correct": {
+              "message": {
+                "en-GB": "Correct. Two minims equal four crotchet beats."
+              }
+            },
+            "incorrect": {
+              "message": {
+                "en-GB": "Not quite. Review the notation or concept and try again."
+              }
+            },
+            "showCorrectAnswer": "after-final-attempt"
+          },
+          "hints": [
+            {
+              "id": "rhythm-count-03-hint-1",
+              "content": {
+                "en-GB": "Convert every duration into crotchet beats, then add them."
+              }
+            }
+          ],
+          "explanation": {
+            "content": {
+              "en-GB": "Two minims equal four crotchet beats."
+            }
+          },
+          "delivery": {},
+          "analytics": {}
+        },
+        {
+          "id": "rhythm-count-04",
+          "type": "selected-response",
+          "version": 1,
+          "metadata": {
+            "skillIds": [
+              "rhythm.duration.sum"
+            ],
+            "difficulty": 2,
+            "tags": [
+              "rhythm",
+              "duration"
+            ]
+          },
+          "variables": {},
+          "stimulus": [
+            {
+              "id": "rhythm-score",
+              "kind": "notation",
+              "source": {
+                "mode": "generator",
+                "generatorId": "rhythm-fragment@1",
+                "seed": "rhythm-count-4",
+                "parameters": {
+                  "timeSignature": {
+                    "beats": 4,
+                    "beatType": 4
+                  },
+                  "pattern": [
+                    "3/8",
+                    "1/8"
+                  ],
+                  "showNotes": true
+                }
+              },
+              "presentation": {
+                "renderer": "foxchild-score",
+                "layout": "single-system",
+                "scale": 1.4,
+                "showCursor": false,
+                "editable": false
+              },
+              "playback": {
+                "enabled": false
+              },
+              "accessibility": {
+                "description": {
+                  "en-GB": "A rhythm fragment to count."
+                }
+              }
+            }
+          ],
+          "prompt": {
+            "content": {
+              "en-GB": "How many crotchet beats does this rhythm contain?"
+            },
+            "format": "plain-text"
+          },
+          "interaction": {
+            "kind": "choice",
+            "responseId": "response-main",
+            "cardinality": "single",
+            "display": "buttons",
+            "shuffleOptions": true,
+            "optionOrderSeed": "rhythm-count-04-options",
+            "options": [
+              {
+                "id": "opt-1",
+                "content": {
+                  "en-GB": "1 crotchet beat"
+                }
+              },
+              {
+                "id": "opt-2",
+                "content": {
+                  "en-GB": "2 crotchet beats"
+                }
+              },
+              {
+                "id": "opt-3",
+                "content": {
+                  "en-GB": "3 crotchet beats"
+                }
+              },
+              {
+                "id": "opt-4",
+                "content": {
+                  "en-GB": "4 crotchet beats"
+                }
+              }
+            ]
+          },
+          "response": {
+            "id": "response-main",
+            "baseType": "identifier",
+            "cardinality": "single",
+            "correct": {
+              "value": "opt-2"
+            }
+          },
+          "assessment": {
+            "strategy": "exact-identifier@1",
+            "maximumScore": 1,
+            "passingScore": 1,
+            "attemptPolicy": {
+              "maximumAttempts": 3,
+              "scorePolicy": "best"
+            }
+          },
+          "feedback": {
+            "mode": "after-submit",
+            "correct": {
+              "message": {
+                "en-GB": "Correct. A dotted crotchet plus a quaver equals four quavers, or two crotchet beats."
+              }
+            },
+            "incorrect": {
+              "message": {
+                "en-GB": "Not quite. Review the notation or concept and try again."
+              }
+            },
+            "showCorrectAnswer": "after-final-attempt"
+          },
+          "hints": [
+            {
+              "id": "rhythm-count-04-hint-1",
+              "content": {
+                "en-GB": "Convert every duration into crotchet beats, then add them."
+              }
+            }
+          ],
+          "explanation": {
+            "content": {
+              "en-GB": "A dotted crotchet plus a quaver equals four quavers, or two crotchet beats."
+            }
+          },
+          "delivery": {},
+          "analytics": {}
+        },
+        {
+          "id": "rhythm-count-05",
+          "type": "selected-response",
+          "version": 1,
+          "metadata": {
+            "skillIds": [
+              "rhythm.duration.sum"
+            ],
+            "difficulty": 2,
+            "tags": [
+              "rhythm",
+              "duration"
+            ]
+          },
+          "variables": {},
+          "stimulus": [
+            {
+              "id": "rhythm-score",
+              "kind": "notation",
+              "source": {
+                "mode": "generator",
+                "generatorId": "rhythm-fragment@1",
+                "seed": "rhythm-count-5",
+                "parameters": {
+                  "timeSignature": {
+                    "beats": 4,
+                    "beatType": 4
+                  },
+                  "pattern": [
+                    "1/4",
+                    "1/8",
+                    "1/8",
+                    "1/4",
+                    "1/4"
+                  ],
+                  "showNotes": true
+                }
+              },
+              "presentation": {
+                "renderer": "foxchild-score",
+                "layout": "single-system",
+                "scale": 1.4,
+                "showCursor": false,
+                "editable": false
+              },
+              "playback": {
+                "enabled": false
+              },
+              "accessibility": {
+                "description": {
+                  "en-GB": "A rhythm fragment to count."
+                }
+              }
+            }
+          ],
+          "prompt": {
+            "content": {
+              "en-GB": "How many crotchet beats does this rhythm contain?"
+            },
+            "format": "plain-text"
+          },
+          "interaction": {
+            "kind": "choice",
+            "responseId": "response-main",
+            "cardinality": "single",
+            "display": "buttons",
+            "shuffleOptions": true,
+            "optionOrderSeed": "rhythm-count-05-options",
+            "options": [
+              {
+                "id": "opt-3",
+                "content": {
+                  "en-GB": "3 crotchet beats"
+                }
+              },
+              {
+                "id": "opt-4",
+                "content": {
+                  "en-GB": "4 crotchet beats"
+                }
+              },
+              {
+                "id": "opt-4.5",
+                "content": {
+                  "en-GB": "4.5 crotchet beats"
+                }
+              },
+              {
+                "id": "opt-5",
+                "content": {
+                  "en-GB": "5 crotchet beats"
+                }
+              }
+            ]
+          },
+          "response": {
+            "id": "response-main",
+            "baseType": "identifier",
+            "cardinality": "single",
+            "correct": {
+              "value": "opt-4"
+            }
+          },
+          "assessment": {
+            "strategy": "exact-identifier@1",
+            "maximumScore": 1,
+            "passingScore": 1,
+            "attemptPolicy": {
+              "maximumAttempts": 3,
+              "scorePolicy": "best"
+            }
+          },
+          "feedback": {
+            "mode": "after-submit",
+            "correct": {
+              "message": {
+                "en-GB": "Correct. 1 + 1/2 + 1/2 + 1 + 1 = 4."
+              }
+            },
+            "incorrect": {
+              "message": {
+                "en-GB": "Not quite. Review the notation or concept and try again."
+              }
+            },
+            "showCorrectAnswer": "after-final-attempt"
+          },
+          "hints": [
+            {
+              "id": "rhythm-count-05-hint-1",
+              "content": {
+                "en-GB": "Convert every duration into crotchet beats, then add them."
+              }
+            }
+          ],
+          "explanation": {
+            "content": {
+              "en-GB": "1 + 1/2 + 1/2 + 1 + 1 = 4."
+            }
+          },
+          "delivery": {},
+          "analytics": {}
+        }
+      ]
+    }
+  ]
+}

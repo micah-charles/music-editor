@@ -1,0 +1,726 @@
+{
+  "format": "foxchild.music-learning.question-set",
+  "schemaVersion": "1.0.0",
+  "id": "set-key-signatures-major-01",
+  "revision": 1,
+  "status": "published",
+  "metadata": {
+    "title": {
+      "en-GB": "Major Key Signatures"
+    },
+    "description": {
+      "en-GB": "Identify common major key signatures from notation."
+    },
+    "language": "en-GB",
+    "authors": [
+      "FoxChild Music Learning Generator"
+    ],
+    "subject": "Music",
+    "domain": "key-signatures",
+    "skillIds": [
+      "theory.key-signature.major.identify"
+    ],
+    "difficulty": "mixed",
+    "tags": []
+  },
+  "defaults": {
+    "locale": "en-GB",
+    "attemptPolicy": {
+      "maximumAttempts": 3,
+      "scorePolicy": "best"
+    }
+  },
+  "assets": [],
+  "variables": {},
+  "delivery": {
+    "mode": "practice",
+    "navigation": "linear",
+    "showProgress": true
+  },
+  "sections": [
+    {
+      "id": "section-1",
+      "title": {
+        "en-GB": "Major Key Signatures"
+      },
+      "delivery": {},
+      "items": [
+        {
+          "id": "key-signature-01",
+          "type": "selected-response",
+          "version": 1,
+          "metadata": {
+            "skillIds": [
+              "theory.key-signature.major.identify"
+            ],
+            "difficulty": 1,
+            "tags": [
+              "key-signature",
+              "major"
+            ]
+          },
+          "variables": {},
+          "stimulus": [
+            {
+              "id": "key-score",
+              "kind": "notation",
+              "source": {
+                "mode": "generator",
+                "generatorId": "key-signature-display@1",
+                "seed": "key-G-major",
+                "parameters": {
+                  "tonic": "G",
+                  "mode": "major",
+                  "clef": "treble",
+                  "showTimeSignature": false,
+                  "showNotes": false
+                }
+              },
+              "presentation": {
+                "renderer": "foxchild-score",
+                "layout": "single-system",
+                "scale": 1.4,
+                "showCursor": false,
+                "editable": false
+              },
+              "playback": {
+                "enabled": false
+              },
+              "accessibility": {
+                "description": {
+                  "en-GB": "Treble clef showing an unidentified major key signature."
+                }
+              }
+            }
+          ],
+          "prompt": {
+            "content": {
+              "en-GB": "Which major key is shown?"
+            },
+            "format": "plain-text"
+          },
+          "interaction": {
+            "kind": "choice",
+            "responseId": "response-main",
+            "cardinality": "single",
+            "display": "buttons",
+            "shuffleOptions": true,
+            "optionOrderSeed": "key-signature-01-options",
+            "options": [
+              {
+                "id": "opt-c",
+                "content": {
+                  "en-GB": "C major"
+                }
+              },
+              {
+                "id": "opt-g",
+                "content": {
+                  "en-GB": "G major"
+                }
+              },
+              {
+                "id": "opt-d",
+                "content": {
+                  "en-GB": "D major"
+                }
+              },
+              {
+                "id": "opt-f",
+                "content": {
+                  "en-GB": "F major"
+                }
+              }
+            ]
+          },
+          "response": {
+            "id": "response-main",
+            "baseType": "identifier",
+            "cardinality": "single",
+            "correct": {
+              "value": "opt-g"
+            }
+          },
+          "assessment": {
+            "strategy": "exact-identifier@1",
+            "maximumScore": 1,
+            "passingScore": 1,
+            "attemptPolicy": {
+              "maximumAttempts": 3,
+              "scorePolicy": "best"
+            }
+          },
+          "feedback": {
+            "mode": "after-submit",
+            "correct": {
+              "message": {
+                "en-GB": "Correct. One sharp, F-sharp, indicates G major."
+              }
+            },
+            "incorrect": {
+              "message": {
+                "en-GB": "Not quite. Review the notation or concept and try again."
+              }
+            },
+            "showCorrectAnswer": "after-final-attempt"
+          },
+          "hints": [
+            {
+              "id": "key-signature-01-hint-1",
+              "content": {
+                "en-GB": "Count the sharps or flats, then use the circle of fifths."
+              }
+            }
+          ],
+          "explanation": {
+            "content": {
+              "en-GB": "One sharp, F-sharp, indicates G major."
+            }
+          },
+          "delivery": {},
+          "analytics": {}
+        },
+        {
+          "id": "key-signature-02",
+          "type": "selected-response",
+          "version": 1,
+          "metadata": {
+            "skillIds": [
+              "theory.key-signature.major.identify"
+            ],
+            "difficulty": 2,
+            "tags": [
+              "key-signature",
+              "major"
+            ]
+          },
+          "variables": {},
+          "stimulus": [
+            {
+              "id": "key-score",
+              "kind": "notation",
+              "source": {
+                "mode": "generator",
+                "generatorId": "key-signature-display@1",
+                "seed": "key-D-major",
+                "parameters": {
+                  "tonic": "D",
+                  "mode": "major",
+                  "clef": "treble",
+                  "showTimeSignature": false,
+                  "showNotes": false
+                }
+              },
+              "presentation": {
+                "renderer": "foxchild-score",
+                "layout": "single-system",
+                "scale": 1.4,
+                "showCursor": false,
+                "editable": false
+              },
+              "playback": {
+                "enabled": false
+              },
+              "accessibility": {
+                "description": {
+                  "en-GB": "Treble clef showing an unidentified major key signature."
+                }
+              }
+            }
+          ],
+          "prompt": {
+            "content": {
+              "en-GB": "Which major key is shown?"
+            },
+            "format": "plain-text"
+          },
+          "interaction": {
+            "kind": "choice",
+            "responseId": "response-main",
+            "cardinality": "single",
+            "display": "buttons",
+            "shuffleOptions": true,
+            "optionOrderSeed": "key-signature-02-options",
+            "options": [
+              {
+                "id": "opt-g",
+                "content": {
+                  "en-GB": "G major"
+                }
+              },
+              {
+                "id": "opt-d",
+                "content": {
+                  "en-GB": "D major"
+                }
+              },
+              {
+                "id": "opt-a",
+                "content": {
+                  "en-GB": "A major"
+                }
+              },
+              {
+                "id": "opt-bb",
+                "content": {
+                  "en-GB": "B-flat major"
+                }
+              }
+            ]
+          },
+          "response": {
+            "id": "response-main",
+            "baseType": "identifier",
+            "cardinality": "single",
+            "correct": {
+              "value": "opt-d"
+            }
+          },
+          "assessment": {
+            "strategy": "exact-identifier@1",
+            "maximumScore": 1,
+            "passingScore": 1,
+            "attemptPolicy": {
+              "maximumAttempts": 3,
+              "scorePolicy": "best"
+            }
+          },
+          "feedback": {
+            "mode": "after-submit",
+            "correct": {
+              "message": {
+                "en-GB": "Correct. Two sharps indicate D major."
+              }
+            },
+            "incorrect": {
+              "message": {
+                "en-GB": "Not quite. Review the notation or concept and try again."
+              }
+            },
+            "showCorrectAnswer": "after-final-attempt"
+          },
+          "hints": [
+            {
+              "id": "key-signature-02-hint-1",
+              "content": {
+                "en-GB": "Count the sharps or flats, then use the circle of fifths."
+              }
+            }
+          ],
+          "explanation": {
+            "content": {
+              "en-GB": "Two sharps indicate D major."
+            }
+          },
+          "delivery": {},
+          "analytics": {}
+        },
+        {
+          "id": "key-signature-03",
+          "type": "selected-response",
+          "version": 1,
+          "metadata": {
+            "skillIds": [
+              "theory.key-signature.major.identify"
+            ],
+            "difficulty": 3,
+            "tags": [
+              "key-signature",
+              "major"
+            ]
+          },
+          "variables": {},
+          "stimulus": [
+            {
+              "id": "key-score",
+              "kind": "notation",
+              "source": {
+                "mode": "generator",
+                "generatorId": "key-signature-display@1",
+                "seed": "key-A-major",
+                "parameters": {
+                  "tonic": "A",
+                  "mode": "major",
+                  "clef": "treble",
+                  "showTimeSignature": false,
+                  "showNotes": false
+                }
+              },
+              "presentation": {
+                "renderer": "foxchild-score",
+                "layout": "single-system",
+                "scale": 1.4,
+                "showCursor": false,
+                "editable": false
+              },
+              "playback": {
+                "enabled": false
+              },
+              "accessibility": {
+                "description": {
+                  "en-GB": "Treble clef showing an unidentified major key signature."
+                }
+              }
+            }
+          ],
+          "prompt": {
+            "content": {
+              "en-GB": "Which major key is shown?"
+            },
+            "format": "plain-text"
+          },
+          "interaction": {
+            "kind": "choice",
+            "responseId": "response-main",
+            "cardinality": "single",
+            "display": "buttons",
+            "shuffleOptions": true,
+            "optionOrderSeed": "key-signature-03-options",
+            "options": [
+              {
+                "id": "opt-d",
+                "content": {
+                  "en-GB": "D major"
+                }
+              },
+              {
+                "id": "opt-a",
+                "content": {
+                  "en-GB": "A major"
+                }
+              },
+              {
+                "id": "opt-e",
+                "content": {
+                  "en-GB": "E major"
+                }
+              },
+              {
+                "id": "opt-b",
+                "content": {
+                  "en-GB": "B major"
+                }
+              }
+            ]
+          },
+          "response": {
+            "id": "response-main",
+            "baseType": "identifier",
+            "cardinality": "single",
+            "correct": {
+              "value": "opt-a"
+            }
+          },
+          "assessment": {
+            "strategy": "exact-identifier@1",
+            "maximumScore": 1,
+            "passingScore": 1,
+            "attemptPolicy": {
+              "maximumAttempts": 3,
+              "scorePolicy": "best"
+            }
+          },
+          "feedback": {
+            "mode": "after-submit",
+            "correct": {
+              "message": {
+                "en-GB": "Correct. Three sharps indicate A major."
+              }
+            },
+            "incorrect": {
+              "message": {
+                "en-GB": "Not quite. Review the notation or concept and try again."
+              }
+            },
+            "showCorrectAnswer": "after-final-attempt"
+          },
+          "hints": [
+            {
+              "id": "key-signature-03-hint-1",
+              "content": {
+                "en-GB": "Count the sharps or flats, then use the circle of fifths."
+              }
+            }
+          ],
+          "explanation": {
+            "content": {
+              "en-GB": "Three sharps indicate A major."
+            }
+          },
+          "delivery": {},
+          "analytics": {}
+        },
+        {
+          "id": "key-signature-04",
+          "type": "selected-response",
+          "version": 1,
+          "metadata": {
+            "skillIds": [
+              "theory.key-signature.major.identify"
+            ],
+            "difficulty": 1,
+            "tags": [
+              "key-signature",
+              "major"
+            ]
+          },
+          "variables": {},
+          "stimulus": [
+            {
+              "id": "key-score",
+              "kind": "notation",
+              "source": {
+                "mode": "generator",
+                "generatorId": "key-signature-display@1",
+                "seed": "key-F-major",
+                "parameters": {
+                  "tonic": "F",
+                  "mode": "major",
+                  "clef": "treble",
+                  "showTimeSignature": false,
+                  "showNotes": false
+                }
+              },
+              "presentation": {
+                "renderer": "foxchild-score",
+                "layout": "single-system",
+                "scale": 1.4,
+                "showCursor": false,
+                "editable": false
+              },
+              "playback": {
+                "enabled": false
+              },
+              "accessibility": {
+                "description": {
+                  "en-GB": "Treble clef showing an unidentified major key signature."
+                }
+              }
+            }
+          ],
+          "prompt": {
+            "content": {
+              "en-GB": "Which major key is shown?"
+            },
+            "format": "plain-text"
+          },
+          "interaction": {
+            "kind": "choice",
+            "responseId": "response-main",
+            "cardinality": "single",
+            "display": "buttons",
+            "shuffleOptions": true,
+            "optionOrderSeed": "key-signature-04-options",
+            "options": [
+              {
+                "id": "opt-c",
+                "content": {
+                  "en-GB": "C major"
+                }
+              },
+              {
+                "id": "opt-f",
+                "content": {
+                  "en-GB": "F major"
+                }
+              },
+              {
+                "id": "opt-bb",
+                "content": {
+                  "en-GB": "B-flat major"
+                }
+              },
+              {
+                "id": "opt-eb",
+                "content": {
+                  "en-GB": "E-flat major"
+                }
+              }
+            ]
+          },
+          "response": {
+            "id": "response-main",
+            "baseType": "identifier",
+            "cardinality": "single",
+            "correct": {
+              "value": "opt-f"
+            }
+          },
+          "assessment": {
+            "strategy": "exact-identifier@1",
+            "maximumScore": 1,
+            "passingScore": 1,
+            "attemptPolicy": {
+              "maximumAttempts": 3,
+              "scorePolicy": "best"
+            }
+          },
+          "feedback": {
+            "mode": "after-submit",
+            "correct": {
+              "message": {
+                "en-GB": "Correct. One flat, B-flat, indicates F major."
+              }
+            },
+            "incorrect": {
+              "message": {
+                "en-GB": "Not quite. Review the notation or concept and try again."
+              }
+            },
+            "showCorrectAnswer": "after-final-attempt"
+          },
+          "hints": [
+            {
+              "id": "key-signature-04-hint-1",
+              "content": {
+                "en-GB": "Count the sharps or flats, then use the circle of fifths."
+              }
+            }
+          ],
+          "explanation": {
+            "content": {
+              "en-GB": "One flat, B-flat, indicates F major."
+            }
+          },
+          "delivery": {},
+          "analytics": {}
+        },
+        {
+          "id": "key-signature-05",
+          "type": "selected-response",
+          "version": 1,
+          "metadata": {
+            "skillIds": [
+              "theory.key-signature.major.identify"
+            ],
+            "difficulty": 2,
+            "tags": [
+              "key-signature",
+              "major"
+            ]
+          },
+          "variables": {},
+          "stimulus": [
+            {
+              "id": "key-score",
+              "kind": "notation",
+              "source": {
+                "mode": "generator",
+                "generatorId": "key-signature-display@1",
+                "seed": "key-Bb-major",
+                "parameters": {
+                  "tonic": "Bb",
+                  "mode": "major",
+                  "clef": "treble",
+                  "showTimeSignature": false,
+                  "showNotes": false
+                }
+              },
+              "presentation": {
+                "renderer": "foxchild-score",
+                "layout": "single-system",
+                "scale": 1.4,
+                "showCursor": false,
+                "editable": false
+              },
+              "playback": {
+                "enabled": false
+              },
+              "accessibility": {
+                "description": {
+                  "en-GB": "Treble clef showing an unidentified major key signature."
+                }
+              }
+            }
+          ],
+          "prompt": {
+            "content": {
+              "en-GB": "Which major key is shown?"
+            },
+            "format": "plain-text"
+          },
+          "interaction": {
+            "kind": "choice",
+            "responseId": "response-main",
+            "cardinality": "single",
+            "display": "buttons",
+            "shuffleOptions": true,
+            "optionOrderSeed": "key-signature-05-options",
+            "options": [
+              {
+                "id": "opt-f",
+                "content": {
+                  "en-GB": "F major"
+                }
+              },
+              {
+                "id": "opt-bb",
+                "content": {
+                  "en-GB": "B-flat major"
+                }
+              },
+              {
+                "id": "opt-eb",
+                "content": {
+                  "en-GB": "E-flat major"
+                }
+              },
+              {
+                "id": "opt-d",
+                "content": {
+                  "en-GB": "D major"
+                }
+              }
+            ]
+          },
+          "response": {
+            "id": "response-main",
+            "baseType": "identifier",
+            "cardinality": "single",
+            "correct": {
+              "value": "opt-bb"
+            }
+          },
+          "assessment": {
+            "strategy": "exact-identifier@1",
+            "maximumScore": 1,
+            "passingScore": 1,
+            "attemptPolicy": {
+              "maximumAttempts": 3,
+              "scorePolicy": "best"
+            }
+          },
+          "feedback": {
+            "mode": "after-submit",
+            "correct": {
+              "message": {
+                "en-GB": "Correct. Two flats indicate B-flat major."
+              }
+            },
+            "incorrect": {
+              "message": {
+                "en-GB": "Not quite. Review the notation or concept and try again."
+              }
+            },
+            "showCorrectAnswer": "after-final-attempt"
+          },
+          "hints": [
+            {
+              "id": "key-signature-05-hint-1",
+              "content": {
+                "en-GB": "Count the sharps or flats, then use the circle of fifths."
+              }
+            }
+          ],
+          "explanation": {
+            "content": {
+              "en-GB": "Two flats indicate B-flat major."
+            }
+          },
+          "delivery": {},
+          "analytics": {}
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,644 @@
+{
+  "format": "foxchild.music-learning.question-set",
+  "schemaVersion": "1.0.0",
+  "id": "set-note-reading-01",
+  "revision": 1,
+  "status": "published",
+  "metadata": {
+    "title": {
+      "en-GB": "Note Reading: Treble Clef"
+    },
+    "description": {
+      "en-GB": "Play five written notes using the on-screen piano or a connected MIDI keyboard."
+    },
+    "language": "en-GB",
+    "authors": [
+      "FoxChild Music Learning Generator"
+    ],
+    "subject": "Music",
+    "domain": "note-reading",
+    "skillIds": [
+      "theory.note-reading.pitch.identify"
+    ],
+    "difficulty": "mixed",
+    "tags": [
+      "midi",
+      "piano-keyboard"
+    ]
+  },
+  "defaults": {
+    "locale": "en-GB",
+    "attemptPolicy": {
+      "maximumAttempts": 3,
+      "scorePolicy": "best"
+    }
+  },
+  "assets": [],
+  "variables": {},
+  "delivery": {
+    "mode": "practice",
+    "navigation": "linear",
+    "showProgress": true
+  },
+  "sections": [
+    {
+      "id": "section-1",
+      "title": {
+        "en-GB": "Note Reading: Treble Clef"
+      },
+      "delivery": {},
+      "items": [
+        {
+          "id": "note-01",
+          "type": "midi-input",
+          "version": 1,
+          "metadata": {
+            "skillIds": [
+              "theory.note-reading.pitch.identify"
+            ],
+            "difficulty": 1,
+            "tags": [
+              "note-reading",
+              "treble"
+            ]
+          },
+          "variables": {},
+          "stimulus": [
+            {
+              "id": "note-score",
+              "kind": "notation",
+              "source": {
+                "mode": "generator",
+                "generatorId": "single-note-display@1",
+                "seed": "note-01",
+                "parameters": {
+                  "midi": 60,
+                  "clef": "treble",
+                  "duration": "1/1",
+                  "showTimeSignature": false
+                }
+              },
+              "presentation": {
+                "renderer": "foxchild-score",
+                "layout": "single-system",
+                "scale": 1.5,
+                "showCursor": false,
+                "editable": false
+              },
+              "playback": {
+                "enabled": false
+              },
+              "accessibility": {
+                "description": {
+                  "en-GB": "A C4 note on the treble clef."
+                }
+              }
+            }
+          ],
+          "prompt": {
+            "content": {
+              "en-GB": "Play the written note on the piano keyboard."
+            },
+            "format": "plain-text"
+          },
+          "interaction": {
+            "kind": "music-keyboard",
+            "responseId": "response-main",
+            "inputSources": [
+              "on-screen-piano",
+              "web-midi"
+            ],
+            "submitMode": "immediate",
+            "range": {
+              "minimumMidi": 36,
+              "maximumMidi": 84
+            }
+          },
+          "response": {
+            "id": "response-main",
+            "baseType": "pitch",
+            "cardinality": "single",
+            "correct": {
+              "midi": 60,
+              "name": "C4"
+            }
+          },
+          "assessment": {
+            "strategy": "pitch-match@1",
+            "maximumScore": 1,
+            "passingScore": 1,
+            "parameters": {
+              "octaveRequired": true,
+              "enharmonicEquivalent": true
+            },
+            "attemptPolicy": {
+              "maximumAttempts": 3,
+              "scorePolicy": "best"
+            }
+          },
+          "feedback": {
+            "mode": "after-submit",
+            "correct": {
+              "message": {
+                "en-GB": "You played C4."
+              }
+            },
+            "incorrect": {
+              "message": {
+                "en-GB": "Check the staff position and accidental."
+              }
+            },
+            "showCorrectAnswer": "after-final-attempt"
+          },
+          "hints": [
+            {
+              "id": "note-01-hint-1",
+              "content": {
+                "en-GB": "The target note is C4."
+              }
+            }
+          ],
+          "explanation": {
+            "content": {
+              "en-GB": "The written pitch is C4; MIDI note 60."
+            }
+          },
+          "delivery": {},
+          "analytics": {}
+        },
+        {
+          "id": "note-02",
+          "type": "midi-input",
+          "version": 1,
+          "metadata": {
+            "skillIds": [
+              "theory.note-reading.pitch.identify"
+            ],
+            "difficulty": 1,
+            "tags": [
+              "note-reading",
+              "treble"
+            ]
+          },
+          "variables": {},
+          "stimulus": [
+            {
+              "id": "note-score",
+              "kind": "notation",
+              "source": {
+                "mode": "generator",
+                "generatorId": "single-note-display@1",
+                "seed": "note-02",
+                "parameters": {
+                  "midi": 62,
+                  "clef": "treble",
+                  "duration": "1/1",
+                  "showTimeSignature": false
+                }
+              },
+              "presentation": {
+                "renderer": "foxchild-score",
+                "layout": "single-system",
+                "scale": 1.5,
+                "showCursor": false,
+                "editable": false
+              },
+              "playback": {
+                "enabled": false
+              },
+              "accessibility": {
+                "description": {
+                  "en-GB": "A D4 note on the treble clef."
+                }
+              }
+            }
+          ],
+          "prompt": {
+            "content": {
+              "en-GB": "Play the written note on the piano keyboard."
+            },
+            "format": "plain-text"
+          },
+          "interaction": {
+            "kind": "music-keyboard",
+            "responseId": "response-main",
+            "inputSources": [
+              "on-screen-piano",
+              "web-midi"
+            ],
+            "submitMode": "immediate",
+            "range": {
+              "minimumMidi": 36,
+              "maximumMidi": 84
+            }
+          },
+          "response": {
+            "id": "response-main",
+            "baseType": "pitch",
+            "cardinality": "single",
+            "correct": {
+              "midi": 62,
+              "name": "D4"
+            }
+          },
+          "assessment": {
+            "strategy": "pitch-match@1",
+            "maximumScore": 1,
+            "passingScore": 1,
+            "parameters": {
+              "octaveRequired": true,
+              "enharmonicEquivalent": true
+            },
+            "attemptPolicy": {
+              "maximumAttempts": 3,
+              "scorePolicy": "best"
+            }
+          },
+          "feedback": {
+            "mode": "after-submit",
+            "correct": {
+              "message": {
+                "en-GB": "You played D4."
+              }
+            },
+            "incorrect": {
+              "message": {
+                "en-GB": "Check the staff position and accidental."
+              }
+            },
+            "showCorrectAnswer": "after-final-attempt"
+          },
+          "hints": [
+            {
+              "id": "note-02-hint-1",
+              "content": {
+                "en-GB": "The target note is D4."
+              }
+            }
+          ],
+          "explanation": {
+            "content": {
+              "en-GB": "The written pitch is D4; MIDI note 62."
+            }
+          },
+          "delivery": {},
+          "analytics": {}
+        },
+        {
+          "id": "note-03",
+          "type": "midi-input",
+          "version": 1,
+          "metadata": {
+            "skillIds": [
+              "theory.note-reading.pitch.identify"
+            ],
+            "difficulty": 1,
+            "tags": [
+              "note-reading",
+              "treble"
+            ]
+          },
+          "variables": {},
+          "stimulus": [
+            {
+              "id": "note-score",
+              "kind": "notation",
+              "source": {
+                "mode": "generator",
+                "generatorId": "single-note-display@1",
+                "seed": "note-03",
+                "parameters": {
+                  "midi": 65,
+                  "clef": "treble",
+                  "duration": "1/1",
+                  "showTimeSignature": false
+                }
+              },
+              "presentation": {
+                "renderer": "foxchild-score",
+                "layout": "single-system",
+                "scale": 1.5,
+                "showCursor": false,
+                "editable": false
+              },
+              "playback": {
+                "enabled": false
+              },
+              "accessibility": {
+                "description": {
+                  "en-GB": "A F4 note on the treble clef."
+                }
+              }
+            }
+          ],
+          "prompt": {
+            "content": {
+              "en-GB": "Play the written note on the piano keyboard."
+            },
+            "format": "plain-text"
+          },
+          "interaction": {
+            "kind": "music-keyboard",
+            "responseId": "response-main",
+            "inputSources": [
+              "on-screen-piano",
+              "web-midi"
+            ],
+            "submitMode": "immediate",
+            "range": {
+              "minimumMidi": 36,
+              "maximumMidi": 84
+            }
+          },
+          "response": {
+            "id": "response-main",
+            "baseType": "pitch",
+            "cardinality": "single",
+            "correct": {
+              "midi": 65,
+              "name": "F4"
+            }
+          },
+          "assessment": {
+            "strategy": "pitch-match@1",
+            "maximumScore": 1,
+            "passingScore": 1,
+            "parameters": {
+              "octaveRequired": true,
+              "enharmonicEquivalent": true
+            },
+            "attemptPolicy": {
+              "maximumAttempts": 3,
+              "scorePolicy": "best"
+            }
+          },
+          "feedback": {
+            "mode": "after-submit",
+            "correct": {
+              "message": {
+                "en-GB": "You played F4."
+              }
+            },
+            "incorrect": {
+              "message": {
+                "en-GB": "Check the staff position and accidental."
+              }
+            },
+            "showCorrectAnswer": "after-final-attempt"
+          },
+          "hints": [
+            {
+              "id": "note-03-hint-1",
+              "content": {
+                "en-GB": "The target note is F4."
+              }
+            }
+          ],
+          "explanation": {
+            "content": {
+              "en-GB": "The written pitch is F4; MIDI note 65."
+            }
+          },
+          "delivery": {},
+          "analytics": {}
+        },
+        {
+          "id": "note-04",
+          "type": "midi-input",
+          "version": 1,
+          "metadata": {
+            "skillIds": [
+              "theory.note-reading.pitch.identify"
+            ],
+            "difficulty": 2,
+            "tags": [
+              "note-reading",
+              "treble"
+            ]
+          },
+          "variables": {},
+          "stimulus": [
+            {
+              "id": "note-score",
+              "kind": "notation",
+              "source": {
+                "mode": "generator",
+                "generatorId": "single-note-display@1",
+                "seed": "note-04",
+                "parameters": {
+                  "midi": 66,
+                  "clef": "treble",
+                  "duration": "1/1",
+                  "showTimeSignature": false
+                }
+              },
+              "presentation": {
+                "renderer": "foxchild-score",
+                "layout": "single-system",
+                "scale": 1.5,
+                "showCursor": false,
+                "editable": false
+              },
+              "playback": {
+                "enabled": false
+              },
+              "accessibility": {
+                "description": {
+                  "en-GB": "A F#4 note on the treble clef."
+                }
+              }
+            }
+          ],
+          "prompt": {
+            "content": {
+              "en-GB": "Play the written note on the piano keyboard."
+            },
+            "format": "plain-text"
+          },
+          "interaction": {
+            "kind": "music-keyboard",
+            "responseId": "response-main",
+            "inputSources": [
+              "on-screen-piano",
+              "web-midi"
+            ],
+            "submitMode": "immediate",
+            "range": {
+              "minimumMidi": 36,
+              "maximumMidi": 84
+            }
+          },
+          "response": {
+            "id": "response-main",
+            "baseType": "pitch",
+            "cardinality": "single",
+            "correct": {
+              "midi": 66,
+              "name": "F#4"
+            }
+          },
+          "assessment": {
+            "strategy": "pitch-match@1",
+            "maximumScore": 1,
+            "passingScore": 1,
+            "parameters": {
+              "octaveRequired": true,
+              "enharmonicEquivalent": true
+            },
+            "attemptPolicy": {
+              "maximumAttempts": 3,
+              "scorePolicy": "best"
+            }
+          },
+          "feedback": {
+            "mode": "after-submit",
+            "correct": {
+              "message": {
+                "en-GB": "You played F#4."
+              }
+            },
+            "incorrect": {
+              "message": {
+                "en-GB": "Check the staff position and accidental."
+              }
+            },
+            "showCorrectAnswer": "after-final-attempt"
+          },
+          "hints": [
+            {
+              "id": "note-04-hint-1",
+              "content": {
+                "en-GB": "The target note is F#4."
+              }
+            }
+          ],
+          "explanation": {
+            "content": {
+              "en-GB": "The written pitch is F#4; MIDI note 66."
+            }
+          },
+          "delivery": {},
+          "analytics": {}
+        },
+        {
+          "id": "note-05",
+          "type": "midi-input",
+          "version": 1,
+          "metadata": {
+            "skillIds": [
+              "theory.note-reading.pitch.identify"
+            ],
+            "difficulty": 2,
+            "tags": [
+              "note-reading",
+              "treble"
+            ]
+          },
+          "variables": {},
+          "stimulus": [
+            {
+              "id": "note-score",
+              "kind": "notation",
+              "source": {
+                "mode": "generator",
+                "generatorId": "single-note-display@1",
+                "seed": "note-05",
+                "parameters": {
+                  "midi": 71,
+                  "clef": "treble",
+                  "duration": "1/1",
+                  "showTimeSignature": false
+                }
+              },
+              "presentation": {
+                "renderer": "foxchild-score",
+                "layout": "single-system",
+                "scale": 1.5,
+                "showCursor": false,
+                "editable": false
+              },
+              "playback": {
+                "enabled": false
+              },
+              "accessibility": {
+                "description": {
+                  "en-GB": "A B4 note on the treble clef."
+                }
+              }
+            }
+          ],
+          "prompt": {
+            "content": {
+              "en-GB": "Play the written note on the piano keyboard."
+            },
+            "format": "plain-text"
+          },
+          "interaction": {
+            "kind": "music-keyboard",
+            "responseId": "response-main",
+            "inputSources": [
+              "on-screen-piano",
+              "web-midi"
+            ],
+            "submitMode": "immediate",
+            "range": {
+              "minimumMidi": 36,
+              "maximumMidi": 84
+            }
+          },
+          "response": {
+            "id": "response-main",
+            "baseType": "pitch",
+            "cardinality": "single",
+            "correct": {
+              "midi": 71,
+              "name": "B4"
+            }
+          },
+          "assessment": {
+            "strategy": "pitch-match@1",
+            "maximumScore": 1,
+            "passingScore": 1,
+            "parameters": {
+              "octaveRequired": true,
+              "enharmonicEquivalent": true
+            },
+            "attemptPolicy": {
+              "maximumAttempts": 3,
+              "scorePolicy": "best"
+            }
+          },
+          "feedback": {
+            "mode": "after-submit",
+            "correct": {
+              "message": {
+                "en-GB": "You played B4."
+              }
+            },
+            "incorrect": {
+              "message": {
+                "en-GB": "Check the staff position and accidental."
+              }
+            },
+            "showCorrectAnswer": "after-final-attempt"
+          },
+          "hints": [
+            {
+              "id": "note-05-hint-1",
+              "content": {
+                "en-GB": "The target note is B4."
+              }
+            }
+          ],
+          "explanation": {
+            "content": {
+              "en-GB": "The written pitch is B4; MIDI note 71."
+            }
+          },
+          "delivery": {},
+          "analytics": {}
+        }
+      ]
+    }
+  ]
+}
