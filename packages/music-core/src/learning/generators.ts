@@ -39,6 +39,7 @@ export function createDefaultMusicGeneratorRegistry(): MusicGeneratorRegistry {
     { ...melodicIntervalGenerator, id: "interval-display@1" },
     chordGenerator,
     { ...chordGenerator, id: "chord-display@1" },
+    cadenceGenerator,
     rhythmFragmentGenerator,
     { ...rhythmFragmentGenerator, id: "note-value-display@2" },
     { ...rhythmFragmentGenerator, id: "time-signature-display@2" },
@@ -135,6 +136,26 @@ export const chordGenerator: MusicQuestionGenerator = {
         pitches: intervals.map((interval) => midiToPitch(root + interval)),
         duration: duration("whole")
       }]
+    });
+  }
+};
+
+export const cadenceGenerator: MusicQuestionGenerator = {
+  id: "cadence-display@1",
+  generate(seed, parameters) {
+    const cadence = String(parameters.cadence ?? "perfect");
+    const progressions: Record<string, Array<{ root: number; intervals: number[] }>> = {
+      perfect: [{ root: 67, intervals: [0, 4, 7] }, { root: 60, intervals: [0, 4, 7] }],
+      plagal: [{ root: 65, intervals: [0, 4, 7] }, { root: 60, intervals: [0, 4, 7] }],
+      imperfect: [{ root: 60, intervals: [0, 4, 7] }, { root: 67, intervals: [0, 4, 7] }],
+      interrupted: [{ root: 67, intervals: [0, 4, 7] }, { root: 69, intervals: [0, 3, 7] }]
+    };
+    const progression = progressions[cadence] ?? progressions.perfect;
+    return score({
+      id: deterministicId("cadence", seed),
+      title: `${cadence} cadence`,
+      tempo: 72,
+      events: progression.map((chord, index) => chordEvent(`cadence-chord-${index + 1}`, chord.root, chord.intervals))
     });
   }
 };
@@ -354,6 +375,15 @@ function score(options: {
 
 function noteEvent(id: string, midi: number, value: NoteDurationValue): MusicEvent {
   return { id, type: "note", pitch: midiToPitch(midi), duration: duration(value) };
+}
+
+function chordEvent(id: string, rootMidi: number, intervals: number[]): MusicEvent {
+  return {
+    id,
+    type: "chord",
+    pitches: intervals.map((interval) => midiToPitch(rootMidi + interval)),
+    duration: duration("whole")
+  };
 }
 
 function noteEventWithTuplet(

@@ -302,6 +302,23 @@ function familyBlueprints(): FamilyBlueprint[] {
           hint: "Find the lowest note: root position has the root in the bass; inversions move the third or fifth down."
         };
       }),
+    family("cadences@1", "Cadences", "chords", "cadence-display@1", "curriculum-peers@1",
+      { cadence: enumeration("perfect", "plagal", "imperfect", "interrupted") },
+      ["cadence-recognition"], ["cadence-types"],
+      (seed, _difficulty, parameters) => {
+        const cadences = ["perfect", "plagal", "imperfect", "interrupted"];
+        const cadence = enumValue(parameters.cadence, cadences, pick(seed, cadences));
+        return {
+          correct: cadence,
+          candidates: cadences,
+          prompt: "Which cadence is heard and shown?",
+          generatorParameters: { cadence },
+          optionLabels: { perfect: "Perfect (V–I)", plagal: "Plagal (IV–I)", imperfect: "Imperfect (ends on V)", interrupted: "Interrupted (V–vi)" },
+          audioOnly: true,
+          explanation: `This is an ${cadence} cadence.`,
+          hint: "Listen to the final chord and notice whether the music sounds complete, amen-like, open or interrupted."
+        };
+      }),
     family("scales@2", "Scales", "scales", "scale-display@2", "common-confusions@1",
       { mode: enumeration("major", "natural-minor", "harmonic-minor") },
       ["scale-type"], ["major-scale", "minor-scales"],

@@ -108,7 +108,7 @@ export function createDefaultSyllabusMatrix(): SyllabusMatrix {
       { id: "harmony", title: "Chords & harmony", skills: [
         generated("harmony.chord-quality", "Chord qualities", "harmony", "Identify triad and seventh-chord qualities.", ["chords"], ["chords@2"], ["exact-identifier@1"]),
         generated("harmony.inversions", "Chord inversions", "harmony", "Identify and construct chord inversions and figured bass.", ["chords"], ["chord-inversions@1"], ["exact-identifier@1"]),
-        planned("harmony.cadences", "Cadences and harmonic function", "harmony", "Recognise cadences and harmonic function in context.", ["chords", "ear-training"], ["exact-identifier@1", "rubric@1"])
+        generated("harmony.cadences", "Cadences and harmonic function", "harmony", "Recognise cadences and harmonic function in context.", ["chords", "ear-training"], ["cadences@1"], ["exact-identifier@1"])
       ]},
       { id: "terms-signs", title: "Terms, signs & ornaments", skills: [
         generated("symbols.music-signs", "Music signs and symbols", "terms-signs", "Interpret articulation, expression and accidental symbols.", ["music-symbols"], ["music-symbols@2"], ["exact-identifier@1"]),
