@@ -240,6 +240,7 @@ function validateChoice(item: LearningItem, path: string, diagnostics: ContentDi
 const strategyBaseTypes: Record<string, ResponseBaseType[]> = {
   "exact-identifier@1": ["identifier"],
   "identifier-set@1": ["identifier-set"],
+  "matching@1": ["mapping"],
   "normalised-text@1": ["string"],
   "numeric-tolerance@1": ["number"],
   "pitch-match@1": ["pitch"],

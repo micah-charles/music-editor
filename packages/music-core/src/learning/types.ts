@@ -198,7 +198,7 @@ export type AssessmentStrategyId =
   | "numeric-tolerance@1" | "pitch-match@1" | "pitch-set-match@1"
   | "pitch-sequence-match@1" | "rhythm-alignment@1" | "score-semantic-diff@1"
   | "midi-performance@1" | "sight-reading@1" | "rubric@1"
-  | "composite-weighted@1" | "ordering@1";
+  | "composite-weighted@1" | "ordering@1" | "matching@1";
 
 export interface AssessmentStrategy {
   id: string;

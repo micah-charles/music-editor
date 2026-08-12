@@ -252,6 +252,11 @@ export function LearningPanel({
       : [];
     return [...selected, ...available.filter((id) => !selected.includes(id))];
   }, [currentItem, optionOrder, selectedResponse]);
+  const matchingTargetOptions = useMemo(
+    () => matchingOptions(currentItem?.interaction.matchOptions),
+    [currentItem]
+  );
+  const matchingSelections = isRecord(selectedResponse) ? selectedResponse : {};
 
   useEffect(() => {
     if (!focusedConceptId && knowledgeGraph.recommendedConceptId) {
@@ -408,6 +413,11 @@ export function LearningPanel({
     const next = [...current];
     [next[index], next[nextIndex]] = [next[nextIndex], next[index]];
     setSelectedResponse(next);
+  }
+
+  function selectMatchingTarget(leftId: string, targetId: string) {
+    if (result || resolvedItem?.interaction.kind !== "matching") return;
+    setSelectedResponse({ ...matchingSelections, [leftId]: targetId });
   }
 
   function retry() {
@@ -665,6 +675,34 @@ export function LearningPanel({
             </form>
           ) : null}
 
+          {resolvedItem?.interaction.kind === "matching" ? (
+            <section className="learning-matching" aria-label="Match each item">
+              <p className="learning-matching-instruction">Match each item on the left with one answer.</p>
+              <div className="learning-matching-list">
+                {optionOrder.map((left) => (
+                  <label key={left.id}>
+                    <span>{localisedText(left.content, locale)}</span>
+                    <select
+                      aria-label={`Match ${localisedText(left.content, locale)}`}
+                      disabled={Boolean(result)}
+                      value={String(matchingSelections[left.id] ?? "")}
+                      onChange={(event) => selectMatchingTarget(left.id, event.target.value)}
+                    >
+                      <option value="">Choose a match</option>
+                      {matchingTargetOptions.map((target) => <option key={target.id} value={target.id}>{localisedText(target.content, locale)}</option>)}
+                    </select>
+                  </label>
+                ))}
+              </div>
+              <button
+                type="button"
+                className="primary"
+                disabled={Boolean(result) || optionOrder.some((option) => !matchingSelections[option.id])}
+                onClick={() => submit(matchingSelections, "matching")}
+              >Submit matches</button>
+            </section>
+          ) : null}
+
           {resolvedItem?.interaction.kind === "ordering" ? (
             <section className="learning-ordering" aria-label="Order the options">
               <p className="learning-ordering-instruction">Arrange the items from first to last.</p>
@@ -766,7 +804,7 @@ export function LearningPanel({
           <button type="button" disabled={sessionPosition === 0} onClick={() => moveQuestion(-1)}>← Previous</button>
           {!result ? (
             <span className="learning-choice-guidance">
-              {resolvedItem?.interaction.kind === "choice" ? "Choose an answer above" : resolvedItem?.interaction.kind === "text-entry" ? "Write an answer above" : resolvedItem?.interaction.kind === "numeric-entry" ? "Enter a number above" : resolvedItem?.interaction.kind === "ordering" ? "Arrange the items above" : "Complete the question above"}
+              {resolvedItem?.interaction.kind === "choice" ? "Choose an answer above" : resolvedItem?.interaction.kind === "text-entry" ? "Write an answer above" : resolvedItem?.interaction.kind === "numeric-entry" ? "Enter a number above" : resolvedItem?.interaction.kind === "matching" ? "Match the items above" : resolvedItem?.interaction.kind === "ordering" ? "Arrange the items above" : "Complete the question above"}
             </span>
           ) : (
             <button type="button" className="primary" disabled={!result && currentAttemptState === "unanswered"} onClick={() => moveQuestion(1)}>
@@ -1667,4 +1705,11 @@ function errorMessage(error: unknown) {
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null && !Array.isArray(value);
+}
+
+function matchingOptions(value: unknown): Array<{ id: string; content: unknown }> {
+  if (!Array.isArray(value)) return [];
+  return value.filter((entry): entry is { id: string; content: unknown } =>
+    isRecord(entry) && typeof entry.id === "string" && "content" in entry
+  );
 }

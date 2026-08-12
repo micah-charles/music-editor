@@ -20,4 +20,10 @@ describe("learning answer interaction", () => {
     expect(learningPanelSource).toContain("Submit order");
     expect(learningPanelSource).toContain("moveOrderingOption");
   });
+
+  it("renders selectable pair assignments for matching questions", () => {
+    expect(learningPanelSource).toContain('resolvedItem?.interaction.kind === "matching"');
+    expect(learningPanelSource).toContain("Submit matches");
+    expect(learningPanelSource).toContain("matchingOptions");
+  });
 });

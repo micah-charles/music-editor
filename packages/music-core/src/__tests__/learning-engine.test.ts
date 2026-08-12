@@ -107,6 +107,7 @@ describe("FCMLIF learning engine", () => {
       "composite-weighted@1",
       "exact-identifier@1",
       "identifier-set@1",
+      "matching@1",
       "midi-performance@1",
       "normalised-text@1",
       "numeric-tolerance@1",
@@ -135,6 +136,7 @@ describe("FCMLIF learning engine", () => {
     expect(run("exact-identifier@1", "a", "a").passed).toBe(true);
     expect(run("normalised-text@1", "  Allegro  ", "allegro").passed).toBe(true);
     expect(run("ordering@1", ["first", "second", "third"], ["first", "second", "third"]).passed).toBe(true);
+    expect(run("matching@1", { a: "one", b: "two" }, { a: "one", b: "two" }).passed).toBe(true);
     expect(run("pitch-match@1", "F#4", { written: { step: "F", alter: 1, octave: 4 }, midi: 66 }).passed).toBe(true);
     expect(run("pitch-set-match@1", [67, 60, 64], [60, 64, 67], { octavePolicy: "exact" }).passed).toBe(true);
     expect(run("midi-performance@1", [
@@ -188,7 +190,7 @@ describe("FCMLIF learning engine", () => {
       ["choice", "identifier", "exact-identifier@1"],
       ["text-entry", "string", "normalised-text@1"],
       ["numeric-entry", "number", "numeric-tolerance@1"],
-      ["matching", "mapping", "composite-weighted@1"],
+      ["matching", "mapping", "matching@1"],
       ["ordering", "ordering", "ordering@1"],
       ["drag-drop", "mapping", "composite-weighted@1"],
       ["score-drag-drop", "score-patch", "score-semantic-diff@1"],
@@ -318,7 +320,7 @@ describe("FCMLIF learning engine", () => {
       readFileSync(new URL(`question-sets/${file}`, publicRoot), "utf8")
     ) as QuestionSet));
     expect(packs).toHaveLength(1);
-    expect(packs.flatMap(questionItems)).toHaveLength(14);
+    expect(packs.flatMap(questionItems)).toHaveLength(15);
     expect(packs[0].metadata.tags).toEqual(expect.arrayContaining(["abrsm-grade-8", "gcse"]));
     expect(questionItems(packs[0]).some((item) => item.metadata?.curriculumLevels &&
       (item.metadata.curriculumLevels as { abrsm?: string[] }).abrsm?.includes("Grade 8"))).toBe(true);

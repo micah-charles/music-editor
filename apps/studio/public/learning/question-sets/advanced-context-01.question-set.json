@@ -252,6 +252,21 @@
           "feedback": { "mode": "after-submit", "correct": { "message": { "en-GB": "Correct. The exposition moves from the tonic theme through transition to the contrasting theme and closing material." } }, "incorrect": { "message": { "en-GB": "Start with the tonic theme, then transition, contrasting theme and closing material." } }, "showCorrectAnswer": "after-final-attempt" },
           "hints": [{ "id": "context-14-hint", "content": { "en-GB": "The transition connects the tonic opening to the contrasting second group." } }],
           "explanation": { "content": { "en-GB": "Ordering tasks assess whether the learner understands formal process, not just isolated labels." } }
+        },
+        {
+          "id": "context-15",
+          "type": "matching",
+          "version": 1,
+          "metadata": { "skillIds": ["musical-analysis.context"], "conceptId": "musical-analysis.context.harmonic-evidence", "curriculumLevels": { "abrsm": ["Grade 7", "Grade 8"], "gcse": ["Higher"] }, "difficulty": 0.92, "tags": ["matching", "harmony", "evidence"] },
+          "variables": {},
+          "stimulus": [{ "id": "context-15-stimulus", "kind": "text", "content": { "en-GB": "Match each harmonic term with the musical evidence that identifies it." }, "accessibility": { "description": { "en-GB": "A written matching exercise about harmonic evidence." } } }],
+          "prompt": { "content": { "en-GB": "Match each term to its defining evidence." }, "format": "plain-text" },
+          "interaction": { "kind": "matching", "responseId": "context-15-response", "cardinality": "single", "options": [{ "id": "term-perfect", "content": { "en-GB": "Perfect cadence" } }, { "id": "term-suspension", "content": { "en-GB": "Suspension" } }, { "id": "term-pedal", "content": { "en-GB": "Pedal point" } }], "matchOptions": [{ "id": "evidence-v-i", "content": { "en-GB": "Dominant harmony resolves to tonic" } }, { "id": "evidence-prepared", "content": { "en-GB": "A dissonant note resolves down by step" } }, { "id": "evidence-held-bass", "content": { "en-GB": "A sustained bass note under changing harmony" } }] },
+          "response": { "id": "context-15-response", "baseType": "mapping", "cardinality": "single", "correct": { "value": { "term-perfect": "evidence-v-i", "term-suspension": "evidence-prepared", "term-pedal": "evidence-held-bass" } } },
+          "assessment": { "strategy": "matching@1", "maximumScore": 1, "passingScore": 1, "attemptPolicy": { "maximumAttempts": 2, "scorePolicy": "best" } },
+          "feedback": { "mode": "after-submit", "correct": { "message": { "en-GB": "Correct. Each match identifies a specific harmonic clue." } }, "incorrect": { "message": { "en-GB": "Use the musical evidence: resolution, prepared dissonance or sustained bass." } }, "showCorrectAnswer": "after-final-attempt" },
+          "hints": [{ "id": "context-15-hint", "content": { "en-GB": "A cadence is a resolution, a suspension resolves a dissonance, and a pedal sustains a bass note." } }],
+          "explanation": { "content": { "en-GB": "Matching lets learners connect terminology with evidence, a core higher-level analysis skill." } }
         }
       ]
     }
