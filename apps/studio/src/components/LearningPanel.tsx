@@ -14,6 +14,9 @@ import {
   coverageMap,
   createBrowserAttemptStore,
   createDefaultQuestionFamilyRegistry,
+  createDefaultAssessmentRegistry,
+  createDefaultSyllabusMatrix,
+  syllabusCoverage,
   createLearnerState,
   deterministicShuffle,
   filterCatalogue,
@@ -40,7 +43,8 @@ import {
   type KnowledgeGraphState,
   type QuestionSet,
   type ResolvedLearningItem,
-  type SetProgress
+  type SetProgress,
+  type SyllabusCoverageEntry
 } from "@foxchild/music-core";
 import { LearningPlaybackControls } from "./LearningPlaybackControls";
 import { KnowledgeGraph, KnowledgeNavigator } from "./KnowledgeGraph";
@@ -90,6 +94,9 @@ const learningSessionKey = "foxchild-learning-session-v1";
 const runtime = new LearningRuntime();
 const attemptStore = createBrowserAttemptStore();
 const adaptiveFamilies = createDefaultQuestionFamilyRegistry().list();
+const adaptiveFamilyRegistry = createDefaultQuestionFamilyRegistry();
+const syllabusMatrix = createDefaultSyllabusMatrix();
+const syllabusAssessments = createDefaultAssessmentRegistry();
 const reviewScheduler = new ReviewScheduler();
 const categoryFilters: Array<{ id: CategoryFilter; label: string; icon: string }> = [
   { id: "all", label: "All sets", icon: "✦" },
@@ -199,6 +206,11 @@ export function LearningPanel({
   const adaptiveCoverage = useMemo(() =>
     coverageMap(adaptiveFamilies, learnerState.mastery),
   [learnerState.mastery]);
+  const syllabusReport = useMemo(() => syllabusCoverage(
+    syllabusMatrix,
+    adaptiveFamilyRegistry,
+    syllabusAssessments
+  ), []);
   const mistakes = useMemo(() => commonMistakes(learnerState.mastery), [learnerState.mastery]);
   const nextReview = useMemo(() => reviewScheduler.next(learnerState.mastery), [learnerState.mastery]);
   const knowledgeGraph = useMemo(() => buildKnowledgeGraphState(learnerState, {
@@ -429,6 +441,7 @@ export function LearningPanel({
         onSelectConcept={selectConcept}
         onOpenScoreLab={openConceptInScoreLab}
         onMode={setMode}
+        syllabusReport={syllabusReport}
       />
       <KnowledgeNavigator graph={knowledgeGraph} focusedConceptId={focusedConcept?.concept.id ?? knowledgeGraph.recommendedConceptId} onSelect={selectConcept} />
       </div>
@@ -711,7 +724,8 @@ function KnowledgeLearningHome({
   onStartAdaptive,
   onSelectConcept,
   onOpenScoreLab,
-  onMode
+  onMode,
+  syllabusReport
 }: {
   totals: ReturnType<typeof overallProgress>;
   graph: KnowledgeGraphState;
@@ -728,6 +742,7 @@ function KnowledgeLearningHome({
   onSelectConcept: (conceptId: string) => void;
   onOpenScoreLab: (concept: KnowledgeConceptState) => void;
   onMode: (mode: LearningMode) => void;
+  syllabusReport: SyllabusCoverageEntry[];
 }) {
   const [exampleVisible, setExampleVisible] = useState(false);
   const focused = graph.concepts.find((entry) => entry.concept.id === focusedConceptId)
@@ -800,6 +815,22 @@ function KnowledgeLearningHome({
         <div><span>Concepts explored</span><strong>{exploredCount} / {graph.concepts.length}</strong></div>
         <div><span>Correct answers</span><strong>{totals.correct}</strong></div>
         <div className={reviewCount ? "needs-attention" : ""}><span>Ready to review</span><strong>{reviewCount}</strong></div>
+      </section>
+
+      <section className="syllabus-coverage-card" aria-labelledby="syllabus-coverage-title">
+        <div className="learning-section-heading">
+          <div><h2 id="syllabus-coverage-title">Syllabus coverage</h2><p>Generated skills are measured separately from planned syllabus work.</p></div>
+          <span>{syllabusReport.filter((entry) => entry.status === "covered").length} covered · {syllabusReport.filter((entry) => entry.status === "planned").length} planned</span>
+        </div>
+        <div className="syllabus-coverage-summary">
+          {syllabusReport.slice(0, 10).map((entry) => (
+            <div key={entry.skillId} className={`syllabus-status-${entry.status}`}>
+              <span>{entry.status === "covered" ? "✓" : entry.status === "partial" ? "◐" : "·"}</span>
+              <strong>{entry.skillId.replaceAll(".", " · ")}</strong>
+              <small>{entry.estimatedGeneratedInstances === "unbounded" ? "open generator" : `${entry.estimatedGeneratedInstances} generated combinations`}</small>
+            </div>
+          ))}
+        </div>
       </section>
 
       <section className="today-practice-card" aria-labelledby="today-practice-title">
