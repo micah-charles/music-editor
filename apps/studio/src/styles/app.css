@@ -3205,6 +3205,38 @@ h3 {
   gap: 0.6rem;
 }
 
+.learning-sight-reading {
+  display: grid;
+  gap: 0.75rem;
+  margin-top: 1rem;
+  padding: 1rem;
+  border: 1px solid var(--line, #dde1eb);
+  border-radius: 0.75rem;
+  background: var(--surface, #fff);
+}
+
+.learning-sight-reading p {
+  margin: 0;
+  color: var(--muted, #6d7280);
+}
+
+.learning-sight-reading-status {
+  color: #4d46e5;
+  font-weight: 700;
+}
+
+.learning-sight-reading-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+}
+
+.learning-sight-reading-actions .recording {
+  border-color: #c7365e;
+  background: #fff0f4;
+  color: #b1224b;
+}
+
 .learning-ordering-instruction {
   margin: 0;
   color: var(--muted, #6d7280);

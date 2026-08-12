@@ -17,6 +17,8 @@ import {
   createDefaultAssessmentRegistry,
   createDefaultSyllabusMatrix,
   createScoreFromEvents,
+  parsePitchName,
+  pitchToMidi,
   syllabusCoverage,
   createLearnerState,
   deterministicShuffle,
@@ -154,6 +156,8 @@ export function LearningPanel({
   const [selectedResponse, setSelectedResponse] = useState<unknown>();
   const [rhythmTaps, setRhythmTaps] = useState<Array<{ onset: number; duration: number }>>([]);
   const [notationPitches, setNotationPitches] = useState<string[]>([]);
+  const [performanceRecording, setPerformanceRecording] = useState(false);
+  const [performanceEvents, setPerformanceEvents] = useState<Array<{ midi: number; onsetMs: number; durationMs: number }>>([]);
   const [result, setResult] = useState<AssessmentResult>();
   const [attemptNumber, setAttemptNumber] = useState(1);
   const [hintVisible, setHintVisible] = useState(false);
@@ -172,6 +176,7 @@ export function LearningPanel({
   const previousMidiRef = useRef<string[]>([]);
   const submissionLockedRef = useRef(false);
   const rhythmStartRef = useRef<number>();
+  const performanceStartRef = useRef<number>();
 
   useEffect(() => {
     let cancelled = false;
@@ -300,7 +305,10 @@ export function LearningPanel({
     setSelectedResponse(undefined);
     setRhythmTaps([]);
     setNotationPitches([]);
+    setPerformanceRecording(false);
+    setPerformanceEvents([]);
     rhythmStartRef.current = undefined;
+    performanceStartRef.current = undefined;
     submissionLockedRef.current = false;
     setAttemptNumber(1);
     setHintVisible(false);
@@ -322,7 +330,10 @@ export function LearningPanel({
     if (pressed && resolvedItem?.interaction.kind === "music-keyboard" && !result) {
       submit(pressed, "web-midi");
     }
-  }, [midiActivePitches, resolvedItem, result]);
+    if (pressed && resolvedItem?.interaction.kind === "sight-reading" && performanceRecording && !result) {
+      recordPerformancePitch(pressed);
+    }
+  }, [midiActivePitches, performanceRecording, resolvedItem, result]);
 
   function selectSet(setId: string) {
     setSelectedSetId(setId);
@@ -434,6 +445,25 @@ export function LearningPanel({
     rhythmStartRef.current ??= now;
     const onset = (now - rhythmStartRef.current) / 1000;
     setRhythmTaps((current) => [...current, { onset, duration: 0.25 }]);
+  }
+
+  function recordPerformancePitch(pitch: string) {
+    const midi = pitchToMidiForLearning(pitch);
+    if (midi === undefined) return;
+    const now = performance.now();
+    performanceStartRef.current ??= now;
+    setPerformanceEvents((current) => [...current, { midi, onsetMs: now - performanceStartRef.current!, durationMs: 350 }]);
+  }
+
+  function togglePerformanceRecording() {
+    if (result) return;
+    if (performanceRecording) {
+      setPerformanceRecording(false);
+      return;
+    }
+    setPerformanceEvents([]);
+    performanceStartRef.current = performance.now();
+    setPerformanceRecording(true);
   }
 
   const notationEntryScore = useMemo(() => {
@@ -763,6 +793,26 @@ export function LearningPanel({
             </section>
           ) : null}
 
+          {resolvedItem?.interaction.kind === "sight-reading" ? (
+            <section className="learning-sight-reading" aria-label="Sight reading performance input">
+              <p>Start the count-in, then perform the phrase on your MIDI keyboard or the on-screen piano.</p>
+              <div className="learning-sight-reading-status" aria-live="polite">
+                {performanceRecording ? "Recording performance…" : `${performanceEvents.length} notes captured`}
+              </div>
+              <PianoKeyboard
+                range={{ from: "C4", to: "C6" }}
+                activePitches={midiActivePitches}
+                keyboardNavigable
+                onKeyPress={(pitch) => { if (performanceRecording) recordPerformancePitch(pitch); }}
+              />
+              <div className="learning-sight-reading-actions">
+                <button type="button" className={performanceRecording ? "recording" : ""} disabled={Boolean(result)} onClick={togglePerformanceRecording}>{performanceRecording ? "Stop recording" : "Start recording"}</button>
+                <button type="button" disabled={Boolean(result) || performanceEvents.length === 0} onClick={() => { setPerformanceEvents([]); performanceStartRef.current = undefined; }}>Clear take</button>
+                <button type="button" className="primary" disabled={Boolean(result) || performanceRecording || performanceEvents.length === 0} onClick={() => submit(performanceEvents, "sight-reading")}>Submit performance</button>
+              </div>
+            </section>
+          ) : null}
+
           {resolvedItem?.interaction.kind === "ordering" ? (
             <section className="learning-ordering" aria-label="Order the options">
               <p className="learning-ordering-instruction">Arrange the items from first to last.</p>
@@ -864,7 +914,7 @@ export function LearningPanel({
           <button type="button" disabled={sessionPosition === 0} onClick={() => moveQuestion(-1)}>← Previous</button>
           {!result ? (
             <span className="learning-choice-guidance">
-              {resolvedItem?.interaction.kind === "choice" ? "Choose an answer above" : resolvedItem?.interaction.kind === "text-entry" ? "Write an answer above" : resolvedItem?.interaction.kind === "numeric-entry" ? "Enter a number above" : resolvedItem?.interaction.kind === "matching" ? "Match the items above" : resolvedItem?.interaction.kind === "ordering" ? "Arrange the items above" : resolvedItem?.interaction.kind === "rhythm-tap" ? "Tap the rhythm above" : resolvedItem?.interaction.kind === "notation-entry" ? "Enter the notation above" : "Complete the question above"}
+              {resolvedItem?.interaction.kind === "choice" ? "Choose an answer above" : resolvedItem?.interaction.kind === "text-entry" ? "Write an answer above" : resolvedItem?.interaction.kind === "numeric-entry" ? "Enter a number above" : resolvedItem?.interaction.kind === "matching" ? "Match the items above" : resolvedItem?.interaction.kind === "ordering" ? "Arrange the items above" : resolvedItem?.interaction.kind === "rhythm-tap" ? "Tap the rhythm above" : resolvedItem?.interaction.kind === "notation-entry" ? "Enter the notation above" : resolvedItem?.interaction.kind === "sight-reading" ? "Perform the phrase above" : "Complete the question above"}
             </span>
           ) : (
             <button type="button" className="primary" disabled={!result && currentAttemptState === "unanswered"} onClick={() => moveQuestion(1)}>
@@ -1779,4 +1829,12 @@ function parseLearningPitch(value: string): { step: "C" | "D" | "E" | "F" | "G" 
   if (!match) return { step: "C", octave: 4 };
   const alter = match[2] === "#" ? 1 : match[2] === "b" ? -1 : 0;
   return { step: match[1] as "C" | "D" | "E" | "F" | "G" | "A" | "B", octave: Number(match[3]), ...(alter ? { alter } : {}) };
+}
+
+function pitchToMidiForLearning(value: string): number | undefined {
+  try {
+    return pitchToMidi(parsePitchName(value));
+  } catch {
+    return undefined;
+  }
 }

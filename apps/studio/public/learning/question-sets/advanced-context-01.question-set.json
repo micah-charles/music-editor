@@ -297,6 +297,21 @@
           "feedback": { "mode": "after-submit", "correct": { "message": { "en-GB": "Correct. The entered pitch sequence matches the phrase." } }, "incorrect": { "message": { "en-GB": "Check the four pitches and their order, then try again." } }, "showCorrectAnswer": "after-final-attempt" },
           "hints": [{ "id": "context-17-hint", "content": { "en-GB": "Use the piano keys to enter C4, D4, E4, then G4." } }],
           "explanation": { "content": { "en-GB": "Notation-entry responses are built as a local score AST and compared semantically." } }
+        },
+        {
+          "id": "context-18",
+          "type": "sight-reading",
+          "version": 1,
+          "metadata": { "skillIds": ["score.sight-reading"], "conceptId": "sight-reading.performance-capture", "curriculumLevels": { "abrsm": ["Grade 5", "Grade 6", "Grade 7"], "gcse": ["Foundation", "Higher"] }, "difficulty": 0.86, "tags": ["sight-reading", "midi", "performance"] },
+          "variables": {},
+          "stimulus": [{ "id": "context-18-score", "kind": "notation", "source": { "mode": "generator", "generatorId": "sight-reading-melody@1", "seed": "context-18", "parameters": { "length": 4, "rootMidi": 60, "bpm": 72 } }, "visibility": "visible", "playback": { "enabled": true, "tempo": 72 }, "accessibility": { "description": { "en-GB": "A four-note sight-reading phrase in treble clef." } } }],
+          "prompt": { "content": { "en-GB": "Perform the phrase steadily, following pitch and rhythm." }, "format": "plain-text" },
+          "interaction": { "kind": "sight-reading", "responseId": "context-18-response", "cardinality": "record", "mode": "flowing" },
+          "response": { "id": "context-18-response", "baseType": "midi-performance", "cardinality": "record", "correct": { "value": [] } },
+          "assessment": { "strategy": "sight-reading@1", "maximumScore": 1, "passingScore": 0.6, "parameters": { "pitch": { "weight": 0.5 }, "rhythm": { "weight": 0.25 }, "tempo": { "weight": 0.15 }, "continuity": { "weight": 0.1 } }, "attemptPolicy": { "maximumAttempts": 2, "scorePolicy": "best" } },
+          "feedback": { "mode": "after-submit", "correct": { "message": { "en-GB": "Good sight reading. Your pitch, rhythm and continuity were aligned." } }, "incorrect": { "message": { "en-GB": "Keep a steady pulse and check the opening pitches before trying again." } }, "showCorrectAnswer": "after-final-attempt" },
+          "hints": [{ "id": "context-18-hint", "content": { "en-GB": "Scan the clef, opening pitch and rhythmic pattern before pressing Start recording." } }],
+          "explanation": { "content": { "en-GB": "Sight-reading performance is assessed locally across pitch, rhythm, tempo and continuity." } }
         }
       ]
     }

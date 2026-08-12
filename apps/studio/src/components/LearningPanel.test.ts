@@ -38,4 +38,10 @@ describe("learning answer interaction", () => {
     expect(learningPanelSource).toContain("Submit notation");
     expect(learningPanelSource).toContain("createScoreFromEvents");
   });
+
+  it("renders sight-reading performance capture controls", () => {
+    expect(learningPanelSource).toContain('resolvedItem?.interaction.kind === "sight-reading"');
+    expect(learningPanelSource).toContain("Start recording");
+    expect(learningPanelSource).toContain("Submit performance");
+  });
 });
