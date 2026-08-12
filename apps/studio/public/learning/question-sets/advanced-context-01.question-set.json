@@ -153,6 +153,24 @@
           "feedback": { "mode": "after-submit", "correct": { "message": { "en-GB": "Correct. Subject, answer, inversion and independent voices are fugal clues." } }, "incorrect": { "message": { "en-GB": "Look for a recurring subject answered at the dominant." } }, "showCorrectAnswer": "after-final-attempt" },
           "hints": [{ "id": "context-08-hint", "content": { "en-GB": "A subject answered in another voice is a key contrapuntal clue." } }],
           "explanation": { "content": { "en-GB": "The description combines subject entries, an answer at the dominant and inversion—hallmarks of fugal contrapuntal technique." } }
+        },
+        {
+          "id": "context-09",
+          "type": "selected-response",
+          "version": 1,
+          "metadata": { "skillIds": ["musical-analysis.form-texture"], "conceptId": "musical-analysis.form-texture.aural-form", "curriculumLevels": { "abrsm": ["Grade 7", "Grade 8"], "gcse": ["Higher"] }, "difficulty": 0.91, "tags": ["aural", "rondo", "audio"] },
+          "variables": {},
+          "stimulus": [
+            { "id": "context-09-score", "kind": "notation", "source": { "mode": "generator", "generatorId": "analysis-example-display@1", "seed": "context-09", "parameters": { "analysisType": "form", "answer": "rondo" } }, "visibility": "hidden", "playback": { "enabled": true }, "accessibility": { "description": { "en-GB": "A generated musical excerpt for aural form analysis." } } },
+            { "id": "context-09-audio", "kind": "audio", "source": { "mode": "render-score", "notationStimulusId": "context-09-score", "instrument": { "soundId": "gm-acoustic-grand-piano" } }, "playback": { "enabled": true, "maxReplays": 4 }, "accessibility": { "description": { "en-GB": "Play the excerpt before answering." } } }
+          ],
+          "prompt": { "content": { "en-GB": "After listening, which formal feature should you track first?" }, "format": "plain-text" },
+          "interaction": { "kind": "choice", "responseId": "context-09-response", "cardinality": "single", "display": "buttons", "shuffleOptions": false, "options": [{ "id": "answer-refrain", "content": { "en-GB": "The return of a principal refrain" } }, { "id": "answer-single-cadence", "content": { "en-GB": "Only the final cadence" } }, { "id": "answer-key-signature", "content": { "en-GB": "The number of sharps in the key signature" } }, { "id": "answer-dynamics-only", "content": { "en-GB": "Dynamics without section boundaries" } }] },
+          "response": { "id": "context-09-response", "baseType": "identifier", "cardinality": "single", "correct": { "value": "answer-refrain" } },
+          "assessment": { "strategy": "exact-identifier@1", "maximumScore": 1, "passingScore": 1, "attemptPolicy": { "maximumAttempts": 2, "scorePolicy": "best" } },
+          "feedback": { "mode": "after-submit", "correct": { "message": { "en-GB": "Correct. Rondo listening begins by tracking the principal refrain and its returns." } }, "incorrect": { "message": { "en-GB": "Listen for the main idea returning between contrasting episodes." } }, "showCorrectAnswer": "after-final-attempt" },
+          "hints": [{ "id": "context-09-hint", "content": { "en-GB": "Mark each return of the opening idea while the audio plays." } }],
+          "explanation": { "content": { "en-GB": "For aural form analysis, section boundaries and refrain returns provide stronger evidence than isolated dynamics or a single cadence." } }
         }
       ]
     }
