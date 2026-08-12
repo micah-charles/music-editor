@@ -51,4 +51,10 @@ describe("learning answer interaction", () => {
     expect(learningPanelSource).toContain("Start recording");
     expect(learningPanelSource).toContain("getUserMedia");
   });
+
+  it("renders score correction controls", () => {
+    expect(learningPanelSource).toContain('resolvedItem?.interaction.kind === "score-drag-drop"');
+    expect(learningPanelSource).toContain("Submit correction");
+    expect(learningPanelSource).toContain("adjustLearningScorePitch");
+  });
 });

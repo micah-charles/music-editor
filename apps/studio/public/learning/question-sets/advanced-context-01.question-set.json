@@ -342,6 +342,21 @@
           "feedback": { "mode": "after-submit", "correct": { "message": { "en-GB": "Your motif matches the requested contour and leap." } }, "incorrect": { "message": { "en-GB": "Check the four pitches: three ascending notes followed by a leap to G4." } }, "showCorrectAnswer": "after-final-attempt" },
           "hints": [{ "id": "context-20-hint", "content": { "en-GB": "Enter C4, D4, E4 and finish on G4." } }],
           "explanation": { "content": { "en-GB": "Composition responses use the same canonical score AST as Score Lab and can be extended to rubric-based teacher review." } }
+        },
+        {
+          "id": "context-21",
+          "type": "score-correction",
+          "version": 1,
+          "metadata": { "skillIds": ["analysis.form-texture"], "conceptId": "analysis.score-correction.pitch-error", "curriculumLevels": { "abrsm": ["Grade 5", "Grade 6"], "gcse": ["Foundation", "Higher"] }, "difficulty": 0.76, "tags": ["score-correction", "drag-drop", "error-detection"] },
+          "variables": {},
+          "stimulus": [{ "id": "context-21-score", "kind": "notation", "source": { "mode": "inline-ast", "score": { "schemaVersion": "2.0", "type": "FoxChildMusicScore", "id": "context-21-stimulus", "metadata": { "title": "Pitch error", "source": "manual" }, "global": { "key": { "tonic": "C", "mode": "major" }, "timeSignature": { "beats": 4, "beatType": 4 }, "tempo": { "bpm": 90 } }, "parts": [{ "id": "melody", "name": "Melody", "instrument": { "name": "Piano", "midiProgram": 1 }, "clef": "treble", "measures": [{ "number": 1, "events": [{ "id": "c21-n1", "type": "note", "pitch": { "step": "C", "octave": 4 }, "duration": { "value": "quarter", "beats": 1 } }, { "id": "c21-n2", "type": "note", "pitch": { "step": "D", "octave": 4, "alter": 1 }, "duration": { "value": "quarter", "beats": 1 } }, { "id": "c21-n3", "type": "note", "pitch": { "step": "E", "octave": 4 }, "duration": { "value": "quarter", "beats": 1 } }, { "id": "c21-n4", "type": "note", "pitch": { "step": "G", "octave": 4 }, "duration": { "value": "quarter", "beats": 1 } }] }] }] } }, "visibility": "visible", "accessibility": { "description": { "en-GB": "A four-note melody containing one pitch error." } } }],
+          "prompt": { "content": { "en-GB": "Correct the pitch error so the melody follows C-major: C4–D4–E4–G4." }, "format": "plain-text" },
+          "interaction": { "kind": "score-drag-drop", "responseId": "context-21-response", "cardinality": "single", "mode": "pitch-correction" },
+          "response": { "id": "context-21-response", "baseType": "score-ast", "cardinality": "single", "correct": { "value": { "schemaVersion": "2.0", "type": "FoxChildMusicScore", "id": "context-21-answer", "metadata": { "title": "Corrected pitch", "source": "manual" }, "global": { "key": { "tonic": "C", "mode": "major" }, "timeSignature": { "beats": 4, "beatType": 4 }, "tempo": { "bpm": 90 } }, "parts": [{ "id": "melody", "name": "Melody", "instrument": { "name": "Piano", "midiProgram": 1 }, "clef": "treble", "measures": [{ "number": 1, "events": [{ "id": "c21-n1", "type": "note", "pitch": { "step": "C", "octave": 4 }, "duration": { "value": "quarter", "beats": 1 } }, { "id": "c21-n2", "type": "note", "pitch": { "step": "D", "octave": 4 }, "duration": { "value": "quarter", "beats": 1 } }, { "id": "c21-n3", "type": "note", "pitch": { "step": "E", "octave": 4 }, "duration": { "value": "quarter", "beats": 1 } }, { "id": "c21-n4", "type": "note", "pitch": { "step": "G", "octave": 4 }, "duration": { "value": "quarter", "beats": 1 } }] }] }] } } },
+          "assessment": { "strategy": "score-semantic-diff@1", "maximumScore": 1, "passingScore": 0.9, "attemptPolicy": { "maximumAttempts": 2, "scorePolicy": "best" } },
+          "feedback": { "mode": "after-submit", "correct": { "message": { "en-GB": "Correct. The raised second note was returned to D natural." } }, "incorrect": { "message": { "en-GB": "Select the note with the accidental and lower it by one semitone." } }, "showCorrectAnswer": "after-final-attempt" },
+          "hints": [{ "id": "context-21-hint", "content": { "en-GB": "The second note is D sharp; lower it once to D natural." } }],
+          "explanation": { "content": { "en-GB": "Score correction provides a focused local edit path before semantic score comparison." } }
         }
       ]
     }

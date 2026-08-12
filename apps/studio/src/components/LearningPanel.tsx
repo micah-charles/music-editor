@@ -160,6 +160,8 @@ export function LearningPanel({
   const [performanceEvents, setPerformanceEvents] = useState<Array<{ midi: number; onsetMs: number; durationMs: number }>>([]);
   const [audioRecording, setAudioRecording] = useState<{ durationMs: number; blobSize: number; recorded: boolean }>();
   const [audioRecordingActive, setAudioRecordingActive] = useState(false);
+  const [scoreCorrectionNoteId, setScoreCorrectionNoteId] = useState<string>();
+  const [scoreCorrectionSemitones, setScoreCorrectionSemitones] = useState(0);
   const [result, setResult] = useState<AssessmentResult>();
   const [attemptNumber, setAttemptNumber] = useState(1);
   const [hintVisible, setHintVisible] = useState(false);
@@ -314,6 +316,8 @@ export function LearningPanel({
     setPerformanceEvents([]);
     setAudioRecording(undefined);
     setAudioRecordingActive(false);
+    setScoreCorrectionNoteId(undefined);
+    setScoreCorrectionSemitones(0);
     rhythmStartRef.current = undefined;
     performanceStartRef.current = undefined;
     audioRecorderRef.current = undefined;
@@ -519,6 +523,10 @@ export function LearningPanel({
     }));
     return createScoreFromEvents({ title: "Learning answer", events });
   }, [notationPitches, resolvedItem]);
+  const correctedScore = useMemo(() => {
+    if (resolvedItem?.interaction.kind !== "score-drag-drop" || !activeScore || !scoreCorrectionNoteId) return undefined;
+    return adjustLearningScorePitch(activeScore, scoreCorrectionNoteId, scoreCorrectionSemitones);
+  }, [activeScore, resolvedItem, scoreCorrectionNoteId, scoreCorrectionSemitones]);
 
   function retry() {
     setAttemptNumber((current) => current + 1);
@@ -870,6 +878,23 @@ export function LearningPanel({
             </section>
           ) : null}
 
+          {resolvedItem?.interaction.kind === "score-drag-drop" && activeScore ? (
+            <section className="learning-score-correction" aria-label="Score correction input">
+              <p>Select the note with the error, then move it up or down before submitting the correction.</p>
+              <div className="learning-score-correction-notes">
+                {scoreNotes(activeScore).map((note) => (
+                  <button type="button" key={note.id} className={scoreCorrectionNoteId === note.id ? "selected" : ""} disabled={Boolean(result)} onClick={() => setScoreCorrectionNoteId(note.id)}>{note.label}</button>
+                ))}
+              </div>
+              <div className="learning-score-correction-actions">
+                <button type="button" disabled={Boolean(result) || !scoreCorrectionNoteId} onClick={() => setScoreCorrectionSemitones((value) => value - 1)}>Lower pitch</button>
+                <strong>{scoreCorrectionSemitones > 0 ? `+${scoreCorrectionSemitones}` : scoreCorrectionSemitones} semitone{Math.abs(scoreCorrectionSemitones) === 1 ? "" : "s"}</strong>
+                <button type="button" disabled={Boolean(result) || !scoreCorrectionNoteId} onClick={() => setScoreCorrectionSemitones((value) => value + 1)}>Raise pitch</button>
+                <button type="button" className="primary" disabled={Boolean(result) || !correctedScore} onClick={() => submit(correctedScore, "score-drag-drop")}>Submit correction</button>
+              </div>
+            </section>
+          ) : null}
+
           {resolvedItem?.interaction.kind === "ordering" ? (
             <section className="learning-ordering" aria-label="Order the options">
               <p className="learning-ordering-instruction">Arrange the items from first to last.</p>
@@ -971,7 +996,7 @@ export function LearningPanel({
           <button type="button" disabled={sessionPosition === 0} onClick={() => moveQuestion(-1)}>← Previous</button>
           {!result ? (
             <span className="learning-choice-guidance">
-              {resolvedItem?.interaction.kind === "choice" ? "Choose an answer above" : resolvedItem?.interaction.kind === "text-entry" ? "Write an answer above" : resolvedItem?.interaction.kind === "numeric-entry" ? "Enter a number above" : resolvedItem?.interaction.kind === "matching" ? "Match the items above" : resolvedItem?.interaction.kind === "ordering" ? "Arrange the items above" : resolvedItem?.interaction.kind === "rhythm-tap" ? "Tap the rhythm above" : resolvedItem?.interaction.kind === "notation-entry" ? "Enter the notation above" : resolvedItem?.interaction.kind === "composition" ? "Compose the answer above" : resolvedItem?.interaction.kind === "sight-reading" ? "Perform the phrase above" : resolvedItem?.interaction.kind === "audio-recording" ? "Record your response above" : "Complete the question above"}
+              {resolvedItem?.interaction.kind === "choice" ? "Choose an answer above" : resolvedItem?.interaction.kind === "text-entry" ? "Write an answer above" : resolvedItem?.interaction.kind === "numeric-entry" ? "Enter a number above" : resolvedItem?.interaction.kind === "matching" ? "Match the items above" : resolvedItem?.interaction.kind === "ordering" ? "Arrange the items above" : resolvedItem?.interaction.kind === "rhythm-tap" ? "Tap the rhythm above" : resolvedItem?.interaction.kind === "notation-entry" ? "Enter the notation above" : resolvedItem?.interaction.kind === "composition" ? "Compose the answer above" : resolvedItem?.interaction.kind === "sight-reading" ? "Perform the phrase above" : resolvedItem?.interaction.kind === "audio-recording" ? "Record your response above" : resolvedItem?.interaction.kind === "score-drag-drop" ? "Correct the score above" : "Complete the question above"}
             </span>
           ) : (
             <button type="button" className="primary" disabled={!result && currentAttemptState === "unanswered"} onClick={() => moveQuestion(1)}>
@@ -1894,4 +1919,29 @@ function pitchToMidiForLearning(value: string): number | undefined {
   } catch {
     return undefined;
   }
+}
+
+function scoreNotes(score: FoxChildMusicScore): Array<{ id: string; label: string }> {
+  return score.parts.flatMap((part) => part.measures.flatMap((measure) => measure.events
+    .filter((event) => event.type === "note")
+    .map((event, index) => ({ id: event.id ?? `${part.id}-${measure.number}-${index}`, label: `${part.name} · bar ${measure.number} · note ${index + 1}` }))));
+}
+
+function adjustLearningScorePitch(score: FoxChildMusicScore, noteId: string, semitones: number): FoxChildMusicScore {
+  const next = structuredClone(score);
+  next.parts.forEach((part) => part.measures.forEach((measure) => measure.events.forEach((event, index) => {
+    const id = event.id ?? `${part.id}-${measure.number}-${index}`;
+    if (id !== noteId || event.type !== "note") return;
+    const midi = pitchToMidi({ ...event.pitch });
+    const adjusted = midiToPitchForLearning(midi + semitones);
+    event.pitch = adjusted;
+  })));
+  return next;
+}
+
+function midiToPitchForLearning(midi: number): { step: "C" | "D" | "E" | "F" | "G" | "A" | "B"; octave: number; alter?: number } {
+  const names = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"] as const;
+  const name = names[((midi % 12) + 12) % 12];
+  const match = /^([A-G])(#?)/.exec(name)!;
+  return { step: match[1] as "C" | "D" | "E" | "F" | "G" | "A" | "B", octave: Math.floor(midi / 12) - 1, ...(match[2] ? { alter: 1 } : {}) };
 }

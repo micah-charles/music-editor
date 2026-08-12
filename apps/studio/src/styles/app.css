@@ -3270,6 +3270,35 @@ h3 {
   color: #b1224b;
 }
 
+.learning-score-correction {
+  display: grid;
+  gap: 0.75rem;
+  margin-top: 1rem;
+  padding: 1rem;
+  border: 1px solid var(--line, #dde1eb);
+  border-radius: 0.75rem;
+  background: var(--surface, #fff);
+}
+
+.learning-score-correction p {
+  margin: 0;
+  color: var(--muted, #6d7280);
+}
+
+.learning-score-correction-notes,
+.learning-score-correction-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.learning-score-correction-notes button.selected {
+  border-color: #5b5cf0;
+  background: #eef0ff;
+  color: #4d46e5;
+}
+
 .learning-ordering-instruction {
   margin: 0;
   color: var(--muted, #6d7280);

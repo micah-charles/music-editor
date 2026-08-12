@@ -74,7 +74,7 @@ export function createDefaultInteractionRegistry(): InteractionRegistry {
     { id: "matching", label: "Matching", responseBaseTypes: ["mapping"] },
     { id: "ordering", label: "Ordering", responseBaseTypes: ["ordering"] },
     { id: "drag-drop", label: "Drag and drop", responseBaseTypes: ["mapping", "ordering"] },
-    { id: "score-drag-drop", label: "Score drag and drop", responseBaseTypes: ["score-patch", "mapping"] },
+    { id: "score-drag-drop", label: "Score drag and drop", responseBaseTypes: ["score-ast", "score-patch", "mapping"] },
     { id: "hotspot", label: "Hotspot", responseBaseTypes: ["identifier", "identifier-set"] },
     { id: "music-keyboard", label: "Music keyboard", responseBaseTypes: ["pitch", "pitch-set", "pitch-sequence", "midi-performance"] },
     { id: "notation-entry", label: "Notation entry", responseBaseTypes: ["score-ast", "score-patch"] },
