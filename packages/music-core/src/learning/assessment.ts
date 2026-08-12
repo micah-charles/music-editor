@@ -209,6 +209,20 @@ export function createDefaultAssessmentRegistry(): AssessmentStrategyRegistry {
     return { ratio: possible === 0 ? 0 : earned / possible, dimensions: { rubricPoints: earned, rubricMaximum: possible } };
   }));
 
+  registry.register(strategy("audio-recording@1", (value, context) => {
+    const record = isRecord(value) ? value : {};
+    const parameters = context.declaration.parameters ?? {};
+    const durationMs = Number(record.durationMs ?? 0);
+    const blobSize = Number(record.blobSize ?? 0);
+    const minimumDurationMs = Math.max(0, Number(parameters.minimumDurationMs ?? 1000));
+    const hasAudio = blobSize > 0 || record.recorded === true;
+    const durationRatio = durationMs >= minimumDurationMs ? 1 : durationMs / Math.max(1, minimumDurationMs);
+    return {
+      ratio: hasAudio ? durationRatio : 0,
+      dimensions: { durationMs, minimumDurationMs, hasAudio }
+    };
+  }));
+
   registry.register(strategy("composite-weighted@1", (value, context) => {
     const actual = isRecord(value) ? value : {};
     const parameters = context.declaration.parameters ?? {};

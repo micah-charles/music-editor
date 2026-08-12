@@ -44,4 +44,10 @@ describe("learning answer interaction", () => {
     expect(learningPanelSource).toContain("Start recording");
     expect(learningPanelSource).toContain("Submit performance");
   });
+
+  it("renders explicit local audio recording controls", () => {
+    expect(learningPanelSource).toContain('resolvedItem?.interaction.kind === "audio-recording"');
+    expect(learningPanelSource).toContain("Start recording");
+    expect(learningPanelSource).toContain("getUserMedia");
+  });
 });

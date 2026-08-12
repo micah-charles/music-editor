@@ -104,6 +104,7 @@ describe("FCMLIF learning engine", () => {
   it("registers and executes every required assessment strategy version", async () => {
     const registry = createDefaultAssessmentRegistry();
     expect(registry.ids()).toEqual([
+      "audio-recording@1",
       "composite-weighted@1",
       "exact-identifier@1",
       "identifier-set@1",
@@ -152,6 +153,7 @@ describe("FCMLIF learning engine", () => {
         { id: "phrasing", maximum: 1 }
       ]
     }).passed).toBe(true);
+    expect(run("audio-recording@1", { recorded: true, durationMs: 1500, blobSize: 100 }, undefined, { minimumDurationMs: 1000 }).passed).toBe(true);
 
     const runtime = new LearningRuntime();
     const sightItem = await runtime.resolveItem(
@@ -320,7 +322,7 @@ describe("FCMLIF learning engine", () => {
       readFileSync(new URL(`question-sets/${file}`, publicRoot), "utf8")
     ) as QuestionSet));
     expect(packs).toHaveLength(1);
-    expect(packs.flatMap(questionItems)).toHaveLength(18);
+    expect(packs.flatMap(questionItems)).toHaveLength(19);
     expect(packs[0].metadata.tags).toEqual(expect.arrayContaining(["abrsm-grade-8", "gcse"]));
     expect(questionItems(packs[0]).some((item) => item.metadata?.curriculumLevels &&
       (item.metadata.curriculumLevels as { abrsm?: string[] }).abrsm?.includes("Grade 8"))).toBe(true);

@@ -252,6 +252,7 @@ const strategyBaseTypes: Record<string, ResponseBaseType[]> = {
   "midi-performance@1": ["midi-performance"],
   "sight-reading@1": ["midi-performance"],
   "rubric@1": ["audio-recording", "score-ast"],
+  "audio-recording@1": ["audio-recording"],
   "composite-weighted@1": ["mapping", "ordering"]
 };
 

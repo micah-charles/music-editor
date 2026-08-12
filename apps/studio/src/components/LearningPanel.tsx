@@ -158,6 +158,8 @@ export function LearningPanel({
   const [notationPitches, setNotationPitches] = useState<string[]>([]);
   const [performanceRecording, setPerformanceRecording] = useState(false);
   const [performanceEvents, setPerformanceEvents] = useState<Array<{ midi: number; onsetMs: number; durationMs: number }>>([]);
+  const [audioRecording, setAudioRecording] = useState<{ durationMs: number; blobSize: number; recorded: boolean }>();
+  const [audioRecordingActive, setAudioRecordingActive] = useState(false);
   const [result, setResult] = useState<AssessmentResult>();
   const [attemptNumber, setAttemptNumber] = useState(1);
   const [hintVisible, setHintVisible] = useState(false);
@@ -177,6 +179,9 @@ export function LearningPanel({
   const submissionLockedRef = useRef(false);
   const rhythmStartRef = useRef<number>();
   const performanceStartRef = useRef<number>();
+  const audioRecorderRef = useRef<MediaRecorder>();
+  const audioChunksRef = useRef<Blob[]>([]);
+  const audioStartRef = useRef<number>();
 
   useEffect(() => {
     let cancelled = false;
@@ -307,8 +312,13 @@ export function LearningPanel({
     setNotationPitches([]);
     setPerformanceRecording(false);
     setPerformanceEvents([]);
+    setAudioRecording(undefined);
+    setAudioRecordingActive(false);
     rhythmStartRef.current = undefined;
     performanceStartRef.current = undefined;
+    audioRecorderRef.current = undefined;
+    audioChunksRef.current = [];
+    audioStartRef.current = undefined;
     submissionLockedRef.current = false;
     setAttemptNumber(1);
     setHintVisible(false);
@@ -464,6 +474,39 @@ export function LearningPanel({
     setPerformanceEvents([]);
     performanceStartRef.current = performance.now();
     setPerformanceRecording(true);
+  }
+
+  async function toggleAudioRecording() {
+    if (result || resolvedItem?.interaction.kind !== "audio-recording") return;
+    if (audioRecordingActive) {
+      audioRecorderRef.current?.stop();
+      setAudioRecordingActive(false);
+      return;
+    }
+    if (!navigator.mediaDevices?.getUserMedia || typeof MediaRecorder === "undefined") {
+      setLoadError("Audio recording is not supported in this browser.");
+      return;
+    }
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      const recorder = new MediaRecorder(stream);
+      audioChunksRef.current = [];
+      audioStartRef.current = performance.now();
+      recorder.ondataavailable = (event) => { if (event.data.size > 0) audioChunksRef.current.push(event.data); };
+      recorder.onstop = () => {
+        stream.getTracks().forEach((track) => track.stop());
+        const blobSize = audioChunksRef.current.reduce((total, chunk) => total + chunk.size, 0);
+        const durationMs = performance.now() - (audioStartRef.current ?? performance.now());
+        const recording = { durationMs, blobSize, recorded: true };
+        setAudioRecording(recording);
+        submit(recording, "audio-recording");
+      };
+      audioRecorderRef.current = recorder;
+      recorder.start();
+      setAudioRecordingActive(true);
+    } catch {
+      setLoadError("Microphone access was cancelled or unavailable.");
+    }
   }
 
   const notationEntryScore = useMemo(() => {
@@ -813,6 +856,20 @@ export function LearningPanel({
             </section>
           ) : null}
 
+          {resolvedItem?.interaction.kind === "audio-recording" ? (
+            <section className="learning-audio-recording" aria-label="Audio recording input">
+              <p>Record a short performance or spoken answer. The recording stays in this browser session.</p>
+              <div className="learning-audio-recording-status" aria-live="polite">
+                {audioRecordingActive ? "Recording… press stop when finished." : audioRecording ? `${Math.round(audioRecording.durationMs / 100) / 10}s recording captured` : "No recording yet"}
+              </div>
+              <div className="learning-audio-recording-actions">
+                <button type="button" className={audioRecordingActive ? "recording" : "primary"} disabled={Boolean(result)} onClick={() => { void toggleAudioRecording(); }}>{audioRecordingActive ? "Stop recording" : "Start recording"}</button>
+                {audioRecording ? <button type="button" disabled={Boolean(result)} onClick={() => setAudioRecording(undefined)}>Record again</button> : null}
+              </div>
+              <small>Minimum recording time: 1 second. Audio quality and musical criteria can be reviewed by a teacher.</small>
+            </section>
+          ) : null}
+
           {resolvedItem?.interaction.kind === "ordering" ? (
             <section className="learning-ordering" aria-label="Order the options">
               <p className="learning-ordering-instruction">Arrange the items from first to last.</p>
@@ -914,7 +971,7 @@ export function LearningPanel({
           <button type="button" disabled={sessionPosition === 0} onClick={() => moveQuestion(-1)}>← Previous</button>
           {!result ? (
             <span className="learning-choice-guidance">
-              {resolvedItem?.interaction.kind === "choice" ? "Choose an answer above" : resolvedItem?.interaction.kind === "text-entry" ? "Write an answer above" : resolvedItem?.interaction.kind === "numeric-entry" ? "Enter a number above" : resolvedItem?.interaction.kind === "matching" ? "Match the items above" : resolvedItem?.interaction.kind === "ordering" ? "Arrange the items above" : resolvedItem?.interaction.kind === "rhythm-tap" ? "Tap the rhythm above" : resolvedItem?.interaction.kind === "notation-entry" ? "Enter the notation above" : resolvedItem?.interaction.kind === "sight-reading" ? "Perform the phrase above" : "Complete the question above"}
+              {resolvedItem?.interaction.kind === "choice" ? "Choose an answer above" : resolvedItem?.interaction.kind === "text-entry" ? "Write an answer above" : resolvedItem?.interaction.kind === "numeric-entry" ? "Enter a number above" : resolvedItem?.interaction.kind === "matching" ? "Match the items above" : resolvedItem?.interaction.kind === "ordering" ? "Arrange the items above" : resolvedItem?.interaction.kind === "rhythm-tap" ? "Tap the rhythm above" : resolvedItem?.interaction.kind === "notation-entry" ? "Enter the notation above" : resolvedItem?.interaction.kind === "sight-reading" ? "Perform the phrase above" : resolvedItem?.interaction.kind === "audio-recording" ? "Record your response above" : "Complete the question above"}
             </span>
           ) : (
             <button type="button" className="primary" disabled={!result && currentAttemptState === "unanswered"} onClick={() => moveQuestion(1)}>

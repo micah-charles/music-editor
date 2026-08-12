@@ -312,6 +312,21 @@
           "feedback": { "mode": "after-submit", "correct": { "message": { "en-GB": "Good sight reading. Your pitch, rhythm and continuity were aligned." } }, "incorrect": { "message": { "en-GB": "Keep a steady pulse and check the opening pitches before trying again." } }, "showCorrectAnswer": "after-final-attempt" },
           "hints": [{ "id": "context-18-hint", "content": { "en-GB": "Scan the clef, opening pitch and rhythmic pattern before pressing Start recording." } }],
           "explanation": { "content": { "en-GB": "Sight-reading performance is assessed locally across pitch, rhythm, tempo and continuity." } }
+        },
+        {
+          "id": "context-19",
+          "type": "audio-recording",
+          "version": 1,
+          "metadata": { "skillIds": ["aural.features"], "conceptId": "aural.features.performance-response", "curriculumLevels": { "abrsm": ["Grade 5", "Grade 6"], "gcse": ["Foundation", "Higher"] }, "difficulty": 0.72, "tags": ["recording", "aural", "performance"] },
+          "variables": {},
+          "stimulus": [{ "id": "context-19-stimulus", "kind": "text", "content": { "en-GB": "Record yourself clapping or singing the four-beat rhythmic motif from the previous exercise." }, "accessibility": { "description": { "en-GB": "A prompt for a short learner audio recording." } } }],
+          "prompt": { "content": { "en-GB": "Make a short recording of your rhythmic response." }, "format": "plain-text" },
+          "interaction": { "kind": "audio-recording", "responseId": "context-19-response", "cardinality": "record", "inputMode": "microphone" },
+          "response": { "id": "context-19-response", "baseType": "audio-recording", "cardinality": "record", "correct": { "value": { "minimumDurationMs": 1000 } } },
+          "assessment": { "strategy": "audio-recording@1", "maximumScore": 1, "passingScore": 1, "parameters": { "minimumDurationMs": 1000 }, "attemptPolicy": { "maximumAttempts": 2, "scorePolicy": "best" } },
+          "feedback": { "mode": "after-submit", "correct": { "message": { "en-GB": "Recording captured. A teacher can review the musical quality separately." } }, "incorrect": { "message": { "en-GB": "Record for at least one second, then try again." } }, "showCorrectAnswer": "after-final-attempt" },
+          "hints": [{ "id": "context-19-hint", "content": { "en-GB": "Find a quiet space and keep the microphone close enough to hear the response." } }],
+          "explanation": { "content": { "en-GB": "The static-first recorder captures a local artifact and verifies duration; qualitative performance marking remains a teacher-led workflow." } }
         }
       ]
     }
