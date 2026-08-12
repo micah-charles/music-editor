@@ -16,7 +16,7 @@
 | Mastery engine | Complete | Evidence updates, bands, penalties and expanding intervals |
 | Review scheduler | Complete | Due and next-review selection |
 | v1 authored content migration | Complete | All 10 sets and 50 questions retained and validated |
-| Advanced authored contextual pack | Complete | 22 ABRSM Grade 3–8 / GCSE questions, including linked listening, written, numeric, ordering, matching, drag/drop, rhythm-tap, notation-entry, sight-reading, audio-recording, composition and score-correction response |
+| Advanced authored contextual pack | Complete | 24 ABRSM Grade 1–8 / GCSE questions, including linked listening, written, numeric, ordering, matching, drag/drop, hotspot, composite, rhythm-tap, notation-entry, sight-reading, audio-recording, composition and score-correction response |
 | Knowledge Graph home | Complete | 14 concepts, prerequisites, relationships, status colours, mastery rings and contextual navigation |
 | Today’s Practice | Complete | One adaptive primary action informed by mastery, review, mistakes, study time and curriculum |
 | Floating Knowledge Navigator | Complete | Persistent contextual flower on Home, lesson, overview and results |
@@ -44,10 +44,11 @@ optional input—not a backend dependency.
 ## Supported specialised interaction surface
 
 The first production student renderers are multiple choice, written text,
-numeric entry, ordering, matching, drag/drop, rhythm tapping, notation entry, sight-reading performance, audio recording, composition, score correction, and single-note piano/MIDI. Audio and notation
+numeric entry, ordering, matching, drag/drop, hotspot, composite, rhythm tapping, notation entry, sight-reading performance, audio recording, composition, score correction, and single-note piano/MIDI. Audio and notation
 stimuli reuse the existing player and score viewer. The domain model and assessment
-registry also retain generic hotspot and composite response contracts for later
-specialised renderers.
+The current generic interaction registry is now exercised across the authored
+pack; future work can add richer spatial drag/drop and teacher-authored rubric
+layouts without changing the static-first contracts.
 
 ## External work deliberately not simulated
 

@@ -274,6 +274,7 @@ export function LearningPanel({
     [currentItem]
   );
   const matchingSelections = isRecord(selectedResponse) ? selectedResponse : {};
+  const compositeSelections = isRecord(selectedResponse) ? selectedResponse : {};
 
   useEffect(() => {
     if (!focusedConceptId && knowledgeGraph.recommendedConceptId) {
@@ -724,8 +725,8 @@ export function LearningPanel({
             </section>
           ) : null}
 
-          {resolvedItem?.interaction.kind === "choice" ? (
-            <div className="learning-answer-grid" role="group" aria-label="Answer choices">
+          {resolvedItem?.interaction.kind === "choice" || resolvedItem?.interaction.kind === "hotspot" ? (
+            <div className={`learning-answer-grid ${resolvedItem.interaction.kind === "hotspot" ? "learning-hotspot-grid" : ""}`} role="group" aria-label={resolvedItem.interaction.kind === "hotspot" ? "Hotspot targets" : "Answer choices"}>
               {optionOrder.map((option, index) => {
                 const selected = selectedResponse === option.id;
                 const correct = result && option.id === resolvedItem.response.correct?.value;
@@ -781,6 +782,18 @@ export function LearningPanel({
                 <button type="submit" className="primary" disabled={Boolean(result) || !String(selectedResponse ?? "").trim()}>{resolvedItem.interaction.kind === "numeric-entry" ? "Submit number" : "Submit written response"}</button>
               </div>
             </form>
+          ) : null}
+
+          {resolvedItem?.interaction.kind === "composite" ? (
+            <section className="learning-composite" aria-label="Composite response criteria">
+              <p>Score each criterion, then submit the combined response.</p>
+              <div className="learning-composite-fields">
+                {compositeFields(currentItem?.interaction).map((field) => (
+                  <label key={field.id}><span>{field.label}</span><input type="number" min="0" max="1" step="0.1" value={String(compositeSelections[field.id] ?? "")} onChange={(event) => setSelectedResponse({ ...compositeSelections, [field.id]: Number(event.target.value) })} /></label>
+                ))}
+              </div>
+              <button type="button" className="primary" disabled={Boolean(result) || compositeFields(currentItem?.interaction).some((field) => compositeSelections[field.id] === undefined)} onClick={() => submit(compositeSelections, "composite")}>Submit composite response</button>
+            </section>
           ) : null}
 
           {resolvedItem?.interaction.kind === "matching" || resolvedItem?.interaction.kind === "drag-drop" ? (
@@ -1903,6 +1916,13 @@ function matchingOptions(value: unknown): Array<{ id: string; content: unknown }
   if (!Array.isArray(value)) return [];
   return value.filter((entry): entry is { id: string; content: unknown } =>
     isRecord(entry) && typeof entry.id === "string" && "content" in entry
+  );
+}
+
+function compositeFields(interaction: unknown): Array<{ id: string; label: string }> {
+  if (!isRecord(interaction) || !Array.isArray(interaction.fields)) return [];
+  return interaction.fields.filter((field): field is { id: string; label: string } =>
+    isRecord(field) && typeof field.id === "string" && typeof field.label === "string"
   );
 }
 

@@ -372,6 +372,34 @@
           "feedback": { "mode": "after-submit", "correct": { "message": { "en-GB": "Correct. Each instrument is assigned to its orchestral family." } }, "incorrect": { "message": { "en-GB": "Recall the sound-producing family: woodwind, strings or brass." } }, "showCorrectAnswer": "after-final-attempt" },
           "hints": [{ "id": "context-22-hint", "content": { "en-GB": "Flute uses a reedless air column, violin uses strings, and trumpet uses brass tubing." } }],
           "explanation": { "content": { "en-GB": "The accessible target-assignment surface is also suitable for drag-and-drop curriculum tasks." } }
+        },
+        {
+          "id": "context-23",
+          "type": "hotspot",
+          "version": 1,
+          "metadata": { "skillIds": ["symbols.music-signs"], "conceptId": "music-symbols.hotspot-identification", "curriculumLevels": { "abrsm": ["Grade 2", "Grade 3"], "gcse": ["Foundation"] }, "difficulty": 0.42, "tags": ["hotspot", "symbols"] },
+          "variables": {},
+          "stimulus": [{ "id": "context-23-stimulus", "kind": "music-symbol", "content": { "symbolId": "fermata" }, "accessibility": { "description": { "en-GB": "A fermata symbol." } } }],
+          "prompt": { "content": { "en-GB": "Select the target that names the displayed symbol." }, "format": "plain-text" },
+          "interaction": { "kind": "hotspot", "responseId": "context-23-response", "cardinality": "single", "options": [{ "id": "target-fermata", "content": { "en-GB": "Fermata" } }, { "id": "target-trill", "content": { "en-GB": "Trill" } }, { "id": "target-turn", "content": { "en-GB": "Turn" } }] },
+          "response": { "id": "context-23-response", "baseType": "identifier", "cardinality": "single", "correct": { "value": "target-fermata" } },
+          "assessment": { "strategy": "exact-identifier@1", "maximumScore": 1, "passingScore": 1 },
+          "feedback": { "mode": "after-submit", "correct": { "message": { "en-GB": "Correct. The fermata indicates a pause or hold." } }, "incorrect": { "message": { "en-GB": "Look for the pause symbol shaped like an eye." } } },
+          "explanation": { "content": { "en-GB": "Hotspot targets remain keyboard-accessible while preserving a focused visual-selection interaction." } }
+        },
+        {
+          "id": "context-24",
+          "type": "composite",
+          "version": 1,
+          "metadata": { "skillIds": ["musical-analysis.context"], "conceptId": "musical-analysis.composite-response", "curriculumLevels": { "abrsm": ["Grade 7", "Grade 8"], "gcse": ["Higher"] }, "difficulty": 0.94, "tags": ["composite", "analysis", "rubric"] },
+          "variables": {},
+          "stimulus": [{ "id": "context-24-stimulus", "kind": "text", "content": { "en-GB": "Rate the strength of your evidence for the excerpt's form and texture." }, "accessibility": { "description": { "en-GB": "A composite self-assessment of analytical criteria." } } }],
+          "prompt": { "content": { "en-GB": "Score each criterion from 0 (not shown) to 1 (strong evidence)." }, "format": "plain-text" },
+          "interaction": { "kind": "composite", "responseId": "context-24-response", "cardinality": "single", "fields": [{ "id": "form", "label": "Formal structure evidence" }, { "id": "texture", "label": "Texture evidence" }] },
+          "response": { "id": "context-24-response", "baseType": "mapping", "cardinality": "single", "correct": { "value": { "form": 1, "texture": 1 } } },
+          "assessment": { "strategy": "composite-weighted@1", "maximumScore": 1, "passingScore": 0.7, "parameters": { "components": [{ "responseId": "form", "weight": 0.5 }, { "responseId": "texture", "weight": 0.5 }] } },
+          "feedback": { "mode": "after-submit", "correct": { "message": { "en-GB": "Your combined evidence score has been recorded." } }, "incorrect": { "message": { "en-GB": "Use both formal and textural evidence in your analysis." } } },
+          "explanation": { "content": { "en-GB": "Composite responses combine multiple scored criteria into one transparent result." } }
         }
       ]
     }

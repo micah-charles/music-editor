@@ -62,4 +62,10 @@ describe("learning answer interaction", () => {
     expect(learningPanelSource).toContain('resolvedItem?.interaction.kind === "drag-drop"');
     expect(learningPanelSource).toContain("Submit {resolvedItem.interaction.kind === \"drag-drop\" ? \"assignments\" : \"matches\"}");
   });
+
+  it("renders hotspot and composite response controls", () => {
+    expect(learningPanelSource).toContain('resolvedItem?.interaction.kind === "hotspot"');
+    expect(learningPanelSource).toContain('resolvedItem?.interaction.kind === "composite"');
+    expect(learningPanelSource).toContain("Submit composite response");
+  });
 });

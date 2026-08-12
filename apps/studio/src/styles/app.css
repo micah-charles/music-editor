@@ -3299,6 +3299,45 @@ h3 {
   color: #4d46e5;
 }
 
+.learning-hotspot-grid button {
+  min-height: 3.2rem;
+  border-style: dashed;
+}
+
+.learning-composite {
+  display: grid;
+  gap: 0.75rem;
+  margin-top: 1rem;
+  padding: 1rem;
+  border: 1px solid var(--line, #dde1eb);
+  border-radius: 0.75rem;
+  background: var(--surface, #fff);
+}
+
+.learning-composite p {
+  margin: 0;
+  color: var(--muted, #6d7280);
+}
+
+.learning-composite-fields {
+  display: grid;
+  gap: 0.6rem;
+}
+
+.learning-composite-fields label {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 5rem;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.learning-composite-fields input {
+  width: 100%;
+  padding: 0.5rem;
+  border: 1px solid var(--line, #dde1eb);
+  border-radius: 0.45rem;
+}
+
 .learning-ordering-instruction {
   margin: 0;
   color: var(--muted, #6d7280);
