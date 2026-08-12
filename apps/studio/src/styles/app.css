@@ -2898,6 +2898,18 @@ h3 {
   text-transform: uppercase;
 }
 
+.learning-linked-question {
+  display: inline-flex;
+  margin-left: 8px;
+  padding: 3px 7px;
+  border-radius: 999px;
+  color: #227b8d;
+  background: #e7f7fa;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: .02em;
+}
+
 .learning-question-title h2 {
   margin: 6px 0 18px;
   font-size: clamp(20px, 2vw, 27px);

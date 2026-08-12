@@ -504,6 +504,11 @@ export function LearningPanel({
   const feedbackMessage = isRecord(feedback) ? localisedText(feedback.message, locale) : "";
   const currentAttemptState = itemAttemptState(selectedSet.id, currentItem.id, attempts);
   const isAdaptiveSession = selectedSet.id.startsWith("session-");
+  const linkedGroupId = String(currentItem.metadata?.linkedGroupId ?? "");
+  const linkedItems = linkedGroupId
+    ? allItems.filter((item) => item.metadata?.linkedGroupId === linkedGroupId)
+    : [];
+  const linkedPosition = linkedItems.findIndex((item) => item.id === currentItem.id);
 
   return (
     <div className="learning-ux3-shell">
@@ -552,6 +557,7 @@ export function LearningPanel({
         <main className="learning-question-card">
           <div className="learning-question-title">
             <span>Question {currentItemIndex + 1}</span>
+            {linkedItems.length > 1 ? <small className="learning-linked-question">Linked listening · Part {linkedPosition + 1} of {linkedItems.length}</small> : null}
             <h2>{localisedText(currentItem.prompt.content, locale)}</h2>
           </div>
 
