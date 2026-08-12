@@ -93,6 +93,66 @@
           "feedback": { "mode": "after-submit", "correct": { "message": { "en-GB": "Correct. V moving to vi interrupts the expected V–I resolution." } }, "incorrect": { "message": { "en-GB": "Check the destination chord: it is vi, not I." } }, "showCorrectAnswer": "after-final-attempt" },
           "hints": [{ "id": "context-04-hint", "content": { "en-GB": "An interrupted cadence substitutes vi for the expected tonic." } }],
           "explanation": { "content": { "en-GB": "The dominant is followed by the submediant, creating an interrupted cadence and redirecting the phrase." } }
+        },
+        {
+          "id": "context-05",
+          "type": "selected-response",
+          "version": 1,
+          "metadata": { "skillIds": ["musical-analysis.context"], "conceptId": "musical-analysis.context.roman-numerals", "curriculumLevels": { "abrsm": ["Grade 6", "Grade 7"], "gcse": ["Higher"] }, "difficulty": 0.84, "tags": ["roman-numerals", "harmony"] },
+          "variables": {},
+          "stimulus": [{ "id": "context-05-stimulus", "kind": "text", "content": { "en-GB": "In a major key, the bass moves scale degree 2 to 5 to 1 while the upper parts resolve by step into the tonic chord." }, "accessibility": { "description": { "en-GB": "A written description of a harmonic progression." } } }],
+          "prompt": { "content": { "en-GB": "Which Roman-numeral progression best matches the evidence?" }, "format": "plain-text" },
+          "interaction": { "kind": "choice", "responseId": "context-05-response", "cardinality": "single", "display": "buttons", "shuffleOptions": false, "options": [{ "id": "answer-ii-v-i", "content": { "en-GB": "ii–V–I" } }, { "id": "answer-iv-v-i", "content": { "en-GB": "iv–V–I" } }, { "id": "answer-vi-iv-i", "content": { "en-GB": "vi–IV–I" } }, { "id": "answer-i-v-vi", "content": { "en-GB": "I–V–vi" } }] },
+          "response": { "id": "context-05-response", "baseType": "identifier", "cardinality": "single", "correct": { "value": "answer-ii-v-i" } },
+          "assessment": { "strategy": "exact-identifier@1", "maximumScore": 1, "passingScore": 1, "attemptPolicy": { "maximumAttempts": 2, "scorePolicy": "best" } },
+          "feedback": { "mode": "after-submit", "correct": { "message": { "en-GB": "Correct. Scale degrees 2–5–1 in a major key give ii–V–I." } }, "incorrect": { "message": { "en-GB": "Translate each bass scale degree into the chord built on that degree." } }, "showCorrectAnswer": "after-final-attempt" },
+          "hints": [{ "id": "context-05-hint", "content": { "en-GB": "The chord on scale degree 2 is ii; the dominant is V." } }],
+          "explanation": { "content": { "en-GB": "This is a common tonal progression: ii prepares V, and V resolves to I." } }
+        },
+        {
+          "id": "context-06",
+          "type": "selected-response",
+          "version": 1,
+          "metadata": { "skillIds": ["musical-analysis.context"], "conceptId": "musical-analysis.context.modulation", "curriculumLevels": { "abrsm": ["Grade 7", "Grade 8"], "gcse": ["Higher"] }, "difficulty": 0.92, "tags": ["modulation", "pivot-chord"] },
+          "variables": {},
+          "stimulus": [{ "id": "context-06-stimulus", "kind": "text", "content": { "en-GB": "The music begins in C major. A D minor chord is first heard as ii, then followed by A7 and D minor becomes the new tonic." }, "accessibility": { "description": { "en-GB": "A written description of a modulation." } } }],
+          "prompt": { "content": { "en-GB": "Which new key is most strongly suggested?" }, "format": "plain-text" },
+          "interaction": { "kind": "choice", "responseId": "context-06-response", "cardinality": "single", "display": "buttons", "shuffleOptions": false, "options": [{ "id": "answer-d-minor", "content": { "en-GB": "D minor" } }, { "id": "answer-g-major", "content": { "en-GB": "G major" } }, { "id": "answer-a-minor", "content": { "en-GB": "A minor" } }, { "id": "answer-f-major", "content": { "en-GB": "F major" } }] },
+          "response": { "id": "context-06-response", "baseType": "identifier", "cardinality": "single", "correct": { "value": "answer-d-minor" } },
+          "assessment": { "strategy": "exact-identifier@1", "maximumScore": 1, "passingScore": 1, "attemptPolicy": { "maximumAttempts": 2, "scorePolicy": "best" } },
+          "feedback": { "mode": "after-submit", "correct": { "message": { "en-GB": "Correct. A7 resolves to D, and D minor is established as the new tonic." } }, "incorrect": { "message": { "en-GB": "Follow the dominant-to-tonic resolution created by A7." } }, "showCorrectAnswer": "after-final-attempt" },
+          "hints": [{ "id": "context-06-hint", "content": { "en-GB": "A7 is the dominant seventh of D, not of G or F." } }],
+          "explanation": { "content": { "en-GB": "The same D-minor sonority changes function: it begins as ii in C and becomes i after its dominant A7 is heard." } }
+        },
+        {
+          "id": "context-07",
+          "type": "selected-response",
+          "version": 1,
+          "metadata": { "skillIds": ["musical-analysis.context"], "conceptId": "musical-analysis.context.instrumentation", "curriculumLevels": { "gcse": ["Foundation", "Higher"], "abrsm": ["Grade 6"] }, "difficulty": 0.78, "tags": ["instrumentation", "listening"] },
+          "variables": {},
+          "stimulus": [{ "id": "context-07-stimulus", "kind": "text", "content": { "en-GB": "The excerpt features a sustained pedal tone, repeated arpeggiated figures and a bright, penetrating melodic line above the ensemble." }, "accessibility": { "description": { "en-GB": "A written description of instrumental features." } } }],
+          "prompt": { "content": { "en-GB": "Which listening strategy is strongest?" }, "format": "plain-text" },
+          "interaction": { "kind": "choice", "responseId": "context-07-response", "cardinality": "single", "display": "buttons", "shuffleOptions": false, "options": [{ "id": "answer-layer-evidence", "content": { "en-GB": "Identify layers by register, timbre and role" } }, { "id": "answer-guess-title", "content": { "en-GB": "Guess the title from tempo alone" } }, { "id": "answer-ignore-timbre", "content": { "en-GB": "Ignore timbre and count only beats" } }, { "id": "answer-assume-period", "content": { "en-GB": "Assign a period before listening" } }] },
+          "response": { "id": "context-07-response", "baseType": "identifier", "cardinality": "single", "correct": { "value": "answer-layer-evidence" } },
+          "assessment": { "strategy": "exact-identifier@1", "maximumScore": 1, "passingScore": 1, "attemptPolicy": { "maximumAttempts": 2, "scorePolicy": "best" } },
+          "feedback": { "mode": "after-submit", "correct": { "message": { "en-GB": "Correct. Reliable listening answers combine timbre, register and musical function." } }, "incorrect": { "message": { "en-GB": "Use observable aural evidence rather than guessing from one feature." } }, "showCorrectAnswer": "after-final-attempt" },
+          "hints": [{ "id": "context-07-hint", "content": { "en-GB": "Describe what each layer sounds like and what it does." } }],
+          "explanation": { "content": { "en-GB": "GCSE listening responses are strongest when they connect aural observations to musical roles, not when they rely on unsupported identification." } }
+        },
+        {
+          "id": "context-08",
+          "type": "selected-response",
+          "version": 1,
+          "metadata": { "skillIds": ["musical-analysis.form-texture"], "conceptId": "musical-analysis.form-texture.counterpoint", "curriculumLevels": { "abrsm": ["Grade 8"], "gcse": ["Higher"] }, "difficulty": 0.94, "tags": ["counterpoint", "texture"] },
+          "variables": {},
+          "stimulus": [{ "id": "context-08-stimulus", "kind": "text", "content": { "en-GB": "A subject enters in the alto, is answered in the soprano at the dominant, and later appears inverted in the bass while the other voices continue independently." }, "accessibility": { "description": { "en-GB": "A written description of contrapuntal writing." } } }],
+          "prompt": { "content": { "en-GB": "Which technique is most clearly described?" }, "format": "plain-text" },
+          "interaction": { "kind": "choice", "responseId": "context-08-response", "cardinality": "single", "display": "buttons", "shuffleOptions": false, "options": [{ "id": "answer-fugal", "content": { "en-GB": "Fugal/contrapuntal writing" } }, { "id": "answer-homophonic", "content": { "en-GB": "Chordal homophony" } }, { "id": "answer-heterophonic", "content": { "en-GB": "Heterophony" } }, { "id": "answer-drone", "content": { "en-GB": "Drone texture" } }] },
+          "response": { "id": "context-08-response", "baseType": "identifier", "cardinality": "single", "correct": { "value": "answer-fugal" } },
+          "assessment": { "strategy": "exact-identifier@1", "maximumScore": 1, "passingScore": 1, "attemptPolicy": { "maximumAttempts": 2, "scorePolicy": "best" } },
+          "feedback": { "mode": "after-submit", "correct": { "message": { "en-GB": "Correct. Subject, answer, inversion and independent voices are fugal clues." } }, "incorrect": { "message": { "en-GB": "Look for a recurring subject answered at the dominant." } }, "showCorrectAnswer": "after-final-attempt" },
+          "hints": [{ "id": "context-08-hint", "content": { "en-GB": "A subject answered in another voice is a key contrapuntal clue." } }],
+          "explanation": { "content": { "en-GB": "The description combines subject entries, an answer at the dominant and inversion—hallmarks of fugal contrapuntal technique." } }
         }
       ]
     }
