@@ -18,6 +18,7 @@ import {
   QuestionFamilyEngine,
   createDefaultQuestionFamilyRegistry,
   stableHash,
+  canonicalQuestionId,
   type QuestionFamilyRegistry
 } from "./questionFamilies";
 import type { LearningItem, QuestionSet } from "./types";
@@ -300,6 +301,9 @@ function authoredQuestion(
   const domain = String(metadata.domain ?? inferDomainFromConcept(conceptId)) as LearningDomain;
   const family = eligibleFamilies.find((candidate) => candidate.domain === domain) ?? eligibleFamilies[0];
   const instanceId = String(metadata.instanceId ?? item.id);
+  const generatorParameters = metadata.generatorParameters && typeof metadata.generatorParameters === "object" && !Array.isArray(metadata.generatorParameters)
+    ? metadata.generatorParameters as Record<string, unknown>
+    : undefined;
   return {
     familyId: String(metadata.familyId ?? family.id),
     domain,
@@ -308,8 +312,16 @@ function authoredQuestion(
     conceptId,
     variantId: String(metadata.variantId ?? `authored-${item.id}`),
     instanceId,
+    canonicalId: String(metadata.canonicalId ?? canonicalQuestionId(
+      String(metadata.familyId ?? family.id),
+      conceptId,
+      String(metadata.variantId ?? `authored-${item.id}`),
+      seed,
+      generatorParameters ?? {}
+    )),
     curriculum: family.curriculum,
     gradeMappings: family.gradeMappings,
+    generatorParameters,
     item: {
       ...structuredClone(item),
       metadata: {

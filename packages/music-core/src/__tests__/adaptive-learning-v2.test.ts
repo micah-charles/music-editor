@@ -11,6 +11,7 @@ import {
   createDefaultDistractorRegistry,
   createDefaultLearningActivity,
   createDefaultQuestionFamilyRegistry,
+  canonicalQuestionId,
   migrateQuestionSetsToActivity,
   normaliseQuestionBankSet,
   questionItems,
@@ -67,6 +68,13 @@ describe("adaptive learning v2", () => {
       expect(first.conceptId, familyId).toBeTruthy();
       expect(first.variantId, familyId).toBeTruthy();
       expect(first.instanceId, familyId).toBeTruthy();
+      expect(first.canonicalId, familyId).toBe(canonicalQuestionId(
+        first.familyId,
+        first.conceptId,
+        first.variantId,
+        first.seed,
+        first.generatorParameters
+      ));
       expect(engine.families.resolve(familyId).variantIds, familyId).toContain(first.variantId);
       const score = first.item.stimulus.find((stimulus) => stimulus.kind === "notation");
       expect(score?.source, familyId).toMatchObject({ mode: "inline-ast" });

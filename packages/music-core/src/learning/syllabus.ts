@@ -47,6 +47,7 @@ export interface SyllabusCoverageEntry {
   missingGeneratorFamilyIds: string[];
   missingAssessmentStrategyIds: string[];
   missingCurriculumLevels: Partial<Record<CurriculumId, string[]>>;
+  estimatedGeneratedInstances: number | "unbounded";
   curriculumLevels: Partial<Record<CurriculumId, string[]>>;
   status: "covered" | "partial" | "planned";
 }
@@ -169,7 +170,13 @@ export function syllabusCoverage(
       ? "planned"
       : missingGeneratorFamilyIds.length || missingAssessmentStrategyIds.length || Object.keys(missingCurriculumLevels).length
         ? "partial"
-        : "covered";
+      : "covered";
+    const familySizes = skill.generatorFamilyIds
+      .filter((id) => families.ids().includes(id))
+      .map((id) => estimateFamilyUniverse(families.resolve(id)));
+    const estimatedGeneratedInstances = familySizes.some((size) => size === "unbounded")
+      ? "unbounded"
+      : familySizes.reduce<number>((sum, size) => sum + Number(size), 0);
     return {
       skillId: skill.id,
       area: skill.area,
@@ -178,8 +185,23 @@ export function syllabusCoverage(
       missingGeneratorFamilyIds,
       missingAssessmentStrategyIds,
       missingCurriculumLevels,
+      estimatedGeneratedInstances,
       curriculumLevels: skill.curriculumLevels,
       status
     };
   });
+}
+
+function estimateFamilyUniverse(family: ReturnType<QuestionFamilyRegistry["resolve"]>): number | "unbounded" {
+  const parameterCount = Object.values(family.parameterSpace).reduce<number | "unbounded">((total, parameter) => {
+    if (total === "unbounded") return total;
+    if (parameter.type === "enum") return total * Math.max(1, parameter.values?.length ?? 0);
+    if (parameter.type === "integer" && parameter.minimum !== undefined && parameter.maximum !== undefined) {
+      return total * Math.max(1, parameter.maximum - parameter.minimum + 1);
+    }
+    if (parameter.type === "boolean") return total * 2;
+    return "unbounded";
+  }, 1);
+  if (parameterCount === "unbounded") return parameterCount;
+  return parameterCount * Math.max(1, family.variantIds.length) * Math.max(1, family.conceptIds.length);
 }

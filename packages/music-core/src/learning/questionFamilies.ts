@@ -81,6 +81,7 @@ export class QuestionFamilyEngine {
     const instanceId = `instance-${slug(familyId)}-${stableHash(seed).toString(16)}`;
     const variantId = definition.variantIds[stableHash(`${seed}:variant`) % definition.variantIds.length];
     const conceptId = definition.conceptIds[stableHash(`${seed}:concept`) % definition.conceptIds.length];
+    const canonicalId = canonicalQuestionId(familyId, conceptId, variantId, seed, blueprint.generatorParameters);
     const item = buildItem(
       definition,
       blueprint,
@@ -99,8 +100,10 @@ export class QuestionFamilyEngine {
       conceptId,
       variantId,
       instanceId,
+      canonicalId,
       curriculum: definition.curriculum,
       gradeMappings: definition.gradeMappings,
+      generatorParameters: blueprint.generatorParameters,
       item
     };
   }
@@ -588,6 +591,30 @@ export function stableHash(seed: string): number {
     hash = Math.imul(hash, 16777619);
   }
   return hash >>> 0;
+}
+
+export function canonicalQuestionId(
+  familyId: string,
+  conceptId: string,
+  variantId: string,
+  seed: string,
+  generatorParameters: Record<string, unknown> = {}
+): string {
+  return [
+    slug(familyId),
+    slug(conceptId),
+    slug(variantId),
+    `params-${stableHash(stableSerialize(generatorParameters)).toString(16)}`,
+    `seed-${stableHash(seed).toString(16)}`
+  ].join(":");
+}
+
+function stableSerialize(value: unknown): string {
+  if (Array.isArray(value)) return `[${value.map(stableSerialize).join(",")}]`;
+  if (value && typeof value === "object") {
+    return `{${Object.entries(value as Record<string, unknown>).sort(([left], [right]) => left.localeCompare(right)).map(([key, entry]) => `${JSON.stringify(key)}:${stableSerialize(entry)}`).join(",")}}`;
+  }
+  return JSON.stringify(value) ?? "null";
 }
 
 function slug(value: string): string {

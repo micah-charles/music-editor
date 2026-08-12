@@ -33,5 +33,6 @@ describe("curriculum syllabus matrix", () => {
     expect(coverage.find((entry) => entry.skillId === "pitch.note-reading")?.missingCurriculumLevels).toMatchObject({
       abrsm: ["Grade 2", "Grade 3", "Grade 4", "Grade 5", "Grade 6", "Grade 7", "Grade 8"]
     });
+    expect(coverage.find((entry) => entry.skillId === "pitch.note-reading")?.estimatedGeneratedInstances).toBeGreaterThan(0);
   });
 });

@@ -80,6 +80,13 @@ A seed plus family and parameters produces stable content and three traceable ID
 - `variantId`: the pedagogical form of the question;
 - `instanceId`: the exact deterministic generated instance.
 
+Generated items also expose `canonicalId`, which combines the versioned family,
+concept, pedagogical variant, stable generator-parameter hash and seed hash.
+The ID is safe to persist in attempt history and lets coverage tools distinguish
+the finite semantic universe from the learner's sampled instances. Syllabus
+coverage estimates the finite parameter universe where bounds are declared and
+reports `unbounded` when a family has an open numeric parameter.
+
 ## Trust boundaries
 
 - Imported JSON must pass diagnostics before use.

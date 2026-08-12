@@ -38,6 +38,7 @@ export interface QuestionIdentity {
   conceptId: string;
   variantId: string;
   instanceId: string;
+  canonicalId: string;
 }
 
 export interface GeneratedLearningQuestion extends QuestionIdentity {
@@ -48,6 +49,7 @@ export interface GeneratedLearningQuestion extends QuestionIdentity {
   bucket?: AdaptiveQuestionBucket;
   curriculum: CurriculumMapping[];
   gradeMappings: Partial<Record<CurriculumId, string[]>>;
+  generatorParameters?: Record<string, unknown>;
   item: LearningItem;
 }
 
