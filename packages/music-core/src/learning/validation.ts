@@ -245,6 +245,7 @@ const strategyBaseTypes: Record<string, ResponseBaseType[]> = {
   "pitch-match@1": ["pitch"],
   "pitch-set-match@1": ["pitch-set"],
   "pitch-sequence-match@1": ["pitch-sequence"],
+  "ordering@1": ["ordering"],
   "rhythm-alignment@1": ["rhythm", "midi-performance"],
   "score-semantic-diff@1": ["score-ast", "score-patch"],
   "midi-performance@1": ["midi-performance"],

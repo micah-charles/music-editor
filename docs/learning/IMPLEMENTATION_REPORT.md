@@ -16,7 +16,7 @@
 | Mastery engine | Complete | Evidence updates, bands, penalties and expanding intervals |
 | Review scheduler | Complete | Due and next-review selection |
 | v1 authored content migration | Complete | All 10 sets and 50 questions retained and validated |
-| Advanced authored contextual pack | Complete | 13 ABRSM Grade 6–8 / GCSE questions, including linked listening, written and numeric response |
+| Advanced authored contextual pack | Complete | 14 ABRSM Grade 6–8 / GCSE questions, including linked listening, written, numeric and ordering response |
 | Knowledge Graph home | Complete | 14 concepts, prerequisites, relationships, status colours, mastery rings and contextual navigation |
 | Today’s Practice | Complete | One adaptive primary action informed by mastery, review, mistakes, study time and curriculum |
 | Floating Knowledge Navigator | Complete | Persistent contextual flower on Home, lesson, overview and results |
@@ -43,10 +43,10 @@ optional input—not a backend dependency.
 
 ## Supported specialised interaction surface
 
-The first production student renderers are multiple choice, written text and
-numeric entry, and single-note piano/MIDI. Audio and notation stimuli reuse the
-existing player and score viewer. The domain model and assessment registry also
-retain matching, ordering, notation-entry, rhythm, recording, sight-reading,
+The first production student renderers are multiple choice, written text,
+numeric entry, ordering, and single-note piano/MIDI. Audio and notation stimuli
+reuse the existing player and score viewer. The domain model and assessment
+registry also retain matching, notation-entry, rhythm, recording, sight-reading,
 composition and composite response contracts for later specialised renderers.
 
 ## External work deliberately not simulated

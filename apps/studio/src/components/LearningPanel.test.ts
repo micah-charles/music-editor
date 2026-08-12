@@ -14,4 +14,10 @@ describe("learning answer interaction", () => {
     expect(learningPanelSource).not.toContain("Save answer");
     expect(learningPanelSource).toContain("Choose an answer above");
   });
+
+  it("renders a reorder-and-submit path for ordering questions", () => {
+    expect(learningPanelSource).toContain('resolvedItem?.interaction.kind === "ordering"');
+    expect(learningPanelSource).toContain("Submit order");
+    expect(learningPanelSource).toContain("moveOrderingOption");
+  });
 });

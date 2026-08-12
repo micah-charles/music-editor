@@ -244,6 +244,14 @@ export function LearningPanel({
       ? deterministicShuffle(options, String(currentItem.interaction.optionOrderSeed ?? currentItem.id))
       : options;
   }, [currentItem]);
+  const orderingOptionIds = useMemo(() => {
+    if (currentItem?.interaction.kind !== "ordering") return [];
+    const available = optionOrder.map((option) => option.id);
+    const selected = Array.isArray(selectedResponse)
+      ? selectedResponse.map(String).filter((id) => available.includes(id))
+      : [];
+    return [...selected, ...available.filter((id) => !selected.includes(id))];
+  }, [currentItem, optionOrder, selectedResponse]);
 
   useEffect(() => {
     if (!focusedConceptId && knowledgeGraph.recommendedConceptId) {
@@ -389,6 +397,17 @@ export function LearningPanel({
       submissionLockedRef.current = false;
       throw error;
     }
+  }
+
+  function moveOrderingOption(optionId: string, delta: -1 | 1) {
+    if (result || !resolvedItem || resolvedItem.interaction.kind !== "ordering") return;
+    const current = orderingOptionIds.length ? orderingOptionIds : optionOrder.map((option) => option.id);
+    const index = current.indexOf(optionId);
+    const nextIndex = index + delta;
+    if (index < 0 || nextIndex < 0 || nextIndex >= current.length) return;
+    const next = [...current];
+    [next[index], next[nextIndex]] = [next[nextIndex], next[index]];
+    setSelectedResponse(next);
   }
 
   function retry() {
@@ -646,6 +665,27 @@ export function LearningPanel({
             </form>
           ) : null}
 
+          {resolvedItem?.interaction.kind === "ordering" ? (
+            <section className="learning-ordering" aria-label="Order the options">
+              <p className="learning-ordering-instruction">Arrange the items from first to last.</p>
+              <ol>
+                {orderingOptionIds.map((optionId, index) => {
+                  const option = optionOrder.find((entry) => entry.id === optionId);
+                  if (!option) return null;
+                  return (
+                    <li key={option.id}>
+                      <span className="learning-ordering-index">{index + 1}</span>
+                      <span className="learning-ordering-label">{localisedText(option.content, locale)}</span>
+                      <button type="button" aria-label={`Move ${localisedText(option.content, locale)} up`} disabled={Boolean(result) || index === 0} onClick={() => moveOrderingOption(option.id, -1)}>↑</button>
+                      <button type="button" aria-label={`Move ${localisedText(option.content, locale)} down`} disabled={Boolean(result) || index === orderingOptionIds.length - 1} onClick={() => moveOrderingOption(option.id, 1)}>↓</button>
+                    </li>
+                  );
+                })}
+              </ol>
+              <button type="button" className="primary" disabled={Boolean(result)} onClick={() => submit(orderingOptionIds, "ordering")}>Submit order</button>
+            </section>
+          ) : null}
+
           {result ? (
             <div className={`learning-result-callout ${result.passed ? "correct" : "incorrect"} ${mode === "test" ? "test" : ""}`} role="status">
               <div className="learning-result-icon">{mode === "test" ? "✓" : result.passed ? "✓" : "↻"}</div>
@@ -726,7 +766,7 @@ export function LearningPanel({
           <button type="button" disabled={sessionPosition === 0} onClick={() => moveQuestion(-1)}>← Previous</button>
           {!result ? (
             <span className="learning-choice-guidance">
-              {resolvedItem?.interaction.kind === "choice" ? "Choose an answer above" : resolvedItem?.interaction.kind === "text-entry" ? "Write an answer above" : resolvedItem?.interaction.kind === "numeric-entry" ? "Enter a number above" : "Complete the question above"}
+              {resolvedItem?.interaction.kind === "choice" ? "Choose an answer above" : resolvedItem?.interaction.kind === "text-entry" ? "Write an answer above" : resolvedItem?.interaction.kind === "numeric-entry" ? "Enter a number above" : resolvedItem?.interaction.kind === "ordering" ? "Arrange the items above" : "Complete the question above"}
             </span>
           ) : (
             <button type="button" className="primary" disabled={!result && currentAttemptState === "unanswered"} onClick={() => moveQuestion(1)}>

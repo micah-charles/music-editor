@@ -237,6 +237,21 @@
           "feedback": { "mode": "after-submit", "correct": { "message": { "en-GB": "Correct. C to F♯ spans six semitones." } }, "incorrect": { "message": { "en-GB": "Count the chromatic steps from C to F♯." } }, "showCorrectAnswer": "after-final-attempt" },
           "hints": [{ "id": "context-13-hint", "content": { "en-GB": "C–C♯–D–D♯–E–F–F♯ is six semitones." } }],
           "explanation": { "content": { "en-GB": "Numeric entry is useful for precise interval and harmonic calculations in higher-level theory." } }
+        },
+        {
+          "id": "context-14",
+          "type": "ordering",
+          "version": 1,
+          "metadata": { "skillIds": ["musical-analysis.form-texture"], "conceptId": "musical-analysis.form-texture.sonata-process", "curriculumLevels": { "abrsm": ["Grade 8"], "gcse": ["Higher"] }, "difficulty": 0.95, "tags": ["ordering", "form", "written-answer"] },
+          "variables": {},
+          "stimulus": [{ "id": "context-14-stimulus", "kind": "text", "content": { "en-GB": "Think about the usual tonal process of a sonata-form exposition." }, "accessibility": { "description": { "en-GB": "A prompt about the order of sonata-form exposition events." } } }],
+          "prompt": { "content": { "en-GB": "Arrange these sonata-form exposition events from first to last." }, "format": "plain-text" },
+          "interaction": { "kind": "ordering", "responseId": "context-14-response", "cardinality": "ordered", "options": [{ "id": "event-primary", "content": { "en-GB": "Primary theme in the tonic" } }, { "id": "event-transition", "content": { "en-GB": "Transition" } }, { "id": "event-secondary", "content": { "en-GB": "Secondary theme in the dominant or relative major" } }, { "id": "event-closing", "content": { "en-GB": "Closing material" } }] },
+          "response": { "id": "context-14-response", "baseType": "ordering", "cardinality": "ordered", "correct": { "value": ["event-primary", "event-transition", "event-secondary", "event-closing"] } },
+          "assessment": { "strategy": "ordering@1", "maximumScore": 1, "passingScore": 1, "attemptPolicy": { "maximumAttempts": 2, "scorePolicy": "best" } },
+          "feedback": { "mode": "after-submit", "correct": { "message": { "en-GB": "Correct. The exposition moves from the tonic theme through transition to the contrasting theme and closing material." } }, "incorrect": { "message": { "en-GB": "Start with the tonic theme, then transition, contrasting theme and closing material." } }, "showCorrectAnswer": "after-final-attempt" },
+          "hints": [{ "id": "context-14-hint", "content": { "en-GB": "The transition connects the tonic opening to the contrasting second group." } }],
+          "explanation": { "content": { "en-GB": "Ordering tasks assess whether the learner understands formal process, not just isolated labels." } }
         }
       ]
     }

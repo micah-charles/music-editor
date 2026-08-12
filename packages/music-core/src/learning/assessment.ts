@@ -59,6 +59,19 @@ export function createDefaultAssessmentRegistry(): AssessmentStrategyRegistry {
     return { ratio: union === 0 ? 1 : overlap / union, dimensions: { matched: overlap, expected: expected.size } };
   }));
 
+  registry.register(strategy("ordering@1", (value, context) => {
+    const actual = Array.isArray(value) ? value.map(String) : [];
+    const expectedValue = context.response.correct?.value;
+    const expected = Array.isArray(expectedValue) ? expectedValue.map(String) : [];
+    if (expected.length === 0) return { ratio: actual.length === 0 ? 1 : 0 };
+    const compared = Math.min(actual.length, expected.length);
+    const inPosition = Array.from({ length: compared }, (_, index) => actual[index] === expected[index])
+      .filter(Boolean).length;
+    const lengthPenalty = Math.abs(actual.length - expected.length);
+    const ratio = Math.max(0, (inPosition - lengthPenalty) / expected.length);
+    return { ratio, dimensions: { inPosition, expected: expected.length } };
+  }));
+
   registry.register(strategy("normalised-text@1", (value, context) => {
     const parameters = context.declaration.parameters ?? {};
     const normalise = (item: unknown) => {
