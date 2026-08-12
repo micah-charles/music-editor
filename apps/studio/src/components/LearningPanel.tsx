@@ -1396,7 +1396,11 @@ function symbolGlyph(id: string): string {
     "half-note": "𝅗𝅥",
     "quarter-note": "♩",
     "eighth-note": "♪",
-    "dotted-half-note": "𝅗𝅥·"
+    "dotted-half-note": "𝅗𝅥·",
+    trill: "tr",
+    turn: "↻",
+    mordent: "≋",
+    "grace-note": "♬"
   };
   return glyphs[id] ?? "♪";
 }

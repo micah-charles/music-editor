@@ -182,6 +182,23 @@ function familyBlueprints(): FamilyBlueprint[] {
           hint: "Think about whether the mark changes duration, articulation, pitch, or expression."
         };
       }),
+    family("ornaments@1", "Ornaments", "music-symbols", "note-value-display@2", "curriculum-peers@1",
+      { symbol: enumeration("trill", "turn", "mordent", "grace-note") },
+      ["ornamentation"], ["ornaments"],
+      (seed, _difficulty, parameters) => {
+        const ornaments = ["trill", "turn", "mordent", "grace-note"];
+        const symbol = enumValue(parameters.symbol, ornaments, pick(seed, ornaments));
+        return {
+          correct: symbol,
+          candidates: ornaments,
+          prompt: "Which ornament is shown?",
+          generatorParameters: { pattern: ["quarter"], beats: 1 },
+          symbolId: symbol,
+          optionLabels: { "grace-note": "Grace note" },
+          explanation: "The symbol indicates a " + symbol.replaceAll("-", " ") + ".",
+          hint: "Look at the shape and position of the small marking above or beside the note."
+        };
+      }),
     family("note-values@2", "Note values", "note-values", "note-value-display@2", "near-neighbour@1",
       { duration: enumeration("whole", "half", "quarter", "eighth") },
       ["note-duration"], ["simple-values", "short-values"],
@@ -299,6 +316,22 @@ function familyBlueprints(): FamilyBlueprint[] {
           optionLabels: { "natural-minor": "natural minor", "harmonic-minor": "harmonic minor" },
           explanation: `The interval pattern identifies a ${mode.replaceAll("-", " ")} scale.`,
           hint: "Look especially at the third, sixth and seventh degrees."
+        };
+      }),
+    family("scale-degrees@1", "Scale degrees", "scales", "scale-display@2", "curriculum-peers@1",
+      { degree: integer(1, 7), mode: enumeration("major", "natural-minor") },
+      ["scale-degree"], ["degree-identification"],
+      (seed, _difficulty, parameters) => {
+        const degree = boundedInteger(parameters.degree, 1 + stableHash(seed) % 7, 1, 7);
+        const mode = enumValue(parameters.mode, ["major", "natural-minor"], "major");
+        const names = ["tonic", "supertonic", "mediant", "subdominant", "dominant", "submediant", "leading note/subtonic"];
+        return {
+          correct: names[degree - 1],
+          candidates: names,
+          prompt: "Which scale degree is highlighted?",
+          generatorParameters: { rootMidi: 60, mode },
+          explanation: "Scale degree " + degree + " is the " + names[degree - 1] + ".",
+          hint: "Count from the tonic as degree one, then name the scale position."
         };
       }),
     family("rhythm@2", "Rhythm", "rhythm", "rhythm-fragment@1", "near-neighbour@1",

@@ -92,7 +92,7 @@ export function createDefaultSyllabusMatrix(): SyllabusMatrix {
       { id: "keys-scales", title: "Keys & scales", skills: [
         generated("keys.key-signatures", "Key signatures", "keys-scales", "Recognise and construct major and minor key signatures.", ["key-signatures"], ["key-signatures@2"], ["exact-identifier@1"]),
         generated("scales.scale-types", "Scale types", "keys-scales", "Distinguish and construct major, natural-minor and harmonic-minor scales.", ["scales"], ["scales@2"], ["exact-identifier@1"]),
-        planned("scales.scale-degrees", "Scale degrees and relationships", "keys-scales", "Use tonic, dominant, relative and parallel relationships.", ["scales", "key-signatures"], ["exact-identifier@1"])
+        generated("scales.scale-degrees", "Scale degrees and relationships", "keys-scales", "Use tonic, dominant, relative and parallel relationships.", ["scales", "key-signatures"], ["scale-degrees@1"], ["exact-identifier@1"])
       ]},
       { id: "intervals", title: "Intervals", skills: [
         generated("intervals.written", "Written intervals", "intervals", "Identify interval number, quality, direction and compound form.", ["intervals"], ["intervals@2"], ["exact-identifier@1"]),
@@ -113,7 +113,7 @@ export function createDefaultSyllabusMatrix(): SyllabusMatrix {
       { id: "terms-signs", title: "Terms, signs & ornaments", skills: [
         generated("symbols.music-signs", "Music signs and symbols", "terms-signs", "Interpret articulation, expression and accidental symbols.", ["music-symbols"], ["music-symbols@2"], ["exact-identifier@1"]),
         generated("terms.tempo", "Tempo terms", "terms-signs", "Match tempo terminology to pulse and performance context.", ["tempo"], ["tempo@2"], ["exact-identifier@1"]),
-        planned("terms.ornaments", "Ornaments and instrumental directions", "terms-signs", "Interpret ornaments and common instrumental directions.", ["music-symbols"], ["exact-identifier@1"])
+        generated("terms.ornaments", "Ornaments and instrumental directions", "terms-signs", "Interpret ornaments and common instrumental directions.", ["music-symbols"], ["ornaments@1"], ["exact-identifier@1"])
       ]},
       { id: "melody-composition", title: "Melody & composition", skills: [
         planned("melody.phrase-structure", "Phrase structure and development", "melody-composition", "Recognise phrases, sequences, repetition and contrast.", ["melody-dictation"], ["rubric@1"]),
