@@ -83,7 +83,11 @@ export class AdaptiveSessionEngine {
     const eligibleAuthoredItems = activity.authoredItems.filter((item) => {
       const conceptId = String(item.metadata?.conceptId ?? "");
       const domain = String(item.metadata?.domain ?? inferDomainFromConcept(conceptId)) as LearningDomain;
-      return eligibleDomains.has(domain);
+      if (!eligibleDomains.has(domain)) return false;
+      const curriculumLevels = item.metadata?.curriculumLevels;
+      if (!preferences.level || !isRecord(curriculumLevels)) return true;
+      const allowedLevels = curriculumLevels[preferences.curriculumId];
+      return !Array.isArray(allowedLevels) || allowedLevels.includes(preferences.level);
     });
     const authoredCount = Math.min(
       eligibleAuthoredItems.length,
@@ -392,4 +396,8 @@ function levelDifficulty(
     : undefined;
   if (configured === undefined) return bucketDifficulty(bucket);
   return Math.max(0.05, Math.min(0.98, configured + (bucketDifficulty(bucket) - 0.45) * 0.25));
+}
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
 }

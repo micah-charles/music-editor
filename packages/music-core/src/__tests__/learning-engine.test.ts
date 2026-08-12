@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { readFileSync } from "node:fs";
 import {
+  AdaptiveLearningRuntime,
   LearningRuntime,
   calculateSetProgress,
   categoriesForSet,
@@ -326,6 +327,16 @@ describe("FCMLIF learning engine", () => {
     const activity = migrateQuestionSetsToActivity(packs);
     expect(activity.authoredItems.every((item) => item.metadata?.domain === "error-detection")).toBe(true);
     expect(activity.authoredItems.some((item) => item.metadata?.conceptId === "musical-analysis.context.modulation")).toBe(true);
+    activity.sessionPolicy.authoredItemShare = 1;
+    const adaptiveRuntime = new AdaptiveLearningRuntime(activity);
+    const foundation = adaptiveRuntime.start(activity, { mastery: [], recentConceptIds: [], recentInteractionKinds: [], sessionHistory: [] }, {
+      curriculumId: "abrsm", level: "Grade 1", domains: ["error-detection"], questionCount: 1
+    }, "authored-grade-filter-foundation");
+    const advanced = adaptiveRuntime.start(activity, { mastery: [], recentConceptIds: [], recentInteractionKinds: [], sessionHistory: [] }, {
+      curriculumId: "abrsm", level: "Grade 8", domains: ["error-detection"], questionCount: 1
+    }, "authored-grade-filter-advanced");
+    expect(foundation.questions[0]?.source).toBe("generated");
+    expect(advanced.questions[0]?.source).toBe("authored");
   });
 
   it("calculates resumable progress and category filtering for the catalogue", () => {
