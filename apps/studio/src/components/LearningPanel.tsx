@@ -510,7 +510,7 @@ export function LearningPanel({
   }
 
   const notationEntryScore = useMemo(() => {
-    if (resolvedItem?.interaction.kind !== "notation-entry" || notationPitches.length === 0) return undefined;
+    if ((resolvedItem?.interaction.kind !== "notation-entry" && resolvedItem?.interaction.kind !== "composition") || notationPitches.length === 0) return undefined;
     const events: MusicEvent[] = notationPitches.map((pitch, index) => ({
       id: `learning-entry-${index + 1}`,
       type: "note",
@@ -815,9 +815,9 @@ export function LearningPanel({
             </section>
           ) : null}
 
-          {resolvedItem?.interaction.kind === "notation-entry" ? (
-            <section className="learning-notation-entry" aria-label="Notation entry input">
-              <p>Build the answer one note at a time using the piano or your MIDI keyboard.</p>
+          {resolvedItem?.interaction.kind === "notation-entry" || resolvedItem?.interaction.kind === "composition" ? (
+            <section className="learning-notation-entry" aria-label={resolvedItem.interaction.kind === "composition" ? "Composition input" : "Notation entry input"}>
+              <p>{resolvedItem.interaction.kind === "composition" ? "Compose a short motif one note at a time using the piano or your MIDI keyboard." : "Build the answer one note at a time using the piano or your MIDI keyboard."}</p>
               <div className="learning-notation-entry-preview" aria-live="polite">
                 {notationPitches.length ? notationPitches.map((pitch, index) => <span key={`${pitch}-${index}`}>{pitch}</span>) : <em>No notes entered yet</em>}
               </div>
@@ -831,7 +831,7 @@ export function LearningPanel({
               <div className="learning-notation-entry-actions">
                 <button type="button" disabled={Boolean(result) || notationPitches.length === 0} onClick={() => setNotationPitches((current) => current.slice(0, -1))}>Undo note</button>
                 <button type="button" disabled={Boolean(result) || notationPitches.length === 0} onClick={() => { setNotationPitches([]); }}>Clear</button>
-                <button type="button" className="primary" disabled={Boolean(result) || !notationEntryScore} onClick={() => submit(notationEntryScore, "notation-entry")}>Submit notation</button>
+                <button type="button" className="primary" disabled={Boolean(result) || !notationEntryScore} onClick={() => submit(notationEntryScore, resolvedItem.interaction.kind)}>{resolvedItem.interaction.kind === "composition" ? "Submit composition" : "Submit notation"}</button>
               </div>
             </section>
           ) : null}
@@ -971,7 +971,7 @@ export function LearningPanel({
           <button type="button" disabled={sessionPosition === 0} onClick={() => moveQuestion(-1)}>← Previous</button>
           {!result ? (
             <span className="learning-choice-guidance">
-              {resolvedItem?.interaction.kind === "choice" ? "Choose an answer above" : resolvedItem?.interaction.kind === "text-entry" ? "Write an answer above" : resolvedItem?.interaction.kind === "numeric-entry" ? "Enter a number above" : resolvedItem?.interaction.kind === "matching" ? "Match the items above" : resolvedItem?.interaction.kind === "ordering" ? "Arrange the items above" : resolvedItem?.interaction.kind === "rhythm-tap" ? "Tap the rhythm above" : resolvedItem?.interaction.kind === "notation-entry" ? "Enter the notation above" : resolvedItem?.interaction.kind === "sight-reading" ? "Perform the phrase above" : resolvedItem?.interaction.kind === "audio-recording" ? "Record your response above" : "Complete the question above"}
+              {resolvedItem?.interaction.kind === "choice" ? "Choose an answer above" : resolvedItem?.interaction.kind === "text-entry" ? "Write an answer above" : resolvedItem?.interaction.kind === "numeric-entry" ? "Enter a number above" : resolvedItem?.interaction.kind === "matching" ? "Match the items above" : resolvedItem?.interaction.kind === "ordering" ? "Arrange the items above" : resolvedItem?.interaction.kind === "rhythm-tap" ? "Tap the rhythm above" : resolvedItem?.interaction.kind === "notation-entry" ? "Enter the notation above" : resolvedItem?.interaction.kind === "composition" ? "Compose the answer above" : resolvedItem?.interaction.kind === "sight-reading" ? "Perform the phrase above" : resolvedItem?.interaction.kind === "audio-recording" ? "Record your response above" : "Complete the question above"}
             </span>
           ) : (
             <button type="button" className="primary" disabled={!result && currentAttemptState === "unanswered"} onClick={() => moveQuestion(1)}>

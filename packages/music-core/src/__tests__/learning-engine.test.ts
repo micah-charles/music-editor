@@ -322,7 +322,7 @@ describe("FCMLIF learning engine", () => {
       readFileSync(new URL(`question-sets/${file}`, publicRoot), "utf8")
     ) as QuestionSet));
     expect(packs).toHaveLength(1);
-    expect(packs.flatMap(questionItems)).toHaveLength(19);
+    expect(packs.flatMap(questionItems)).toHaveLength(20);
     expect(packs[0].metadata.tags).toEqual(expect.arrayContaining(["abrsm-grade-8", "gcse"]));
     expect(questionItems(packs[0]).some((item) => item.metadata?.curriculumLevels &&
       (item.metadata.curriculumLevels as { abrsm?: string[] }).abrsm?.includes("Grade 8"))).toBe(true);

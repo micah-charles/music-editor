@@ -37,6 +37,7 @@ describe("learning answer interaction", () => {
     expect(learningPanelSource).toContain('resolvedItem?.interaction.kind === "notation-entry"');
     expect(learningPanelSource).toContain("Submit notation");
     expect(learningPanelSource).toContain("createScoreFromEvents");
+    expect(learningPanelSource).toContain("Submit composition");
   });
 
   it("renders sight-reading performance capture controls", () => {

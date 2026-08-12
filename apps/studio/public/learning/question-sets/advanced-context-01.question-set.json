@@ -327,6 +327,21 @@
           "feedback": { "mode": "after-submit", "correct": { "message": { "en-GB": "Recording captured. A teacher can review the musical quality separately." } }, "incorrect": { "message": { "en-GB": "Record for at least one second, then try again." } }, "showCorrectAnswer": "after-final-attempt" },
           "hints": [{ "id": "context-19-hint", "content": { "en-GB": "Find a quiet space and keep the microphone close enough to hear the response." } }],
           "explanation": { "content": { "en-GB": "The static-first recorder captures a local artifact and verifies duration; qualitative performance marking remains a teacher-led workflow." } }
+        },
+        {
+          "id": "context-20",
+          "type": "composition",
+          "version": 1,
+          "metadata": { "skillIds": ["melody.completion"], "conceptId": "melody.composition.short-motif", "curriculumLevels": { "abrsm": ["Grade 5", "Grade 6"], "gcse": ["Foundation", "Higher"] }, "difficulty": 0.8, "tags": ["composition", "melody", "score-entry"] },
+          "variables": {},
+          "stimulus": [{ "id": "context-20-stimulus", "kind": "text", "content": { "en-GB": "Create a four-note C-major motif that rises by step, then leaps to G4." }, "accessibility": { "description": { "en-GB": "A short melody-composition prompt." } } }],
+          "prompt": { "content": { "en-GB": "Compose the four-note motif C4–D4–E4–G4." }, "format": "plain-text" },
+          "interaction": { "kind": "composition", "responseId": "context-20-response", "cardinality": "single", "mode": "melody" },
+          "response": { "id": "context-20-response", "baseType": "score-ast", "cardinality": "single", "correct": { "value": { "type": "FoxChildMusicScore", "schemaVersion": "2.0", "id": "context-20-answer", "metadata": { "title": "Context 20 answer", "source": "manual" }, "global": { "key": { "tonic": "C", "mode": "major" }, "timeSignature": { "beats": 4, "beatType": 4 }, "tempo": { "bpm": 90 } }, "parts": [{ "id": "melody", "name": "Melody", "instrument": { "name": "Piano", "midiProgram": 1 }, "clef": "treble", "measures": [{ "number": 1, "events": [{ "id": "n1", "type": "note", "pitch": { "step": "C", "octave": 4 }, "duration": { "value": "quarter", "beats": 1 } }, { "id": "n2", "type": "note", "pitch": { "step": "D", "octave": 4 }, "duration": { "value": "quarter", "beats": 1 } }, { "id": "n3", "type": "note", "pitch": { "step": "E", "octave": 4 }, "duration": { "value": "quarter", "beats": 1 } }, { "id": "n4", "type": "note", "pitch": { "step": "G", "octave": 4 }, "duration": { "value": "quarter", "beats": 1 } }] }] }] } } },
+          "assessment": { "strategy": "score-semantic-diff@1", "maximumScore": 1, "passingScore": 0.9, "parameters": { "pitchWeight": 1, "rhythmWeight": 0 }, "attemptPolicy": { "maximumAttempts": 2, "scorePolicy": "best" } },
+          "feedback": { "mode": "after-submit", "correct": { "message": { "en-GB": "Your motif matches the requested contour and leap." } }, "incorrect": { "message": { "en-GB": "Check the four pitches: three ascending notes followed by a leap to G4." } }, "showCorrectAnswer": "after-final-attempt" },
+          "hints": [{ "id": "context-20-hint", "content": { "en-GB": "Enter C4, D4, E4 and finish on G4." } }],
+          "explanation": { "content": { "en-GB": "Composition responses use the same canonical score AST as Score Lab and can be extended to rubric-based teacher review." } }
         }
       ]
     }
