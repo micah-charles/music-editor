@@ -16,11 +16,11 @@
 | Mastery engine | Complete | Evidence updates, bands, penalties and expanding intervals |
 | Review scheduler | Complete | Due and next-review selection |
 | v1 authored content migration | Complete | All 10 sets and 50 questions retained and validated |
-| Advanced authored contextual pack | Complete | 12 ABRSM Grade 6–8 / GCSE questions, including linked listening and written response |
+| Advanced authored contextual pack | Complete | 13 ABRSM Grade 6–8 / GCSE questions, including linked listening, written and numeric response |
 | Knowledge Graph home | Complete | 14 concepts, prerequisites, relationships, status colours, mastery rings and contextual navigation |
 | Today’s Practice | Complete | One adaptive primary action informed by mastery, review, mistakes, study time and curriculum |
 | Floating Knowledge Navigator | Complete | Persistent contextual flower on Home, lesson, overview and results |
-| Student question runner | Complete | Choice, text entry, piano/MIDI, compact notation/audio, feedback and navigator |
+| Student question runner | Complete | Choice, text/numeric entry, piano/MIDI, compact notation/audio, feedback and navigator |
 | Lesson workspace | Complete | Breadcrumb/search, question, live graph, current skill and bottom session dock |
 | Score Lab bridge | Complete | Generated notation/audio examples open in Score Lab without modifying the project |
 | Automatic resume | Complete | Generated session draft is restored after reload and cleared on completion |

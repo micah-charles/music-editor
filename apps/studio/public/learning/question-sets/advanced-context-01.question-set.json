@@ -222,6 +222,21 @@
           "feedback": { "mode": "after-submit", "correct": { "message": { "en-GB": "Correct. Harmonic arrival is stronger evidence of cadence than dynamics or register alone." } }, "incorrect": { "message": { "en-GB": "Listen for a functional harmonic arrival, not only a change in sound colour." } }, "showCorrectAnswer": "after-final-attempt" },
           "hints": [{ "id": "context-12-hint", "content": { "en-GB": "Cadence evidence comes from harmonic function and resolution." } }],
           "explanation": { "content": { "en-GB": "This linked question asks for a specific analytical claim supported by the shared recording." } }
+        },
+        {
+          "id": "context-13",
+          "type": "numeric-entry",
+          "version": 1,
+          "metadata": { "skillIds": ["musical-analysis.context"], "conceptId": "musical-analysis.context.interval-analysis", "curriculumLevels": { "abrsm": ["Grade 6", "Grade 7"], "gcse": ["Higher"] }, "difficulty": 0.8, "tags": ["numeric", "intervals", "written-answer"] },
+          "variables": {},
+          "stimulus": [{ "id": "context-13-stimulus", "kind": "text", "content": { "en-GB": "A melodic line rises from C4 to F♯4." }, "accessibility": { "description": { "en-GB": "A written description of an ascending interval." } } }],
+          "prompt": { "content": { "en-GB": "How many semitones does the interval span?" }, "format": "plain-text" },
+          "interaction": { "kind": "numeric-entry", "responseId": "context-13-response", "cardinality": "single", "inputMode": "numeric", "min": 0, "max": 24 },
+          "response": { "id": "context-13-response", "baseType": "number", "cardinality": "single", "correct": { "value": 6 } },
+          "assessment": { "strategy": "numeric-tolerance@1", "maximumScore": 1, "passingScore": 1, "parameters": { "target": 6, "fullCreditTolerance": 0, "absoluteTolerance": 0 }, "attemptPolicy": { "maximumAttempts": 2, "scorePolicy": "best" } },
+          "feedback": { "mode": "after-submit", "correct": { "message": { "en-GB": "Correct. C to F♯ spans six semitones." } }, "incorrect": { "message": { "en-GB": "Count the chromatic steps from C to F♯." } }, "showCorrectAnswer": "after-final-attempt" },
+          "hints": [{ "id": "context-13-hint", "content": { "en-GB": "C–C♯–D–D♯–E–F–F♯ is six semitones." } }],
+          "explanation": { "content": { "en-GB": "Numeric entry is useful for precise interval and harmonic calculations in higher-level theory." } }
         }
       ]
     }

@@ -628,20 +628,20 @@ export function LearningPanel({
             </div>
           ) : null}
 
-          {resolvedItem?.interaction.kind === "text-entry" ? (
-            <form className="learning-text-entry" onSubmit={(event) => { event.preventDefault(); if (!result && String(selectedResponse ?? "").trim()) submit(selectedResponse, "text-entry"); }}>
-              <label htmlFor="learning-written-answer">Written answer</label>
+          {resolvedItem?.interaction.kind === "text-entry" || resolvedItem?.interaction.kind === "numeric-entry" ? (
+            <form className="learning-text-entry" onSubmit={(event) => { event.preventDefault(); if (!result && String(selectedResponse ?? "").trim()) submit(selectedResponse, resolvedItem.interaction.kind); }}>
+              <label htmlFor="learning-written-answer">{resolvedItem.interaction.kind === "numeric-entry" ? "Numeric answer" : "Written answer"}</label>
               <div>
                 <input
                   id="learning-written-answer"
-                  type="text"
-                  value={typeof selectedResponse === "string" ? selectedResponse : ""}
+                  type={resolvedItem.interaction.kind === "numeric-entry" ? "number" : "text"}
+                  value={selectedResponse === undefined ? "" : String(selectedResponse)}
                   disabled={Boolean(result)}
                   autoComplete="off"
-                  onChange={(event) => setSelectedResponse(event.target.value)}
-                  placeholder="Type your answer"
+                  onChange={(event) => setSelectedResponse(resolvedItem.interaction.kind === "numeric-entry" && event.target.value !== "" ? Number(event.target.value) : event.target.value)}
+                  placeholder={resolvedItem.interaction.kind === "numeric-entry" ? "Enter a number" : "Type your answer"}
                 />
-                <button type="submit" className="primary" disabled={Boolean(result) || !String(selectedResponse ?? "").trim()}>Submit written response</button>
+                <button type="submit" className="primary" disabled={Boolean(result) || !String(selectedResponse ?? "").trim()}>{resolvedItem.interaction.kind === "numeric-entry" ? "Submit number" : "Submit written response"}</button>
               </div>
             </form>
           ) : null}
@@ -726,7 +726,7 @@ export function LearningPanel({
           <button type="button" disabled={sessionPosition === 0} onClick={() => moveQuestion(-1)}>← Previous</button>
           {!result ? (
             <span className="learning-choice-guidance">
-              {resolvedItem?.interaction.kind === "choice" ? "Choose an answer above" : resolvedItem?.interaction.kind === "text-entry" ? "Write an answer above" : "Complete the question above"}
+              {resolvedItem?.interaction.kind === "choice" ? "Choose an answer above" : resolvedItem?.interaction.kind === "text-entry" ? "Write an answer above" : resolvedItem?.interaction.kind === "numeric-entry" ? "Enter a number above" : "Complete the question above"}
             </span>
           ) : (
             <button type="button" className="primary" disabled={!result && currentAttemptState === "unanswered"} onClick={() => moveQuestion(1)}>
