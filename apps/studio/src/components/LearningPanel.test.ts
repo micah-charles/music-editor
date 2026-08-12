@@ -23,7 +23,7 @@ describe("learning answer interaction", () => {
 
   it("renders selectable pair assignments for matching questions", () => {
     expect(learningPanelSource).toContain('resolvedItem?.interaction.kind === "matching"');
-    expect(learningPanelSource).toContain("Submit matches");
+    expect(learningPanelSource).toContain("Submit {resolvedItem.interaction.kind === \"drag-drop\" ? \"assignments\" : \"matches\"}");
     expect(learningPanelSource).toContain("matchingOptions");
   });
 
@@ -56,5 +56,10 @@ describe("learning answer interaction", () => {
     expect(learningPanelSource).toContain('resolvedItem?.interaction.kind === "score-drag-drop"');
     expect(learningPanelSource).toContain("Submit correction");
     expect(learningPanelSource).toContain("adjustLearningScorePitch");
+  });
+
+  it("renders target assignment for drag-drop questions", () => {
+    expect(learningPanelSource).toContain('resolvedItem?.interaction.kind === "drag-drop"');
+    expect(learningPanelSource).toContain("Submit {resolvedItem.interaction.kind === \"drag-drop\" ? \"assignments\" : \"matches\"}");
   });
 });

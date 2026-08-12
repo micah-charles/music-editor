@@ -357,6 +357,21 @@
           "feedback": { "mode": "after-submit", "correct": { "message": { "en-GB": "Correct. The raised second note was returned to D natural." } }, "incorrect": { "message": { "en-GB": "Select the note with the accidental and lower it by one semitone." } }, "showCorrectAnswer": "after-final-attempt" },
           "hints": [{ "id": "context-21-hint", "content": { "en-GB": "The second note is D sharp; lower it once to D natural." } }],
           "explanation": { "content": { "en-GB": "Score correction provides a focused local edit path before semantic score comparison." } }
+        },
+        {
+          "id": "context-22",
+          "type": "drag-drop",
+          "version": 1,
+          "metadata": { "skillIds": ["score.instruments"], "conceptId": "score.instruments.family-sort", "curriculumLevels": { "abrsm": ["Grade 3", "Grade 4", "Grade 5"], "gcse": ["Foundation"] }, "difficulty": 0.62, "tags": ["drag-drop", "instruments", "score-reading"] },
+          "variables": {},
+          "stimulus": [{ "id": "context-22-stimulus", "kind": "text", "content": { "en-GB": "Place each instrument in its correct family." }, "accessibility": { "description": { "en-GB": "A drag and drop instrument-family sorting task." } } }],
+          "prompt": { "content": { "en-GB": "Assign each instrument to the correct family target." }, "format": "plain-text" },
+          "interaction": { "kind": "drag-drop", "responseId": "context-22-response", "cardinality": "single", "options": [{ "id": "instrument-flute", "content": { "en-GB": "Flute" } }, { "id": "instrument-violin", "content": { "en-GB": "Violin" } }, { "id": "instrument-trumpet", "content": { "en-GB": "Trumpet" } }], "matchOptions": [{ "id": "family-woodwind", "content": { "en-GB": "Woodwind" } }, { "id": "family-strings", "content": { "en-GB": "Strings" } }, { "id": "family-brass", "content": { "en-GB": "Brass" } }] },
+          "response": { "id": "context-22-response", "baseType": "mapping", "cardinality": "single", "correct": { "value": { "instrument-flute": "family-woodwind", "instrument-violin": "family-strings", "instrument-trumpet": "family-brass" } } },
+          "assessment": { "strategy": "matching@1", "maximumScore": 1, "passingScore": 1, "attemptPolicy": { "maximumAttempts": 2, "scorePolicy": "best" } },
+          "feedback": { "mode": "after-submit", "correct": { "message": { "en-GB": "Correct. Each instrument is assigned to its orchestral family." } }, "incorrect": { "message": { "en-GB": "Recall the sound-producing family: woodwind, strings or brass." } }, "showCorrectAnswer": "after-final-attempt" },
+          "hints": [{ "id": "context-22-hint", "content": { "en-GB": "Flute uses a reedless air column, violin uses strings, and trumpet uses brass tubing." } }],
+          "explanation": { "content": { "en-GB": "The accessible target-assignment surface is also suitable for drag-and-drop curriculum tasks." } }
         }
       ]
     }

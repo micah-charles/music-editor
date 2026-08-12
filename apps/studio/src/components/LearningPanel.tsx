@@ -449,7 +449,7 @@ export function LearningPanel({
   }
 
   function selectMatchingTarget(leftId: string, targetId: string) {
-    if (result || resolvedItem?.interaction.kind !== "matching") return;
+    if (result || (resolvedItem?.interaction.kind !== "matching" && resolvedItem?.interaction.kind !== "drag-drop")) return;
     setSelectedResponse({ ...matchingSelections, [leftId]: targetId });
   }
 
@@ -783,9 +783,9 @@ export function LearningPanel({
             </form>
           ) : null}
 
-          {resolvedItem?.interaction.kind === "matching" ? (
-            <section className="learning-matching" aria-label="Match each item">
-              <p className="learning-matching-instruction">Match each item on the left with one answer.</p>
+          {resolvedItem?.interaction.kind === "matching" || resolvedItem?.interaction.kind === "drag-drop" ? (
+            <section className="learning-matching" aria-label={resolvedItem.interaction.kind === "drag-drop" ? "Drag each item to a target" : "Match each item"}>
+              <p className="learning-matching-instruction">{resolvedItem.interaction.kind === "drag-drop" ? "Assign each item to its drop target." : "Match each item on the left with one answer."}</p>
               <div className="learning-matching-list">
                 {optionOrder.map((left) => (
                   <label key={left.id}>
@@ -806,8 +806,8 @@ export function LearningPanel({
                 type="button"
                 className="primary"
                 disabled={Boolean(result) || optionOrder.some((option) => !matchingSelections[option.id])}
-                onClick={() => submit(matchingSelections, "matching")}
-              >Submit matches</button>
+                onClick={() => submit(matchingSelections, resolvedItem.interaction.kind)}
+              >Submit {resolvedItem.interaction.kind === "drag-drop" ? "assignments" : "matches"}</button>
             </section>
           ) : null}
 
