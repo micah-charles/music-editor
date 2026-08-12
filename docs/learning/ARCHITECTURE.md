@@ -115,7 +115,7 @@ same stable concept IDs used by question families and mastery evidence.
 
 The manifest also supports `adaptivePacks`: supplemental authored material is
 loaded into the adaptive activity without changing the ten-card Learning Home.
-The current advanced context pack contains nine authored ABRSM Grade 6–8 and
+The current advanced context pack contains ten authored ABRSM Grade 6–8 and
 GCSE Foundation/Higher analysis questions with evidence-based explanations,
 including a generated notation/audio listening item.
 

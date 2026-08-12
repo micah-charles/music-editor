@@ -171,6 +171,21 @@
           "feedback": { "mode": "after-submit", "correct": { "message": { "en-GB": "Correct. Rondo listening begins by tracking the principal refrain and its returns." } }, "incorrect": { "message": { "en-GB": "Listen for the main idea returning between contrasting episodes." } }, "showCorrectAnswer": "after-final-attempt" },
           "hints": [{ "id": "context-09-hint", "content": { "en-GB": "Mark each return of the opening idea while the audio plays." } }],
           "explanation": { "content": { "en-GB": "For aural form analysis, section boundaries and refrain returns provide stronger evidence than isolated dynamics or a single cadence." } }
+        },
+        {
+          "id": "context-10",
+          "type": "text-entry",
+          "version": 1,
+          "metadata": { "skillIds": ["musical-analysis.context"], "conceptId": "musical-analysis.context.qualified-response", "curriculumLevels": { "abrsm": ["Grade 8"], "gcse": ["Higher"] }, "difficulty": 0.96, "tags": ["written-answer", "evidence"] },
+          "variables": {},
+          "stimulus": [{ "id": "context-10-stimulus", "kind": "text", "content": { "en-GB": "A passage combines a descending chromatic bass, suspensions and an expressive minor-key melody." }, "accessibility": { "description": { "en-GB": "A written description of a harmonic and melodic passage." } } }],
+          "prompt": { "content": { "en-GB": "Name one valid harmonic feature shown by the description." }, "format": "plain-text" },
+          "interaction": { "kind": "text-entry", "responseId": "context-10-response", "cardinality": "single", "inputMode": "text", "maxLength": 80 },
+          "response": { "id": "context-10-response", "baseType": "string", "cardinality": "single", "correct": { "value": ["chromatic bass", "descending chromatic bass", "suspension", "suspensions"] } },
+          "assessment": { "strategy": "normalised-text@1", "maximumScore": 1, "passingScore": 1, "parameters": { "caseFold": true, "collapseWhitespace": true }, "attemptPolicy": { "maximumAttempts": 2, "scorePolicy": "best" } },
+          "feedback": { "mode": "after-submit", "correct": { "message": { "en-GB": "Correct. That is a valid harmonic observation supported by the evidence." } }, "incorrect": { "message": { "en-GB": "Name a specific feature such as chromatic bass or suspension." } }, "showCorrectAnswer": "after-final-attempt" },
+          "hints": [{ "id": "context-10-hint", "content": { "en-GB": "Look for the named harmonic devices in the description." } }],
+          "explanation": { "content": { "en-GB": "A high-level written response should identify a precise, observable feature rather than make an unsupported stylistic claim." } }
         }
       ]
     }

@@ -622,6 +622,24 @@ export function LearningPanel({
             </div>
           ) : null}
 
+          {resolvedItem?.interaction.kind === "text-entry" ? (
+            <form className="learning-text-entry" onSubmit={(event) => { event.preventDefault(); if (!result && String(selectedResponse ?? "").trim()) submit(selectedResponse, "text-entry"); }}>
+              <label htmlFor="learning-written-answer">Written answer</label>
+              <div>
+                <input
+                  id="learning-written-answer"
+                  type="text"
+                  value={typeof selectedResponse === "string" ? selectedResponse : ""}
+                  disabled={Boolean(result)}
+                  autoComplete="off"
+                  onChange={(event) => setSelectedResponse(event.target.value)}
+                  placeholder="Type your answer"
+                />
+                <button type="submit" className="primary" disabled={Boolean(result) || !String(selectedResponse ?? "").trim()}>Submit written response</button>
+              </div>
+            </form>
+          ) : null}
+
           {result ? (
             <div className={`learning-result-callout ${result.passed ? "correct" : "incorrect"} ${mode === "test" ? "test" : ""}`} role="status">
               <div className="learning-result-icon">{mode === "test" ? "✓" : result.passed ? "✓" : "↻"}</div>
@@ -702,7 +720,7 @@ export function LearningPanel({
           <button type="button" disabled={sessionPosition === 0} onClick={() => moveQuestion(-1)}>← Previous</button>
           {!result ? (
             <span className="learning-choice-guidance">
-              {resolvedItem?.interaction.kind === "choice" ? "Choose an answer above" : "Complete the question above"}
+              {resolvedItem?.interaction.kind === "choice" ? "Choose an answer above" : resolvedItem?.interaction.kind === "text-entry" ? "Write an answer above" : "Complete the question above"}
             </span>
           ) : (
             <button type="button" className="primary" disabled={!result && currentAttemptState === "unanswered"} onClick={() => moveQuestion(1)}>
