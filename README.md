@@ -239,8 +239,10 @@ attempt history → mastery + scheduled review
 Learning Home provides a recommended session, curriculum/topic/length controls,
 a fourteen-domain coverage map, mastery, recent history, common mistakes and
 next-review timing. The original ten sets and all fifty authored questions
-remain available through the authored practice library and v1-to-v2 migration.
-The entire normal learning flow is static-first and browser-local.
+remain available through the authored practice library and v1-to-v2 migration;
+the adaptive activity also loads a twelve-question advanced ABRSM/GCSE context
+pack without expanding the ten-card catalogue. The entire normal learning flow
+is static-first and browser-local.
 
 Reference files:
 
@@ -251,3 +253,6 @@ Reference files:
 - [Question-set schema](docs/learning/schemas/question-set-v1.schema.json)
 - [Attempt schema](docs/learning/schemas/attempt-v1.schema.json)
 - [Example question set](apps/studio/public/learning/music-learning-foundations.question-set.json)
+
+Run `npm run qa:smoke` to validate the published bank, adaptive pack, generator
+registry and ABRSM Grade 8 routing together.

@@ -5,26 +5,28 @@
 | Capability | Status | Verification |
 | --- | --- | --- |
 | `LearningActivity` 2.0 contract | Complete | Strict TypeScript model and Draft 2020-12 JSON Schema |
-| Fourteen question-family domains | Complete | Registry coverage test and deterministic generation test per family |
+| Fourteen question-family domains / 29 generated families | Complete | Registry coverage test, deterministic generation and `npm run qa:smoke` |
 | Parameter spaces and traceable identity | Complete | `conceptId`, `variantId`, `instanceId` assertions |
 | Canonical notation model | Complete | Generated notation is inline `FoxChildMusicScore` AST and passes v1 validation |
 | Generator registry | Complete | Versioned deterministic generators for all required domains |
 | Distractor registry | Complete | Near-neighbour, curriculum-peer and common-confusion strategies |
 | Curriculum registry | Complete | FoxChild, ABRSM, Trinity and GCSE mappings |
+| Grade-aware generation and authored filtering | Complete | Per-level difficulty profiles plus Grade 1/Grade 8 authored-routing regression |
 | Adaptive session policy | Complete | Exact 40/30/20/10 allocation, filtering and recent-content avoidance |
 | Mastery engine | Complete | Evidence updates, bands, penalties and expanding intervals |
 | Review scheduler | Complete | Due and next-review selection |
 | v1 authored content migration | Complete | All 10 sets and 50 questions retained and validated |
+| Advanced authored contextual pack | Complete | 12 ABRSM Grade 6–8 / GCSE questions, including linked listening and written response |
 | Knowledge Graph home | Complete | 14 concepts, prerequisites, relationships, status colours, mastery rings and contextual navigation |
 | Today’s Practice | Complete | One adaptive primary action informed by mastery, review, mistakes, study time and curriculum |
 | Floating Knowledge Navigator | Complete | Persistent contextual flower on Home, lesson, overview and results |
-| Student question runner | Complete | Choice, piano/MIDI, compact notation/audio, feedback and navigator |
+| Student question runner | Complete | Choice, text entry, piano/MIDI, compact notation/audio, feedback and navigator |
 | Lesson workspace | Complete | Breadcrumb/search, question, live graph, current skill and bottom session dock |
 | Score Lab bridge | Complete | Generated notation/audio examples open in Score Lab without modifying the project |
 | Automatic resume | Complete | Generated session draft is restored after reload and cleared on completion |
 | Responsive and accessible UI | Complete | Desktop/tablet/mobile reflow, keyboard controls, AA palette and reduced motion |
 | Static-first operation | Complete | Browser-only generation, assessment and persistence |
-| Automated verification | Complete | 146 unit/regression tests plus production build and live browser QA |
+| Automated verification | Complete | 154 tests, `npm run qa:smoke`, typecheck and production build |
 
 ## Student experience
 
@@ -41,9 +43,9 @@ optional input—not a backend dependency.
 
 ## Supported specialised interaction surface
 
-The first production student renderers are multiple choice and single-note
-piano/MIDI. Audio and notation stimuli reuse the existing player and score
-viewer. The domain model and assessment registry also retain text, numeric,
+The first production student renderers are multiple choice, written text entry
+and single-note piano/MIDI. Audio and notation stimuli reuse the existing player
+and score viewer. The domain model and assessment registry also retain numeric,
 matching, ordering, notation-entry, rhythm, recording, sight-reading,
 composition and composite response contracts for later specialised renderers.
 
