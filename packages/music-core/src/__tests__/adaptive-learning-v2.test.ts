@@ -58,7 +58,7 @@ describe("adaptive learning v2", () => {
     });
   });
 
-  it("generates deterministic identity, canonical AST, answers, and distractors for every family", async () => {
+  it("generates deterministic identity, required stimuli, answers, and distractors for every family", async () => {
     const engine = new QuestionFamilyEngine();
     for (const familyId of engine.families.ids()) {
       const first = engine.generate(familyId, "deterministic-seed", 0.6);
@@ -69,7 +69,12 @@ describe("adaptive learning v2", () => {
       expect(first.instanceId, familyId).toBeTruthy();
       expect(engine.families.resolve(familyId).variantIds, familyId).toContain(first.variantId);
       const score = first.item.stimulus.find((stimulus) => stimulus.kind === "notation");
-      expect(score?.source, familyId).toMatchObject({ mode: "inline-ast" });
+      if (familyId === "music-symbols@2") {
+        expect(score, familyId).toBeUndefined();
+        expect(first.item.stimulus.map((stimulus) => stimulus.kind), familyId).toEqual(["music-symbol"]);
+      } else {
+        expect(score?.source, familyId).toMatchObject({ mode: "inline-ast" });
+      }
       const wrapper: QuestionSet = {
         format: "foxchild.music-learning.question-set",
         schemaVersion: "1.0.0",

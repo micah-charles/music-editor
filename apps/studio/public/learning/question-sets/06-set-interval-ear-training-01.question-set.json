@@ -87,7 +87,7 @@
               },
               "accessibility": {
                 "description": {
-                  "en-GB": "Hidden notation for an ascending Major second."
+                  "en-GB": "Hidden notation used to generate the interval exercise."
                 }
               },
               "visibility": "hidden"
@@ -241,7 +241,7 @@
               },
               "accessibility": {
                 "description": {
-                  "en-GB": "Hidden notation for an ascending Minor third."
+                  "en-GB": "Hidden notation used to generate the interval exercise."
                 }
               },
               "visibility": "hidden"
@@ -395,7 +395,7 @@
               },
               "accessibility": {
                 "description": {
-                  "en-GB": "Hidden notation for an ascending Major third."
+                  "en-GB": "Hidden notation used to generate the interval exercise."
                 }
               },
               "visibility": "hidden"
@@ -549,7 +549,7 @@
               },
               "accessibility": {
                 "description": {
-                  "en-GB": "Hidden notation for an ascending Perfect fourth."
+                  "en-GB": "Hidden notation used to generate the interval exercise."
                 }
               },
               "visibility": "hidden"
@@ -703,7 +703,7 @@
               },
               "accessibility": {
                 "description": {
-                  "en-GB": "Hidden notation for an ascending Perfect fifth."
+                  "en-GB": "Hidden notation used to generate the interval exercise."
                 }
               },
               "visibility": "hidden"

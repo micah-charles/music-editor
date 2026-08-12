@@ -1340,7 +1340,7 @@ function renderSimpleStimulus(item: ResolvedLearningItem, locale: string) {
   if (!stimulus) return null;
   if (stimulus.kind === "music-symbol") {
     const symbolId = isRecord(stimulus.content) ? String(stimulus.content.symbolId ?? "") : "";
-    return <div className="learning-symbol-stimulus" aria-label={notationDescription(item, locale)}><span>{symbolGlyph(symbolId)}</span><small>{symbolId.replaceAll("-", " ")}</small></div>;
+    return <div className="learning-symbol-stimulus" aria-label={notationDescription(item, locale)}><span>{symbolGlyph(symbolId)}</span></div>;
   }
   return <div className="learning-text-stimulus">{localisedText(stimulus.content, locale)}</div>;
 }

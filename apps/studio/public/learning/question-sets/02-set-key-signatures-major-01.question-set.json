@@ -88,7 +88,7 @@
               },
               "accessibility": {
                 "description": {
-                  "en-GB": "Treble clef showing the key signature for G major."
+                  "en-GB": "Treble clef showing an unidentified major key signature."
                 }
               }
             }
@@ -223,7 +223,7 @@
               },
               "accessibility": {
                 "description": {
-                  "en-GB": "Treble clef showing the key signature for D major."
+                  "en-GB": "Treble clef showing an unidentified major key signature."
                 }
               }
             }
@@ -358,7 +358,7 @@
               },
               "accessibility": {
                 "description": {
-                  "en-GB": "Treble clef showing the key signature for A major."
+                  "en-GB": "Treble clef showing an unidentified major key signature."
                 }
               }
             }
@@ -493,7 +493,7 @@
               },
               "accessibility": {
                 "description": {
-                  "en-GB": "Treble clef showing the key signature for F major."
+                  "en-GB": "Treble clef showing an unidentified major key signature."
                 }
               }
             }
@@ -628,7 +628,7 @@
               },
               "accessibility": {
                 "description": {
-                  "en-GB": "Treble clef showing the key signature for B-flat major."
+                  "en-GB": "Treble clef showing an unidentified major key signature."
                 }
               }
             }

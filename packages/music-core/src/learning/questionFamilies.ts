@@ -408,17 +408,18 @@ function buildItem(
       id: `symbol-${instanceId}`,
       kind: "music-symbol",
       content: { symbolId: blueprint.symbolId },
-      accessibility: { description: { "en-GB": `The ${blueprint.symbolId} music symbol.` } }
+      accessibility: { description: { "en-GB": "An unidentified music symbol." } }
+    });
+  } else {
+    stimuli.push({
+      id: `score-${instanceId}`,
+      kind: "notation",
+      visibility: blueprint.audioOnly ? "hidden" : "visible",
+      source: { mode: "inline-ast", score },
+      playback: { enabled: blueprint.audioOnly === true },
+      accessibility: { description: { "en-GB": blueprint.prompt } }
     });
   }
-  stimuli.push({
-    id: `score-${instanceId}`,
-    kind: "notation",
-    visibility: blueprint.audioOnly ? "hidden" : "visible",
-    source: { mode: "inline-ast", score },
-    playback: { enabled: blueprint.audioOnly === true },
-    accessibility: { description: { "en-GB": blueprint.prompt } }
-  });
   if (blueprint.audioOnly) {
     stimuli.push({
       id: `audio-${instanceId}`,
